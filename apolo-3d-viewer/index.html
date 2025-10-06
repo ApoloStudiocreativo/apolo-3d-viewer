@@ -1,19 +1,40 @@
-{
-    "headers": [
-      {
-        "source": "/models/(.*)\\.glb",
-        "headers": [
-          { "key": "Content-Type", "value": "model/gltf-binary" },
-          { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-        ]
-      },
-      {
-        "source": "/models/(.*)\\.usdz",
-        "headers": [
-          { "key": "Content-Type", "value": "model/vnd.usdz+zip" },
-          { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-        ]
-      }
-    ]
-  }
-  
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+  <title>CRISTO 3D + AR</title>
+  <style>
+    html, body { margin:0; height:100%; background:#0f1115; overflow:hidden; }
+    model-viewer { width:100vw; height:100vh; display:block; }
+    #ar-button{
+      width:200px; height:70px; position:absolute; left:50%; bottom:50px; transform:translateX(-50%);
+      background:rgb(64,203,203); color:#fff; border:none; border-radius:12px; font-size:22px; font-weight:600;
+      cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 20px rgba(0,0,0,.25);
+    }
+    #ar-button:active{ transform:translateX(-50%) scale(.98); }
+  </style>
+</head>
+<body>
+  <model-viewer
+    src="models/cristo.glb"
+    ios-src="models/CRISTO.usdz"
+    alt="Figura del Cristo en 3D"
+    camera-controls
+    ar
+    ar-modes="webxr scene-viewer quick-look"
+    environment-image="neutral"
+    shadow-intensity="1.5"
+    shadow-softness="1"
+    exposure="1"
+    scale="0.1 0.1 0.1"
+    camera-orbit="0deg 75deg 1.5m"
+    min-camera-orbit="auto auto 0.5m"
+    max-camera-orbit="auto auto 5m"
+    field-of-view="30deg"
+    touch-action="pan-y">
+    <button id="ar-button" slot="ar-button">Ver en AR</button>
+  </model-viewer>
+</body>
+</html>
