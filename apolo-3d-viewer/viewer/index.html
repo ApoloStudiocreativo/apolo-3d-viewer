@@ -273,5 +273,30 @@ other
 			<span id="camid"></span>
 		</div>
 		<script src="main.js"></script>
+		<div id="caminfo">
+			<span id="camid"></span>
+		</div>
+
+		<!-- Script principal del visor -->
+		<script src="main.js"></script>
+
+		<!-- 👇 Añade este bloque debajo -->
+		<script type="module">
+			// Si NO hay ?url= en la dirección, carga por defecto tu PLY
+			const params = new URLSearchParams(location.search);
+			if (!params.has('url')) {
+				// Usa ruta relativa si el .ply está en /viewer/
+				const defecto = 'calvo-anillo.ply';
+
+				// Si lo sirves desde IONOS, pon la URL absoluta:
+				// const defecto = 'https://www.apolostudio.es/3d/calvo-anillo.ply';
+
+				params.set('url', defecto);
+				location.search = params.toString(); // recarga con ?url=...
+			}
+		</script>
+	</body>
+</html>
+
 	</body>
 </html>
