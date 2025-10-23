@@ -313,5 +313,44 @@
                 <path d="M16 2.09961C16.4971 2.09961 16.9004 2.50294 16.9004 3V7.09961H21C21.4971 7.09961 21.9004 7.50294 21.9004 8C21.9004 8.49706 21.4971 8.90039 21 8.90039H16C15.5029 8.90039 15.0996 8.49706 15.0996 8V3C15.0996 2.50294 15.5029 2.09961 16 2.09961Z" />
             </symbol>
         </svg>
+        <!-- AUDIO: se reproducirá tras la primera interacción (clic/toque) -->
+<audio id="scene-audio" src="/assets/audio/ambiente.mp3" loop></audio>
+
+<script>
+  (function () {
+    const audio = document.getElementById("scene-audio");
+    let started = false;
+
+    function startAudio() {
+      if (started) return;
+      started = true;
+
+      // Volumen inicial (0.0 a 1.0)
+      audio.volume = 0.6;
+
+      audio.play().catch(err => {
+        console.log("Autoplay bloqueado:", err);
+      });
+
+      // Quitamos los listeners para no repetir
+      window.removeEventListener("click", startAudio);
+      window.removeEventListener("touchstart", startAudio);
+      window.removeEventListener("pointerdown", startAudio);
+    }
+
+    // En cuanto el usuario toque/haga clic, sonará (cumple políticas de autoplay)
+    window.addEventListener("click", startAudio, { once: true });
+    window.addEventListener("touchstart", startAudio, { once: true });
+    window.addEventListener("pointerdown", startAudio, { once: true });
+
+    // Opcional: tecla "m" para silenciar/activar
+    window.addEventListener("keydown", (e) => {
+      if (e.key.toLowerCase() === "m") {
+        audio.muted = !audio.muted;
+      }
+    });
+  })();
+</script>
+
     </body>
 </html>
