@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 	<head>
-		<title>Museo San Joaquin y Santa Ana</title>
+		<title>WebGL Gaussian Splat Viewer</title>
 		<meta charset="utf-8" />
 		<meta
 			name="viewport"
@@ -272,25 +272,6 @@ other
 		<div id="caminfo">
 			<span id="camid"></span>
 		</div>
-<!-- 1) PON ESTE BLOQUE ANTES DE main.js -->
-<script>
-	// Si NO hay ?url= en la dirección, añádelo y recarga ANTES de cargar main.js
-	(function () {
-	  const params = new URLSearchParams(location.search);
-	  if (!params.has('url')) {
-		params.set('url', 'calvo-anillo.ply'); // o tu URL absoluta externa
-		// usa replace para no dejar una entrada extra en el historial
-		location.replace(location.pathname + '?' + params.toString());
-	  }
-	})();
-  </script>
- 
 		<script src="main.js"></script>
-		<div id="caminfo">
-			<span id="camid"></span>
-		</div>
-	</body>
-</html>
-
 	</body>
 </html>
