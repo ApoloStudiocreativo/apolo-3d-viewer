@@ -272,6 +272,24 @@ other
 		<div id="caminfo">
 			<span id="camid"></span>
 		</div>
+		    <!-- 👇 Añade esto ANTES de main.js -->
+			<script>
+				(function () {
+				  const params = new URLSearchParams(location.search);
+				  if (!params.has('url')) {
+					// Si tu .ply está en la MISMA carpeta que este index.html (p.ej. /viewer/):
+					params.set('url', 'calvo-anillo.ply');
+		  
+					// Si lo sirves desde otro dominio (IONOS), usa la URL ABSOLUTA (y si quieres, coméntalo de arriba):
+					// params.set('url', 'https://www.apolostudio.es/3d/calvo-anillo.ply');
+		  
+					// Importante: usa replace para que la recarga ocurra ANTES de cargar main.js
+					const base = location.pathname.replace(/index\.html?$/,'');
+					location.replace(base + '?' + params.toString());
+				  }
+				})();
+			  </script>
+		  
 		<script src="main.js"></script>
 	</body>
 
