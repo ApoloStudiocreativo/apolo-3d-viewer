@@ -277,13 +277,15 @@ other
 				(function () {
 				  const params = new URLSearchParams(location.search);
 				  if (!params.has('url')) {
-					// Si tu .ply está en la MISMA carpeta que este index.html (p.ej. /viewer/):
-					params.set('url', 'calvo-anillo.ply');
-		  
-					// Si lo sirves desde otro dominio (IONOS), usa la URL ABSOLUTA (y si quieres, coméntalo de arriba):
-					// params.set('url', 'https://www.apolostudio.es/3d/calvo-anillo.ply');
-		  
-					// Importante: usa replace para que la recarga ocurra ANTES de cargar main.js
+					// Construye URL ABSOLUTA a un .ply que esté en la misma carpeta (/viewer/)
+					const defecto = new URL('calvo-anillo.ply', location.href).toString();
+			  
+					// Si lo tienes en IONOS, usa su URL directa:
+					// const defecto = 'https://www.apolostudio.es/3d/calvo-anillo.ply';
+			  
+					params.set('url', defecto);
+			  
+					// Recarga la página ANTES de cargar main.js, con ?url=<absoluta>
 					const base = location.pathname.replace(/index\.html?$/,'');
 					location.replace(base + '?' + params.toString());
 				  }
