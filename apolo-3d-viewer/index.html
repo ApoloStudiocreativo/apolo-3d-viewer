@@ -161,6 +161,7 @@
       try{
         if(type === 'glb' && model){
           // GLB view
+          document.body.classList.remove('mode-splat');
           mv.src     = glbUrl(model);
           mv.iosSrc  = usdzUrl(model);
           mv.classList.remove('hidden');
@@ -193,6 +194,7 @@
 
         if(type === 'splat' && figure){
           // SPLAT view
+          document.body.classList.add('mode-splat'); 
           splat.src = splatUrl(figure);
           splat.classList.remove('hidden');
           // FAB AR para la misma figura (usa GLB/USDZ homónimo)
