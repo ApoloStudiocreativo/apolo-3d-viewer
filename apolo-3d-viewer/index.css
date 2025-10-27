@@ -1,0 +1,15 @@
+/* Oculta el botón AR nativo de <model-viewer> */
+model-viewer::part(ar-button) {
+    display: none !important;
+  }
+  
+  /* (Opcional) Oculta el aviso flotante de AR de <model-viewer> */
+  model-viewer::part(ar-prompt) {
+    display: none !important;
+  }
+  
+  /* (Opcional) Oculta el estado AR de <model-viewer> si llega a mostrarse */
+  model-viewer::part(ar-status) {
+    display: none !important;
+  }
+  
