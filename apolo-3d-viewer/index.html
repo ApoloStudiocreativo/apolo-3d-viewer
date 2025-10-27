@@ -2,39 +2,120 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
-  <title>CRISTO 3D + AR</title>
+  <title>Apolo 3D Viewer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <style>
-    html, body { margin:0; height:100%; background:#0f1115; overflow:hidden; }
-    model-viewer { width:100vw; height:100vh; display:block; }
-    #ar-button{
-      width:200px; height:70px; position:absolute; left:50%; bottom:50px; transform:translateX(-50%);
-      background:rgb(64,203,203); color:#fff; border:none; border-radius:12px; font-size:22px; font-weight:600;
-      cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 20px rgba(0,0,0,.25);
+    :root { color-scheme: dark; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #0f1115;
+      overflow: hidden;
+      font-family: system-ui, sans-serif;
     }
-    #ar-button:active{ transform:translateX(-50%) scale(.98); }
+    #viewer-container {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+    }
+    model-viewer, iframe {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border: none;
+    }
+    #ar-button {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      transform: translateX(-50%);
+      padding: 14px 20px;
+      border: 0;
+      border-radius: 12px;
+      color: #fff;
+      background: rgb(64,203,203);
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35);
+      z-index: 10;
+    }
+    #ar-button:active { transform: translateX(-50%) scale(.97); }
+    #message {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: white;
+      text-align: center;
+      padding: 24px;
+      white-space: pre-line;
+    }
   </style>
 </head>
 <body>
-  <model-viewer
-    src="models/cristo.glb"
-    ios-src="models/CRISTO.usdz"
-    alt="Figura del Cristo en 3D"
-    camera-controls
-    ar
-    ar-modes="webxr scene-viewer quick-look"
-    environment-image="neutral"
-    shadow-intensity="1.5"
-    shadow-softness="1"
-    exposure="1"
-    scale="0.1 0.1 0.1"
-    camera-orbit="0deg 75deg 1.5m"
-    min-camera-orbit="auto auto 0.5m"
-    max-camera-orbit="auto auto 5m"
-    field-of-view="30deg"
-    touch-action="pan-y">
-    <button id="ar-button" slot="ar-button">Ver en AR</button>
-  </model-viewer>
+
+<div id="viewer-container">
+  <div id="message">Cargando visor...</div>
+</div>
+
+<script>
+  const qs = new URLSearchParams(location.search);
+  const type = (qs.get("type") || "").toLowerCase();   // 'glb' | 'splat'
+  const model = qs.get("model");                        // ejemplo: 'cristo'
+  const figure = qs.get("figure");                      // ejemplo: 'calvo-anillo'
+
+  const container = document.getElementById("viewer-container");
+  const message = document.getElementById("message");
+
+  function showError(msg) {
+    container.innerHTML = `<div id='message'>${msg}</div>`;
+  }
+
+  if (type === "glb" && model) {
+    renderGLB(model);
+  }
+  else if (type === "splat" && figure) {
+    renderSplat(figure);
+  }
+  else {
+    showError("❌ Falta parámetro en la URL.\n\nUsa ejemplos:\n?type=glb&model=cristo\n?type=splat&figure=calvo-anillo");
+  }
+
+  async function renderGLB(name) {
+    await import("https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js");
+
+    const mv = document.createElement("model-viewer");
+    mv.setAttribute("src", `/models/${name}/${name}.glb`);
+    mv.setAttribute("ios-src", `/models/${name}/${name}.usdz`);
+    mv.setAttribute("ar", "");
+    mv.setAttribute("ar-modes", "webxr scene-viewer quick-look");
+    mv.setAttribute("camera-controls", "");
+    mv.setAttribute("shadow-intensity", "1.5");
+    mv.setAttribute("touch-action", "pan-y");
+    mv.setAttribute("environment-image", "neutral");
+    mv.setAttribute("alt", `Modelo 3D de ${name}`);
+
+    const btn = document.createElement("button");
+    btn.id = "ar-button";
+    btn.slot = "ar-button";
+    btn.textContent = "Ver en AR";
+    mv.appendChild(btn);
+
+    container.replaceChildren(mv);
+  }
+
+  function renderSplat(fig) {
+    const iframe = document.createElement("iframe");
+    iframe.src =
+      `/splat/viewer/?content=/splat/${fig}/scene.compressed.ply` +
+      `&settings=/splat/${fig}/settings.json`;
+    iframe.allow = "xr; fullscreen; autoplay";
+
+    container.replaceChildren(iframe);
+  }
+</script>
+
 </body>
 </html>
