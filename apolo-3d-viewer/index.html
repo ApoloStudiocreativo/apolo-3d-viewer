@@ -2,181 +2,203 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Apolo 3D Viewer</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover" />
+  <title>Visor Universal 3D + AR</title>
+
+  <!-- model-viewer para modo GLB -->
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+
   <style>
-    :root { color-scheme: dark; }
-    html, body {
-      margin: 0;
-      height: 100%;
-      background: #0f1115;
-      overflow: hidden;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    :root{
+      --bg:#0f1115;
+      --text:#e9eef7;
+      --muted:#9aa4b2;
+      --brand:#40cbcb;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
     }
-    #viewer-container { position: fixed; inset: 0; width: 100vw; height: 100vh; }
-    model-viewer, iframe { width: 100%; height: 100%; display: block; border: none; }
+    html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden}
+    .full{position:fixed;inset:0}
+    .hidden{display:none!important}
 
-    /* FAB AR: por defecto oculto (escritorio) */
-    #ar-fab {
-      position: fixed;
-      right: 16px;
-      bottom: calc(16px + env(safe-area-inset-bottom));
-      width: 56px; height: 56px; border-radius: 50%;
-      border: 0; background: #40cbcb; color: #fff;
-      display: none; /* <- clave: oculto por defecto (desktop) */
-      align-items: center; justify-content: center;
-      box-shadow: 0 12px 30px rgba(0,0,0,.35);
-      z-index: 2000;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-      cursor: pointer;
+    /* Contenedores de vista */
+    model-viewer, iframe#splat {
+      width:100vw; height:100dvh; display:block; background:var(--bg);
     }
-    #ar-fab:active { transform: scale(.96); }
-    #ar-fab svg { width: 24px; height: 24px; display:block; }
+    iframe#splat{border:0}
 
-    /* Mostrar SOLO en dispositivos táctiles (móvil/tablet) */
-    @media (hover: none) and (pointer: coarse) {
-      #ar-fab { display: flex; }
+    /* Mensaje de error/ayuda */
+    #msg{
+      position:fixed; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      font:500 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      text-align:center; color:var(--muted);
+      padding:24px;
+    }
+    #msg b{color:#ff6464}
+
+    /* Botón AR: visible solo en móvil/tablet */
+    .ar-fab{
+      position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+      display:none; /* por defecto oculto, se activa con media query */
+      gap:10px; align-items:center; justify-content:center;
+      height:56px; padding:0 18px; min-width:180px;
+      border:none; border-radius:16px; cursor:pointer;
+      background:var(--brand); color:white; font-weight:700; font-size:16px; letter-spacing:.2px;
+      box-shadow:var(--shadow);
+      z-index:20;
+    }
+    .ar-fab:active{transform:translateX(-50%) scale(.98)}
+    .ar-fab svg{width:22px;height:22px}
+
+    /* Solo móvil/tablet */
+    @media (max-width:1024px){
+      .ar-fab{display:flex}
     }
 
-    #message {
-      position: absolute; inset: 0; display: grid; place-items: center;
-      color: white; text-align: center; padding: 24px; white-space: pre-line;
+    /* Esqueleto simple mientras carga */
+    .skeleton{
+      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(160deg,#101319 0%,#0b0e13 100%);
+      color:#7b8696; font:500 14px system-ui, -apple-system, Segoe UI, Roboto, Arial;
     }
+    .spinner{width:28px;height:28px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:#fff;animation:rot .9s linear infinite;margin-right:10px}
+    @keyframes rot{to{transform:rotate(360deg)}}
   </style>
 </head>
 <body>
 
-<div id="viewer-container">
-  <div id="message">Cargando visor...</div>
-</div>
+  <!-- Mensaje si faltan parámetros -->
+  <div id="msg" class="hidden"></div>
 
-<!-- Botón AR global (solo móvil/tablet) -->
-<button id="ar-fab" aria-label="Abrir en Realidad Aumentada" title="AR">
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path fill="currentColor" d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5v-9Zm9 1.8L6.6 7.5 12 4.8l5.4 2.7L12 9.3Zm-1 9.42v-6.3L5 8.85v6.3l6 3.57Zm2 0 6-3.57v-6.3l-6 3.57v6.3Z"/>
-  </svg>
-</button>
+  <!-- Capa skeleton mientras montamos la vista -->
+  <div id="skel" class="skeleton"><div class="spinner"></div>Cargando…</div>
 
-<script>
-  const qs = new URLSearchParams(location.search);
-  const type   = (qs.get("type") || "").toLowerCase();   // 'glb' | 'splat'
-  const model  = qs.get("model");                         // p.ej. 'cristo'
-  const figure = qs.get("figure");                        // p.ej. 'calvo-anillo'
+  <!-- Vista GLB -->
+  <model-viewer id="mv" class="hidden"
+    alt="Modelo 3D"
+    camera-controls
+    touch-action="pan-y"
+    ar ar-modes="webxr scene-viewer quick-look"
+    environment-image="neutral"
+    shadow-intensity="1.2"
+    shadow-softness="0.9"
+    exposure="1"
+    camera-orbit="0deg 70deg 1.5m"
+    min-camera-orbit="auto auto 0.4m"
+    max-camera-orbit="auto auto 6m"
+    field-of-view="30deg">
+  </model-viewer>
 
-  const container = document.getElementById("viewer-container");
-  const message   = document.getElementById("message");
-  const arFab     = document.getElementById("ar-fab");
+  <!-- Vista SPLAT -->
+  <iframe id="splat" class="hidden" allow="xr; xr-spatial-tracking; gyroscope; accelerometer"></iframe>
 
-  // Detección simple
-  const UA        = navigator.userAgent;
-  const isIOS     = /iPhone|iPad|iPod/i.test(UA);
-  const isAndroid = /Android/i.test(UA);
-  const isCriOS   = /CriOS/i.test(UA);       // Chrome en iOS
-  const isFxiOS   = /FxiOS/i.test(UA);       // Firefox en iOS
-  const isSafari  = isIOS && !isCriOS && !isFxiOS;
+  <!-- FAB AR unificado (solo móvil/tablet) -->
+  <button id="arBtn" class="ar-fab hidden" type="button" aria-label="Ver en AR">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8.66 5v8L12 21l-8.66-5V8L12 3zM12 3v18M3.34 8L12 13l8.66-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Ver en AR
+  </button>
 
-  function showError(msg) {
-    container.innerHTML = `<div id='message'>${msg}</div>`;
-  }
+  <script>
+  (function(){
+    const qs = new URLSearchParams(location.search);
+    const type   = (qs.get('type')||'').toLowerCase();          // 'glb' | 'splat'
+    const model  = (qs.get('model')||'').toLowerCase();         // para glb
+    const figure = (qs.get('figure')||'').toLowerCase();        // para splat
 
-  // Referencia a <model-viewer> para activateAR
-  let mvRef = null;
-  // Nombre base para encontrar /models/{name}/{name}.{glb|usdz}
-  let arName = null;
+    const mv    = document.getElementById('mv');
+    const splat = document.getElementById('splat');
+    const skel  = document.getElementById('skel');
+    const msg   = document.getElementById('msg');
+    const arBtn = document.getElementById('arBtn');
 
-  if (type === "glb" && model) {
-    arName = model;
-    renderGLB(model);
-  }
-  else if (type === "splat" && figure) {
-    arName = figure; // asumimos que habrá AR paralelo
-    renderSplat(figure);
-  }
-  else {
-    showError("❌ Falta parámetro en la URL.\n\nUsa ejemplos:\n?type=glb&model=cristo\n?type=splat&figure=calvo-anillo");
-  }
+    // Helpers ruta según norma confirmada
+    const glbUrl  = (name) => `/models/${name}/${name}.glb`;
+    const usdzUrl = (name) => `/models/${name}/${name}.usdz`;
+    const splatUrl= (name) => `/splat/${name}/index.html`;
 
-  async function renderGLB(name) {
-    await import("https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js");
+    // Detectar plataforma
+    const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/.test(navigator.userAgent);
 
-    const mv = document.createElement("model-viewer");
-    mv.setAttribute("src", `/models/${name}/${name}.glb`);
-    mv.setAttribute("ios-src", `/models/${name}/${name}.usdz`);
-    mv.setAttribute("ar", "");
-    mv.setAttribute("ar-modes", "webxr scene-viewer quick-look");
-    mv.setAttribute("camera-controls", "");
-    mv.setAttribute("shadow-intensity", "1.5");
-    mv.setAttribute("shadow-softness", "1");
-    mv.setAttribute("exposure", "1");
-    mv.setAttribute("environment-image", "neutral");
-    mv.setAttribute("touch-action", "pan-y");
-    mv.setAttribute("alt", `Modelo 3D de ${name}`);
+    // AR launcher unificado
+    function openARFor(name){
+      const usdz = usdzUrl(name);
+      const glb  = glbUrl(name);
 
-    mvRef = mv;
-    container.replaceChildren(mv);
-  }
-
-  function renderSplat(fig) {
-    const iframe = document.createElement("iframe");
-    iframe.src =
-      `/splat/viewer/?content=/splat/${fig}/scene.compressed.ply` +
-      `&settings=/splat/${fig}/settings.json`;
-    iframe.allow = "xr; fullscreen; autoplay";
-    container.replaceChildren(iframe);
-  }
-
-  // --- Mostrar/ocultar FAB también vía JS para mayor robustez ---
-  function shouldShowARFab() {
-    // Solo móvil/tablet (táctil/puntero grueso)
-    const isTouchLike = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-    return isTouchLike; // true en móvil/tablet, false en desktop
-  }
-
-  function syncFabVisibility() {
-    arFab.style.display = shouldShowARFab() ? 'flex' : 'none';
-  }
-
-  // Sincroniza al cargar y al cambiar orientación/viewport
-  syncFabVisibility();
-  window.addEventListener('resize', syncFabVisibility);
-  window.addEventListener('orientationchange', syncFabVisibility);
-
-  // --- LÓGICA DEL FAB AR ---
-  arFab.addEventListener('click', () => {
-    // Si tenemos <model-viewer> y expone activateAR, úsalo
-    if (mvRef && typeof mvRef.activateAR === 'function') {
-      try { mvRef.activateAR(); return; } catch (e) { /* fallback */ }
+      if(isIOS){
+        // Quick Look: abrir el .usdz directamente
+        window.location.href = usdz;
+        return;
+      }
+      if(isAndroid){
+        // Scene Viewer intent
+        const file = new URL(glb, location.origin).toString();
+        const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(file)}&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(location.href)};end;`;
+        window.location.href = intent;
+        return;
+      }
+      // Escritorio: no hacemos nada (el botón no se muestra en desktop)
     }
 
-    // Fallback absoluto por plataforma: abre directamente los assets AR
-    const base = location.origin;
-    if (!arName) {
-      alert('No se ha indicado un modelo para AR.');
-      return;
+    // Mostrar mensaje de ayuda
+    function showHelp(){
+      skel.classList.add('hidden');
+      msg.classList.remove('hidden');
+      msg.innerHTML = `
+        <div>
+          <b>Falta parámetro en la URL.</b><br/><br/>
+          Usa ejemplos:<br/>
+          <code>?type=glb&model=cristo</code><br/>
+          <code>?type=splat&figure=calvo-anillo</code>
+        </div>
+      `;
     }
 
-    const usdz = `${base}/models/${arName}/${arName}.usdz`;
-    const glb  = `${base}/models/${arName}/${arName}.glb`;
+    // Montaje según type
+    (async function init(){
+      try{
+        if(type === 'glb' && model){
+          // GLB view
+          mv.src     = glbUrl(model);
+          mv.iosSrc  = usdzUrl(model);
+          mv.classList.remove('hidden');
+          // FAB AR: siempre disponible en móvil/tablet
+          arBtn.classList.remove('hidden');
+          arBtn.onclick = () => {
+            // si model-viewer puede abrir AR nativo, úsalo:
+            if (mv?.activateAR) {
+              // Algunos navegadores bloquean si no hay user gesture; este handler ya es gesture
+              mv.activateAR().catch(()=> openARFor(model));
+            } else {
+              openARFor(model);
+            }
+          };
+          skel.classList.add('hidden');
+          return;
+        }
 
-    if (isIOS) {
-      // iOS: Quick Look
-      window.location.href = usdz;
-      return;
-    }
+        if(type === 'splat' && figure){
+          // SPLAT view
+          splat.src = splatUrl(figure);
+          splat.classList.remove('hidden');
+          // FAB AR para la misma figura (usa GLB/USDZ homónimo)
+          arBtn.classList.remove('hidden');
+          arBtn.onclick = () => openARFor(figure);
+          skel.classList.add('hidden');
+          return;
+        }
 
-    if (isAndroid) {
-      // Android: Scene Viewer (https, compatible y sencillo)
-      const sceneViewerUrl =
-        `https://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(glb)}&mode=ar_preferred&title=${encodeURIComponent(arName)}`;
-      window.location.href = sceneViewerUrl;
-      return;
-    }
+        // Si no coincide nada:
+        showHelp();
 
-    // Desktop u otros (no debería ver el FAB, pero por si acaso)
-    alert('AR no está disponible en este dispositivo.');
-  });
-</script>
-
+      }catch(err){
+        console.error(err);
+        msg.classList.remove('hidden');
+        msg.innerHTML = `<b>Error:</b> ${String(err).replace(/</g,'&lt;')}`;
+        skel.classList.add('hidden');
+      }
+    })();
+  })();
+  </script>
 </body>
 </html>
