@@ -5,13 +5,16 @@
   <title>Apolo 3D Viewer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <style>
-    :root { color-scheme: dark; }
+    :root { 
+      color-scheme: dark; 
+      --gap: 16px;
+    }
     html, body {
       margin: 0;
       height: 100%;
       background: #0f1115;
       overflow: hidden;
-      font-family: system-ui, sans-serif;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
     }
     #viewer-container {
       position: fixed;
@@ -25,23 +28,50 @@
       display: block;
       border: none;
     }
+    /* Botón AR: desktop/tablet (pastilla centrada) */
     #ar-button {
       position: fixed;
       left: 50%;
-      bottom: 28px;
       transform: translateX(-50%);
-      padding: 14px 20px;
+      bottom: calc(14px + env(safe-area-inset-bottom));
+      padding: 14px 18px;
       border: 0;
       border-radius: 12px;
       color: #fff;
-      background: rgb(64,203,203);
-      font-size: 18px;
+      background: #40cbcb;
+      font-size: 17px;
       font-weight: 600;
       cursor: pointer;
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-      z-index: 10;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.35);
+      z-index: 1000;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
-    #ar-button:active { transform: translateX(-50%) scale(.97); }
+    #ar-button:active { transform: translateX(-50%) scale(.98); }
+    #ar-button svg { width: 22px; height: 22px; display: block; }
+
+    /* Móvil: FAB circular abajo-derecha */
+    @media (max-width: 640px) {
+      #ar-button {
+        right: var(--gap);
+        left: auto;
+        transform: none;
+        width: 56px;
+        height: 56px;
+        padding: 0;
+        border-radius: 50%;
+        justify-content: center;
+        bottom: calc(var(--gap) + env(safe-area-inset-bottom));
+      }
+      #ar-button .label {
+        display: none; /* ocultamos texto en móvil, dejamos solo icono */
+      }
+      #ar-button:active { transform: scale(.96); }
+    }
+
     #message {
       position: absolute;
       inset: 0;
@@ -63,8 +93,8 @@
 <script>
   const qs = new URLSearchParams(location.search);
   const type = (qs.get("type") || "").toLowerCase();   // 'glb' | 'splat'
-  const model = qs.get("model");                        // ejemplo: 'cristo'
-  const figure = qs.get("figure");                      // ejemplo: 'calvo-anillo'
+  const model = qs.get("model");                        // p.ej. 'cristo'
+  const figure = qs.get("figure");                      // p.ej. 'calvo-anillo'
 
   const container = document.getElementById("viewer-container");
   const message = document.getElementById("message");
@@ -93,14 +123,24 @@
     mv.setAttribute("ar-modes", "webxr scene-viewer quick-look");
     mv.setAttribute("camera-controls", "");
     mv.setAttribute("shadow-intensity", "1.5");
-    mv.setAttribute("touch-action", "pan-y");
+    mv.setAttribute("shadow-softness", "1");
+    mv.setAttribute("exposure", "1");
     mv.setAttribute("environment-image", "neutral");
+    mv.setAttribute("touch-action", "pan-y");
     mv.setAttribute("alt", `Modelo 3D de ${name}`);
 
+    // Botón AR con icono + etiqueta (la etiqueta se oculta en móvil)
     const btn = document.createElement("button");
     btn.id = "ar-button";
     btn.slot = "ar-button";
-    btn.textContent = "Ver en AR";
+    btn.setAttribute("aria-label", "Ver en Realidad Aumentada");
+
+    btn.innerHTML = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M3 7.5L12 3l9 4.5v9L12 21l-9-4.5v-9Zm9 1.8L6.6 7.5 12 4.8l5.4 2.7L12 9.3Zm-1 9.42v-6.3L5 8.85v6.3l6 3.57Zm2 0 6-3.57v-6.3l-6 3.57v6.3Z"/>
+      </svg>
+      <span class="label">Ver en AR</span>
+    `;
     mv.appendChild(btn);
 
     container.replaceChildren(mv);
@@ -112,7 +152,6 @@
       `/splat/viewer/?content=/splat/${fig}/scene.compressed.ply` +
       `&settings=/splat/${fig}/settings.json`;
     iframe.allow = "xr; fullscreen; autoplay";
-
     container.replaceChildren(iframe);
   }
 </script>
