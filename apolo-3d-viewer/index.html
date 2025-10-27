@@ -164,6 +164,18 @@
           mv.src     = glbUrl(model);
           mv.iosSrc  = usdzUrl(model);
           mv.classList.remove('hidden');
+
+          // Bloquear el botón AR por defecto de <model-viewer> con un slot "fantasma"
+          if (!mv.querySelector('[slot="ar-button"]')) {
+          const blocker = document.createElement('button');
+          blocker.setAttribute('slot', 'ar-button');
+          blocker.setAttribute('aria-hidden', 'true');
+          blocker.style.display = 'none';
+          blocker.tabIndex = -1;
+          mv.appendChild(blocker);
+          }
+
+
           // FAB AR: siempre disponible en móvil/tablet
           arBtn.classList.remove('hidden');
           arBtn.onclick = () => {

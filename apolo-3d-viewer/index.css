@@ -13,3 +13,5 @@ model-viewer::part(ar-button) {
     display: none !important;
   }
   
+  /* Extra: si proveemos un botón con slot, que también quede oculto */
+model-viewer button[slot="ar-button"] { display: none !important; }
