@@ -124,13 +124,44 @@
     const glbUrl  = (name) => `/models/${name}/${name}.glb`;
     const usdzUrl = (name) => `/models/${name}/${name}.usdz`;
     const splatUrl= (name) => `/splat/${name}/index.html`;
-    const audioUrl= (name) => `/assets/audio/${name}.mp3`;
 
     // Detectar plataforma
     const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const isAndroid = /Android/.test(navigator.userAgent);
 
-    // ---- Audio: estado persistente ----
+    // ----- Utilidades Audio -----
+
+    // HEAD rápido para saber si existe el archivo
+    async function fileExists(url){
+      try { const r = await fetch(url, { method: 'HEAD' }); return r.ok; }
+      catch { return false; }
+    }
+
+    // Espera un gesto de usuario para poder reproducir
+    function waitUserGestureOnce(extraTargets = []){
+      return new Promise(resolve => {
+        const done = () => {
+          window.removeEventListener('pointerdown', done);
+          window.removeEventListener('keydown', done);
+          window.removeEventListener('touchstart', done);
+          extraTargets.forEach(t => {
+            t?.removeEventListener?.('pointerdown', done);
+            t?.removeEventListener?.('click', done);
+            t?.removeEventListener?.('touchstart', done);
+          });
+          resolve();
+        };
+        window.addEventListener('pointerdown', done, { once:true, passive:true });
+        window.addEventListener('keydown', done, { once:true });
+        window.addEventListener('touchstart', done, { once:true, passive:true });
+        extraTargets.forEach(t => {
+          t?.addEventListener?.('pointerdown', done, { once:true, passive:true });
+          t?.addEventListener?.('click', done, { once:true });
+          t?.addEventListener?.('touchstart', done, { once:true, passive:true });
+        });
+      });
+    }
+
     const AUDIO_KEY = "apolo.audio.state"; // { muted: bool, playing: bool }
     function loadAudioState(){
       try { return JSON.parse(localStorage.getItem(AUDIO_KEY)) || { muted:false, playing:false }; }
@@ -140,33 +171,23 @@
       try { localStorage.setItem(AUDIO_KEY, JSON.stringify(next)); } catch {}
     }
 
-    // Desbloqueo por gesto de usuario
-    function waitUserGestureOnce(){
-      return new Promise(resolve => {
-        const done = () => {
-          window.removeEventListener('pointerdown', done);
-          window.removeEventListener('keydown', done);
-          window.removeEventListener('touchstart', done);
-          resolve();
-        };
-        window.addEventListener('pointerdown', done, { once:true, passive:true });
-        window.addEventListener('keydown', done, { once:true });
-        window.addEventListener('touchstart', done, { once:true, passive:true });
-      });
-    }
-
-    async function setupGlobalAudioForSlug(slug){
+    // Carga audio para un slug con fallback a ambiente.mp3
+    async function setupGlobalAudioForSlug(slug, unlockTargets = []){
       if (!audioEl) return;
 
-      // Si no hay slug, limpia
-      if (!slug) {
+      // Intenta por figura, si no existe cae a ambiente.mp3
+      let src = null;
+      const primary = slug ? `/assets/audio/${slug}.mp3` : null;
+      if (primary && await fileExists(primary)) src = primary;
+      else if (await fileExists('/assets/audio/ambiente.mp3')) src = '/assets/audio/ambiente.mp3';
+
+      if (!src) {
         audioEl.removeAttribute('src');
         try { audioEl.pause(); } catch {}
         audioEl.load();
         return;
       }
 
-      const src = audioUrl(slug);
       if (audioEl.getAttribute('src') !== src) {
         audioEl.setAttribute('src', src);
         try { audioEl.load(); } catch {}
@@ -176,28 +197,19 @@
       const state = loadAudioState();
       audioEl.muted = !!state.muted;
 
-      // Arranque si el usuario lo dejó en "playing"
+      // Reanuda si el usuario lo dejó en "playing"
       if (state.playing) {
-        try {
-          await waitUserGestureOnce();
-          await audioEl.play();
-        } catch {
-          // Si falla, quedará en pausa hasta que el usuario interactúe
-        }
+        try { await waitUserGestureOnce(unlockTargets); await audioEl.play(); }
+        catch { /* queda pausado hasta un gesto válido */ }
       } else {
         try { await audioEl.pause(); } catch {}
       }
 
-      // Persistencia en cambios manuales
+      // Persistencia
       audioEl.onplay = () => saveAudioState({ ...loadAudioState(), playing:true });
       audioEl.onpause = () => saveAudioState({ ...loadAudioState(), playing:false });
       audioEl.onvolumechange = () => saveAudioState({ ...loadAudioState(), muted: audioEl.muted });
-
-      // Manejo de error de carga 404
-      audioEl.onerror = () => {
-        // Silencioso: no rompe nada
-        saveAudioState({ ...loadAudioState(), playing:false });
-      };
+      audioEl.onerror = () => saveAudioState({ ...loadAudioState(), playing:false });
     }
 
     // AR launcher unificado
@@ -206,21 +218,19 @@
       const glb  = glbUrl(name);
 
       if(isIOS){
-        // Quick Look: abrir el .usdz directamente
-        window.location.href = usdz;
+        window.location.href = usdz; // Quick Look
         return;
       }
       if(isAndroid){
-        // Scene Viewer intent
         const file = new URL(glb, location.origin).toString();
         const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(file)}&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(location.href)};end;`;
         window.location.href = intent;
         return;
       }
-      // Escritorio: no hacemos nada (el botón no se muestra en desktop)
+      // Escritorio: botón oculto
     }
 
-    // Mostrar mensaje de ayuda
+    // Mensaje de ayuda
     function showHelp(){
       skel.classList.add('hidden');
       msg.classList.remove('hidden');
@@ -244,7 +254,7 @@
           mv.iosSrc  = usdzUrl(model);
           mv.classList.remove('hidden');
 
-          // Bloquear el botón AR por defecto de <model-viewer> con un slot "fantasma"
+          // Bloquear el botón AR por defecto de <model-viewer>
           if (!mv.querySelector('[slot="ar-button"]')) {
             const blocker = document.createElement('button');
             blocker.setAttribute('slot', 'ar-button');
@@ -254,10 +264,10 @@
             mv.appendChild(blocker);
           }
 
-          // Audio global según slug
-          await setupGlobalAudioForSlug(model);
+          // Audio global con fallback y desbloqueo por gesto en mv/arBtn
+          await setupGlobalAudioForSlug(model, [mv, arBtn]);
 
-          // FAB AR: siempre disponible en móvil/tablet
+          // FAB AR
           arBtn.classList.remove('hidden');
           arBtn.onclick = () => {
             if (mv?.activateAR) {
@@ -272,14 +282,14 @@
 
         if(type === 'splat' && figure){
           // SPLAT view
-          document.body.classList.add('mode-splat'); 
+          document.body.classList.add('mode-splat');
           splat.src = splatUrl(figure);
           splat.classList.remove('hidden');
 
-          // Audio global según slug
-          await setupGlobalAudioForSlug(figure);
+          // Audio global con fallback y desbloqueo por gesto en iframe/arBtn
+          await setupGlobalAudioForSlug(figure, [splat, arBtn]);
 
-          // FAB AR para la misma figura (usa GLB/USDZ homónimo)
+          // FAB AR para la misma figura
           arBtn.classList.remove('hidden');
           arBtn.onclick = () => openARFor(figure);
           skel.classList.add('hidden');
