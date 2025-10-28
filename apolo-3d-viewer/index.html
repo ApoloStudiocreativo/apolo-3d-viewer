@@ -109,14 +109,22 @@ field-of-view="30deg">
 
 <!-- BARRA DE FABs -->
 <div id="fabRow" class="fab-row">
+
   <!-- AUDIO (izquierda) -->
-  <button id="audioBtn" class="audio-fab hidden" type="button" aria-label="Audio">
-    <svg viewBox="0 0 24 24" fill="none">
-      <path d="M4 9v6h3l5 4V5L7 9H4z" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-      <path d="M15 10.5a3.5 3.5 0 010 3" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-      <path d="M17.5 8a6 6 0 010 8" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-    </svg>
-  </button>
+<button id="audioBtn" class="audio-fab hidden" type="button" aria-label="Reproducir audio" aria-pressed="false">
+  <!-- Icono ALTAVOZ (estado: parado) -->
+  <svg class="icon-play" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <path d="M4 9v6h3l5 4V5L7 9H4z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M15 10.5a3.5 3.5 0 010 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M17.5 8a6 6 0 010 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+  </svg>
+  <!-- Icono PAUSA (estado: reproduciendo) -->
+  <svg class="icon-pause" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    <rect x="6" y="5" width="4" height="14" rx="1.2" stroke="currentColor" stroke-width="1.8"/>
+    <rect x="14" y="5" width="4" height="14" rx="1.2" stroke="currentColor" stroke-width="1.8"/>
+  </svg>
+</button>
+
 
   <!-- AR (derecha) -->
   <button id="arBtn" class="ar-fab hidden" type="button" aria-label="Ver en AR">
@@ -153,15 +161,25 @@ function setupAudioFor(id){
   audioBtn.onclick = () => {
     if (!audio) return;
     if (audio.paused) {
+
+  // al hacer play  
       audio.play().then(() => {
-        audioBtn.classList.add('is-playing');
-      }).catch(err=>{
-        console.log('Acción de usuario requerida:',err);
+      audioBtn.classList.add('is-playing');
+      audioBtn.setAttribute('aria-pressed', 'true');
+      audioBtn.setAttribute('aria-label', 'Pausar audio');
       });
+
     } else {
       audio.pause();
       audioBtn.classList.remove('is-playing');
     }
+
+    // al pausar
+    audio.pause();
+    audioBtn.classList.remove('is-playing');
+    audioBtn.setAttribute('aria-pressed', 'false');
+    audioBtn.setAttribute('aria-label', 'Reproducir audio');
+
   };
 }
 
