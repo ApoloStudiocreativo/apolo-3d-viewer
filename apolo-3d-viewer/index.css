@@ -22,20 +22,20 @@
  
  /* En SPLAT: subir un poco pero no demasiado */
  body.mode-splat{
-   --fab-bottom: calc(88px + env(safe-area-inset-bottom));
+   --fab-bottom: calc(70px + env(safe-area-inset-bottom));
  }
  
  /* Móviles estrechos (iPhone SE/Mini) */
  @media (max-width: 390px){
    body.mode-splat{
-     --fab-bottom: calc(105px + env(safe-area-inset-bottom));
+     --fab-bottom: calc(80px + env(safe-area-inset-bottom));
    }
  }
  
  /* Landscape muy bajito: subir más */
  @media (max-height: 480px){
    body.mode-splat{
-     --fab-bottom: calc(120px + env(safe-area-inset-bottom));
+     --fab-bottom: calc(80px + env(safe-area-inset-bottom));
    }
  }
  
