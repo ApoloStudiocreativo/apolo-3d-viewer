@@ -62,6 +62,13 @@ body.mode-splat{
   }
 }
 
+/* móviles muy estrechos: un poco más alto */
+@media (max-width: 390px){
+  body.mode-splat{
+    --fab-bottom: calc(70px + env(safe-area-inset-bottom));
+  }
+}
+
 /* pantallas bajitas en horizontal */
 @media (max-height: 480px){
   body.mode-splat{
