@@ -95,21 +95,23 @@ field-of-view="30deg">
 <!-- Vista SPLAT -->
 <iframe id="splat" class="hidden" allow="xr; xr-spatial-tracking; gyroscope; accelerometer"></iframe>
 
-<!-- FAB AR unificado (solo móvil/tablet) -->
-<button id="arBtn" class="ar-fab hidden" type="button" aria-label="Ver en AR">
-<svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8.66 5v8L12 21l-8.66-5V8L12 3zM12 3v18M3.34 8L12 13l8.66-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-Ver en AR
-</button>
+<!-- BARRA DE FABs -->
+<div id="fabRow" class="fab-row">
+  <!-- AUDIO (izquierda) -->
+  <button id="audioBtn" class="audio-fab hidden" type="button" aria-label="Audio">
+    <svg viewBox="0 0 24 24" fill="none">
+      <path d="M4 9v6h3l5 4V5L7 9H4z" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M15 10.5a3.5 3.5 0 010 3" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M17.5 8a6 6 0 010 8" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+  </button>
 
-<!-- FAB AUDIO (siempre en móviles/tablets) -->
-<button id="audioBtn" class="audio-fab hidden" type="button" aria-label="Audio">
-  <svg viewBox="0 0 24 24" fill="none">
-    <path d="M4 9v6h3l5 4V5L7 9H4z" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-    <path d="M15 10.5a3.5 3.5 0 010 3" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-    <path d="M17.5 8a6 6 0 010 8" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
-  </svg>
-</button>
-
+  <!-- AR (derecha) -->
+  <button id="arBtn" class="ar-fab hidden" type="button" aria-label="Ver en AR">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8.66 5v8L12 21l-8.66-5V8L12 3zM12 3v18M3.34 8L12 13l8.66-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Ver en AR
+  </button>
+</div>
 
 <script>
 (function(){

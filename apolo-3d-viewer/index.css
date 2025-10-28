@@ -122,3 +122,60 @@ body.mode-splat{
     display:flex;
   }
 }
+
+/* ====== Fila de FABs (evita solapamientos) ====== */
+.fab-row{
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: var(--fab-bottom);
+  display: none;                 /* solo móvil/tablet */
+  align-items: center;
+  justify-content: space-between;/* audio izquierda, AR derecha */
+  padding: 0 18px;
+  z-index: 20;
+  pointer-events: none;          /* la fila no intercepta, los botones sí */
+}
+
+/* Los botones dentro de la fila dejan de ser "fixed" */
+.fab-row .ar-fab,
+.fab-row .audio-fab{
+  position: relative;
+  left: auto; right: auto; bottom: auto; transform: none;
+  pointer-events: auto;          /* clics habilitados */
+}
+
+/* Mostrar en móvil/tablet */
+@media (max-width:1024px){
+  .fab-row{ display: flex; }
+}
+
+/* Botón AR ya no necesita 'right' ni 'transform' porque lo empuja el flex */
+.ar-fab{
+  height: 56px;
+  min-width: 180px;              /* que tenga cuerpo, ajusta si quieres */
+  border: none;
+  border-radius: 16px;
+  background: var(--brand);
+  color: #fff;
+  font-weight: 700;
+  padding: 0 18px;
+  box-shadow: var(--shadow);
+}
+
+/* Botón Audio ancho configurable */
+.audio-fab{
+  height: 56px;
+  width: 120px;                  /* tu ancho “pastilla”; prueba 140/160 si quieres */
+  border: none;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow);
+  backdrop-filter: saturate(180%) blur(8px);
+  color: #fff;
+}
+.audio-fab.is-playing{ background: var(--brand); }
+.audio-fab svg{ width:24px; height:24px; }
