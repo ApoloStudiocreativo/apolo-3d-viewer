@@ -1,322 +1,228 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover" />
-  <title>Visor Universal 3D + AR</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>Visor Universal 3D + AR</title>
 
-  <link rel="stylesheet" href="./index.css">
-  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+<link rel="stylesheet" href="./index.css">
+<script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
 
-  <style>
-    :root{
-      --bg:#0f1115; --text:#e9eef7; --muted:#9aa4b2; --brand:#40cbcb;
-      --shadow:0 10px 30px rgba(0,0,0,.35);
-    }
-    html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden}
-    .hidden{display:none!important}
+<style>
+:root {
+  --bg: #0f1115;
+  --text:#e9eef7;
+  --muted:#9aa4b2;
+  --brand:#40cbcb;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+  --fab-bottom: calc(22px + env(safe-area-inset-bottom));
+}
 
-    model-viewer, iframe#splat{width:100vw;height:100dvh;display:block;background:var(--bg)}
-    iframe#splat{border:0}
+/* SPLAT: botones más arriba */
+body.mode-splat {
+  --fab-bottom: calc(90px + env(safe-area-inset-bottom));
+}
 
-    #msg{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-      font:500 16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial;text-align:center;color:var(--muted);padding:24px}
-    #msg b{color:#ff6464}
+html, body {
+  margin:0;
+  height:100%;
+  background:var(--bg);
+  color:var(--text);
+  overflow:hidden;
+}
 
-    .skeleton{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-      background:linear-gradient(160deg,#101319 0%,#0b0e13 100%);color:#7b8696;font:500 14px system-ui,-apple-system,Segoe UI,Roboto,Arial}
-    .spinner{width:28px;height:28px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:#fff;animation:rot .9s linear infinite;margin-right:10px}
-    @keyframes rot{to{transform:rotate(360deg)}}
+.hidden { display:none !important }
 
-    .ar-fab{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
-      display:none;gap:10px;align-items:center;justify-content:center;height:56px;padding:0 18px;min-width:180px;
-      border:none;border-radius:100px;cursor:pointer;background:var(--brand);color:#fff;font-weight:700;font-size:16px;box-shadow:var(--shadow);z-index:20}
-    .ar-fab svg{width:22px;height:22px}
-    @media (max-width:1024px){.ar-fab{display:flex}}
+model-viewer, iframe#splat {
+  width:100vw;
+  height:100dvh;
+  display:block;
+  background:var(--bg);
+}
+iframe#splat { border:0 }
 
-    /* Botón de audio (móvil) */
-    /* 3️⃣ Botón de audio (Play/Pausa) — estilo glass y alineado a --fab-bottom */
+/* Loader y mensaje ayuda (sin tocar) */
+#msg, .skeleton{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
 
-    /* Botón Audio igual que FAB AR pero estilo glass */
-    /* Botón Audio (IZQUIERDA) igual que AR */
-#audio-nudge{
+/* FAB AR DERECHA */
+.ar-fab {
   position:fixed;
-  left:calc(16px + env(safe-area-inset-left));
   bottom:var(--fab-bottom);
-  
+  right:calc(16px + env(safe-area-inset-right));
+
+  display:none;
   height:56px;
   padding:0 18px;
   min-width:180px;
   border:none;
   border-radius:50px;
   cursor:pointer;
-
-  display:none; /* JS lo muestra siempre que haya figura */
   align-items:center;
   justify-content:center;
   gap:10px;
+  background:var(--brand);
+  color:white;
+  font:700 16px system-ui;
+  box-shadow:var(--shadow);
+  z-index:20;
+}
+.ar-fab svg{ width:22px; height:22px }
+@media(max-width:1024px){ .ar-fab{ display:flex } }
 
-  /* Estilo glass elegante */
+/* ✅ BOTÓN AUDIO IZQUIERDA */
+#audio-nudge {
+  position:fixed;
+  bottom:var(--fab-bottom);
+  left:calc(16px + env(safe-area-inset-left));
+
+  display:none;
+  height:56px;
+  padding:0 18px;
+  min-width:180px;
+  border:none;
+  border-radius:50px;
+  cursor:pointer;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
   background:rgba(17,21,28,.6);
   border:1px solid rgba(255,255,255,.14);
-  color:#fff;
-  box-shadow:0 8px 24px rgba(0,0,0,.35);
+  color:white;
+  font:700 16px system-ui;
+  box-shadow:var(--shadow);
   backdrop-filter:blur(8px);
-  -webkit-backdrop-filter:blur(8px);
-
-  font:700 16px/1 system-ui, -apple-system, Segoe UI, Roboto, Arial;
   z-index:30;
-  transform:translateZ(0);
 }
+#audio-nudge svg{ width:22px;height:22px }
 #audio-nudge.playing{
   background:rgba(27,33,43,.7);
   border-color:rgba(255,255,255,.22);
 }
-#audio-nudge svg{
-  width:22px;
-  height:22px;
-}
-#audio-nudge:active{
-  transform:translateY(1px);
-}
-@media (min-width:1025px){
-  #audio-nudge{ display:none!important }
-}
+@media(min-width:1025px){ #audio-nudge{display:none!important} }
 
-
-/* Grupo horizontal de FABs */
-#fab-group{
-  position:fixed;
-  left:50%;
-  bottom:calc(var(--fab-bottom) + env(safe-area-inset-bottom));
-  transform:translateX(-50%);
-  display:flex;
-  gap:10px;
-  z-index:30;
-}
-
-/* Los botones ya no necesitan right/bottom */
-#audio-nudge,
-.ar-fab{
-  position:relative !important;
-  bottom:auto !important;
-  right:calc(16px + env(safe-area-inset-right));
-  left:auto;
-  transform:none;
-}
-
-
-
-  </style>
+</style>
 </head>
 <body>
 
-  <div id="msg" class="hidden"></div>
-  <div id="skel" class="skeleton"><div class="spinner"></div>Cargando…</div>
+<div id="msg" class="hidden"></div>
+<div id="skel" class="skeleton"><div class="spinner"></div>Cargando…</div>
 
-  <model-viewer id="mv" class="hidden"
-    alt="Modelo 3D" camera-controls touch-action="pan-y"
-    ar ar-modes="webxr scene-viewer quick-look"
-    environment-image="neutral"
-    shadow-intensity="1.2" shadow-softness="0.9"
-    exposure="1"
-    camera-orbit="0deg 70deg 1.5m"
-    min-camera-orbit="auto auto 0.4m"
-    max-camera-orbit="auto auto 6m"
-    field-of-view="30deg">
-  </model-viewer>
+<model-viewer id="mv" class="hidden"
+  camera-controls
+  ar ar-modes="webxr scene-viewer quick-look">
+</model-viewer>
 
-  <!-- IMPORTANTE: bloqueamos autoplay dentro del iframe -->
-  <iframe
-    id="splat"
-    class="hidden"
-    allow="xr; xr-spatial-tracking; gyroscope; accelerometer; autoplay 'none'">
-  </iframe>
+<iframe id="splat" class="hidden" allow="xr; xr-spatial-tracking; gyroscope; accelerometer; autoplay 'none'"></iframe>
 
-  <div id="fab-group">
-    <button id="arBtn" class="ar-fab hidden" type="button" aria-label="Ver en AR">
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M12 3l8.66 5v8L12 21l-8.66-5V8L12 3zM12 3v18M3.34 8L12 13l8.66-5"
-          stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      Ver en AR
-    </button>
+<button id="audio-nudge" type="button" aria-label="Audio">
+  <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7-11-7z" stroke="white" stroke-width="1.6"/></svg>
+  Sonido
+</button>
 
-    <button id="audio-nudge" class="hidden" type="button" aria-label="Reproducir/Pausar">
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M8 5v14l11-7-11-7z" stroke="white" stroke-width="1.6"
-          stroke-linejoin="round"/>
-      </svg>
-      Sonido
-    </button>
-  </div>
+<button id="arBtn" class="ar-fab hidden" type="button" aria-label="AR">
+  <svg viewBox="0 0 24 24"><path d="M12 3l8.66 5v8L12 21l-8.66-5V8L12 3zM12 3v18M3.34 8L12 13l8.66-5" stroke="white" stroke-width="1.8"/></svg>
+  Ver en AR
+</button>
 
-  <audio id="global-audio" preload="none" playsinline></audio>
+<audio id="global-audio" preload="none" playsinline></audio>
 
-  <script>
-  (function(){
-    const qs = new URLSearchParams(location.search);
-    const type   = (qs.get('type')||'').toLowerCase();
-    const model  = (qs.get('model')||'').toLowerCase();
-    const figure = (qs.get('figure')||'').toLowerCase();
+<script>
+(function(){
+  const qs = new URLSearchParams(location.search);
+  const type = (qs.get('type')||'').toLowerCase();
+  const model = (qs.get('model')||'').toLowerCase();
+  const figure = (qs.get('figure')||'').toLowerCase();
 
-    const mv    = document.getElementById('mv');
-    const splat = document.getElementById('splat');
-    const arBtn = document.getElementById('arBtn');
-    const audioEl = document.getElementById('global-audio');
-    const audioBtn = document.getElementById('audio-nudge');
-    const skel  = document.getElementById('skel');
-    const msg   = document.getElementById('msg');
+  const mv = document.getElementById('mv');
+  const splat = document.getElementById('splat');
+  const arBtn = document.getElementById('arBtn');
+  const audioEl = document.getElementById('global-audio');
+  const audioBtn = document.getElementById('audio-nudge');
+  const skel = document.getElementById('skel');
+  const msg = document.getElementById('msg');
 
-    const glbUrl   = n => `/models/${n}/${n}.glb`;
-    const usdzUrl  = n => `/models/${n}/${n}.usdz`;
-    const splatUrl = n => `/splat/${n}/index.html`;
+  const glbUrl = n => `/models/${n}/${n}.glb`;
+  const usdzUrl = n => `/models/${n}/${n}.usdz`;
+  const splatUrl = n => `/splat/${n}/index.html`;
 
-    async function fileExists(url){ try{ const r=await fetch(url,{method:'HEAD'}); return r.ok; } catch{ return false; } }
+  async function fileExists(url){ try{return (await fetch(url,{method:'HEAD'})).ok;}catch{return false;} }
 
-    // Botón Sonido: toggle manual
-    audioBtn.addEventListener('click', async () => {
-      if (!audioEl.currentSrc) return;
-      try{
-        if (audioEl.paused) await audioEl.play();
-        else await audioEl.pause();
-      }catch{}
-      syncAudioButton();
+  function syncAudioButton(){
+    const hasSrc = !!audioEl?.currentSrc;
+    const playing = hasSrc && !audioEl.paused && !audioEl.ended;
+    audioBtn.classList.toggle('playing', playing);
+    audioBtn.innerHTML = playing
+      ? `<svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14" stroke="white" stroke-width="1.8"/></svg> Pausa`
+      : `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7-11-7z" stroke="white" stroke-width="1.6"/></svg> Sonido`;
+  }
+  audioBtn.addEventListener('click', async () => {
+    if (!audioEl.currentSrc) return;
+    try{ audioEl.paused ? await audioEl.play() : await audioEl.pause(); }catch{}
+    syncAudioButton();
+  });
+
+  async function setupAudio(slug){
+    let src = `/assets/audio/${slug}.mp3`;
+    if (!(await fileExists(src))) src = `/assets/audio/ambiente.mp3`;
+    audioEl.src = src;
+    audioEl.pause();
+    audioBtn.classList.remove('hidden');
+    syncAudioButton();
+  }
+
+  function openAR(n){
+    if(/iPad|iPhone|iPod/.test(navigator.userAgent)){
+      location.href = usdzUrl(n);
+    } else {
+      const file = new URL(glbUrl(n), location.origin).toString();
+      const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(file)}#Intent;scheme=https;package=com.google.ar.core;end;`;
+      location.href = intent;
+    }
+  }
+
+  splat.addEventListener('load',()=>{
+    const idoc = splat.contentDocument||splat.contentWindow?.document;
+    idoc?.querySelectorAll('audio,video').forEach(m=>{
+      m.pause?.(); m.muted=true;
     });
+  });
 
-    function showAudioBtn(){ audioBtn.classList.remove('hidden'); syncAudioButton(); }
-    function hideAudioBtn(){ audioBtn.classList.add('hidden'); }
+  (async function init(){
+    try{
+      if(type==='glb' && model){
+        document.body.classList.remove('mode-splat');
+        mv.src = glbUrl(model);
+        mv.classList.remove('hidden');
+        await setupAudio(model);
 
-    function syncAudioButton(){
-  const hasSrc = !!audioEl?.currentSrc;
-  if (!hasSrc) { audioBtn.classList.remove('playing'); audioBtn.setAttribute('aria-pressed','false'); }
-  const playing = hasSrc && !audioEl.paused && !audioEl.ended;
-  audioBtn.classList.toggle('playing', playing);
-  audioBtn.setAttribute('aria-pressed', String(playing));
-  audioBtn.innerHTML = playing
-    ? `<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14M16 5v14" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg> Pausa`
-    : `<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7-11-7z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/></svg> Sonido`;
-}
-
-
-
-    // Carga del audio con fallback y SIEMPRE en pausa
-    async function setupAudio(slug){
-      let src=null;
-      const primary = slug ? `/assets/audio/${slug}.mp3` : null;
-      if (primary && await fileExists(primary)) src = primary;
-      else if (await fileExists('/assets/audio/ambiente.mp3')) src = '/assets/audio/ambiente.mp3';
-
-      if (!src) {
-  audioEl.removeAttribute('src');
-  audioEl.load();
-  showAudioBtn(); // ✅ mostrarse siempre
-  return;
-}
-
-
-      if (audioEl.getAttribute('src') !== src) {
-        audioEl.setAttribute('src', src);
-        try{ audioEl.load(); }catch{}
-      }
-
-      // Nunca reproducimos automáticamente
-      try{ await audioEl.pause(); }catch{}
-      showAudioBtn();
-    }
-
-    // AR unificado
-    function openAR(n){
-      if(/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1)){
-        location.href = usdzUrl(n); return;
-      }
-      if(/Android/.test(navigator.userAgent)){
-        const file = new URL(glbUrl(n), location.origin).toString();
-        const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(file)}&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;end;`;
-        location.href = intent; return;
-      }
-    }
-
-    // Mantener texto del botón sincronizado
-    ['play','pause','loadeddata','emptied','error','ended'].forEach(ev=>{
-      audioEl.addEventListener(ev, syncAudioButton);
-    });
-
-    // 🔒 Al cargarse el iframe SPLAT: parar/mutear cualquier media interna
-    function hardStopIframeMedia(){
-      try{
-        const idoc = splat.contentDocument || splat.contentWindow?.document;
-        if (!idoc) return;
-        idoc.querySelectorAll('audio,video').forEach(m=>{
-          try{ m.pause(); }catch{}
-          m.muted = true;
-          try{ m.currentTime = 0; }catch{}
-        });
-        // Howler.js (si lo usaran)
-        const iw = splat.contentWindow;
-        if (iw && iw.Howler && typeof iw.Howler.stop === 'function') {
-          try{ iw.Howler.stop(); }catch{}
-        }
-      }catch{}
-    }
-
-    splat.addEventListener('load', hardStopIframeMedia);
-
-    (async function init(){
-      try{
-        if (type==='glb' && model){
-          mv.src = glbUrl(model);
-          mv.iosSrc = usdzUrl(model);
-          mv.classList.remove('hidden');
-
-          // Oculta el botón AR nativo de model-viewer
-          if (!mv.querySelector('[slot="ar-button"]')) {
-            const blocker = document.createElement('button');
-            blocker.setAttribute('slot','ar-button');
-            blocker.style.display = 'none';
-            blocker.tabIndex = -1;
-            mv.appendChild(blocker);
-          }
-
-          await setupAudio(model);
-
-          arBtn.classList.remove('hidden');
-          arBtn.onclick = () => {
-            if (mv?.activateAR) { mv.activateAR().catch(()=> openAR(model)); }
-            else { openAR(model); }
-          };
-          skel.classList.add('hidden');
-          return;
-        }
-
-        if (type==='splat' && figure){
-          splat.src = splatUrl(figure);
-          splat.classList.remove('hidden');
-
-          await setupAudio(figure);
-
-          arBtn.classList.remove('hidden');
-          arBtn.onclick = () => openAR(figure);
-          skel.classList.add('hidden');
-          return;
-        }
-
+        arBtn.classList.remove('hidden');
+        arBtn.onclick = () => openAR(model);
         skel.classList.add('hidden');
-        msg.classList.remove('hidden');
-        msg.innerHTML = `<div>
-          <b>Falta parámetro en la URL.</b><br/><br/>
-          Usa ejemplos:<br/>
-          <code>?type=glb&model=cristo</code><br/>
-          <code>?type=splat&figure=calvo-anillo</code>
-        </div>`;
-      }catch(err){
-        console.error(err);
-        skel.classList.add('hidden');
-        msg.classList.remove('hidden');
-        msg.textContent = 'Error cargando contenido';
+        return;
       }
-    })();
+
+      if(type==='splat' && figure){
+        document.body.classList.add('mode-splat');
+        splat.src = splatUrl(figure);
+        splat.classList.remove('hidden');
+        await setupAudio(figure);
+
+        arBtn.classList.remove('hidden');
+        arBtn.onclick = () => openAR(figure);
+        skel.classList.add('hidden');
+        return;
+      }
+
+      skel.classList.add('hidden');
+      msg.classList.remove('hidden');
+      msg.innerHTML="Faltan parámetros";
+    }catch{
+      skel.classList.add('hidden');
+      msg.classList.remove('hidden');
+      msg.innerText="Error";
+    }
   })();
-  </script>
+})();
+</script>
 </body>
 </html>
