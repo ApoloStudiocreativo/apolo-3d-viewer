@@ -35,12 +35,44 @@
     @media (max-width:1024px){.ar-fab{display:flex}}
 
     /* Botón de audio (móvil) */
-    #audio-nudge{position:fixed;right:16px;bottom:16px;display:none;align-items:center;gap:8px;
-      padding:10px 14px;border-radius:999px;background:#1f2733;border:none;cursor:pointer;color:#fff;font:600 14px system-ui;box-shadow:var(--shadow);z-index:30}
-    #audio-nudge svg{width:18px;height:18px}
-    @media (min-width:1025px){#audio-nudge{display:none!important}}
+    /* 3️⃣ Botón de audio (Play/Pausa) — estilo glass y alineado a --fab-bottom */
+#audio-nudge{
+  position: fixed;
+  right: calc(16px + env(safe-area-inset-right));
+  bottom: var(--fab-bottom);            /* ✅ usa tu misma variable */
+  display: none;                        /* lo muestra el JS cuando hay audio */
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(17,21,28,.6);
+  color: #fff;
+  font: 600 14px/1 system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 30;
+  transform: translateZ(0);
+}
+#audio-nudge svg{
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+/* Estado visual cuando está reproduciendo */
+#audio-nudge.playing{
+  background: rgba(27,33,43,.7);
+  border-color: rgba(255,255,255,.22);
+}
+#audio-nudge:active{
+  transform: translateZ(0) scale(.98);
+}
+/* En escritorio oculto (igual que antes) */
+@media (min-width: 1025px){
+  #audio-nudge{ display: none !important; }
+}
 
-    #global-audio{display:none}
   </style>
 </head>
 <body>
