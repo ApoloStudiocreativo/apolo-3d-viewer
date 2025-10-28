@@ -180,17 +180,17 @@
       syncAudioButton();
     });
 
-    + function showAudioBtn(){ audioBtn.classList.remove('hidden'); syncAudioButton(); }
-    + function hideAudioBtn(){ audioBtn.classList.add('hidden'); }
+    function showAudioBtn(){ audioBtn.classList.remove('hidden'); syncAudioButton(); }
+    function hideAudioBtn(){ audioBtn.classList.add('hidden'); }
 
     function syncAudioButton(){
   const hasSrc = !!audioEl?.currentSrc;
-  + if (!hasSrc) { audioBtn.classList.add('hidden'); return; }
-  + audioBtn.classList.remove('hidden');
+  if (!hasSrc) { audioBtn.classList.add('hidden'); return; }
+  audioBtn.classList.remove('hidden');
 
   const playing = !audioEl.paused && !audioEl.ended;
-  audioBtn.classList.toggle('playing', playing);          // ✅ NUEVO: clase visual
-  audioBtn.setAttribute('aria-pressed', String(playing)); // ✅ NUEVO: accesibilidad
+  audioBtn.classList.toggle('playing', playing);
+  audioBtn.setAttribute('aria-pressed', String(playing));
   audioBtn.innerHTML = playing
     ? `<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14M16 5v14" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg> Pausa`
     : `<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7-11-7z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/></svg> Sonido`;
