@@ -41,8 +41,7 @@
     /* Botón AR: visible solo en móvil/tablet */
     .ar-fab{
       position:fixed; left:50%; bottom: var(--fab-bottom, 24px); transform:translateX(-50%);
-      display:none; /* por defecto oculto, se activa con media query */
-      gap:10px; align-items:center; justify-content:center;
+      display:none; gap:10px; align-items:center; justify-content:center;
       height:56px; padding:0 18px; min-width:180px;
       border:none; border-radius:100px; cursor:pointer;
       background:var(--brand); color:white; font-weight:700; font-size:16px; letter-spacing:.2px;
@@ -51,13 +50,9 @@
     }
     .ar-fab:active{transform:translateX(-50%) scale(.98)}
     .ar-fab svg{width:22px;height:22px}
+    @media (max-width:1024px){ .ar-fab{display:flex} }
 
-    /* Solo móvil/tablet */
-    @media (max-width:1024px){
-      .ar-fab{display:flex}
-    }
-
-    /* Esqueleto simple mientras carga */
+    /* Esqueleto */
     .skeleton{
       position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
       background:linear-gradient(160deg,#101319 0%,#0b0e13 100%);
@@ -69,16 +64,16 @@
     /* Audio global oculto */
     #global-audio{display:none}
 
-    /* Nudge de audio móvil */
-    #audio-nudge{
+    /* Botón de audio (toggle) móvil */
+    #audio-toggle{
       position:fixed; right:16px; bottom:16px;
       display:none; align-items:center; gap:8px;
       padding:10px 14px; border-radius:999px; border:none; cursor:pointer;
       background:#1f2733; color:#fff; font:600 14px/1 system-ui, -apple-system, Segoe UI, Roboto, Arial;
       box-shadow:var(--shadow); z-index:30;
     }
-    #audio-nudge svg{width:18px; height:18px}
-    @media (min-width:1025px){ #audio-nudge{display:none!important} }
+    #audio-toggle svg{width:18px; height:18px}
+    @media (min-width:1025px){ #audio-toggle{display:none!important} }
   </style>
 </head>
 <body>
@@ -114,9 +109,10 @@
     Ver en AR
   </button>
 
-  <!-- Nudge de audio (móvil) -->
-  <button id="audio-nudge" type="button" aria-label="Activar sonido">
-    <svg viewBox="0 0 24 24" fill="none"><path d="M4 9v6h4l5 4V5L8 9H4zM16 12h2m-2 3h3m-3-6h4" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <!-- Botón de Audio (toggle) -->
+  <button id="audio-toggle" type="button" aria-label="Reproducir audio" aria-pressed="false">
+    <!-- Icono Play por defecto -->
+    <svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7-11-7z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/></svg>
     Sonido
   </button>
 
@@ -136,7 +132,7 @@
     const msg   = document.getElementById('msg');
     const arBtn = document.getElementById('arBtn');
     const audioEl = document.getElementById('global-audio');
-    const audioNudge = document.getElementById('audio-nudge');
+    const audioToggle = document.getElementById('audio-toggle');
 
     // Helpers de rutas
     const glbUrl   = (name) => `/models/${name}/${name}.glb`;
@@ -148,30 +144,6 @@
     async function fileExists(url){
       try { const r = await fetch(url, { method: 'HEAD' }); return r.ok; }
       catch { return false; }
-    }
-
-    function waitUserGestureOnce(extraTargets = []){
-      return new Promise(resolve => {
-        const done = () => {
-          window.removeEventListener('pointerdown', done);
-          window.removeEventListener('keydown', done);
-          window.removeEventListener('touchstart', done);
-          extraTargets.forEach(t => {
-            t?.removeEventListener?.('pointerdown', done);
-            t?.removeEventListener?.('click', done);
-            t?.removeEventListener?.('touchstart', done);
-          });
-          resolve();
-        };
-        window.addEventListener('pointerdown', done, { once:true, passive:true });
-        window.addEventListener('keydown', done, { once:true });
-        window.addEventListener('touchstart', done, { once:true, passive:true });
-        extraTargets.forEach(t => {
-          t?.addEventListener?.('pointerdown', done, { once:true, passive:true });
-          t?.addEventListener?.('click', done, { once:true });
-          t?.addEventListener?.('touchstart', done, { once:true, passive:true });
-        });
-      });
     }
 
     // Desbloqueo global en captura (muy temprano)
@@ -187,27 +159,22 @@
       document.addEventListener('click', handler, { once:true, capture:true });
     }
 
-    // Empuje extra de audio móvil (misma interacción)
+    // Kick: intenta play() pegado al MISMO gesto en targets que tocas
     function kickMobileAudioOnce(targets = []) {
-      const el = document.getElementById('global-audio');
-      if (!el) return;
-
+      if (!audioEl) return;
       const handler = async () => {
         try {
-          await el.play();
+          await audioEl.play();
           const st = loadAudioState();
           saveAudioState({ ...st, playing: true });
-          hideAudioNudge();
-        } catch (e) {
-          // si el sistema lo bloquea, el nudge seguirá visible
-        }
+          renderAudioButton();
+        } catch {}
         targets.forEach(t => {
           t?.removeEventListener?.('click', handler);
           t?.removeEventListener?.('touchend', handler);
           t?.removeEventListener?.('pointerup', handler);
         });
       };
-
       targets.forEach(t => {
         t?.addEventListener?.('click', handler, { once: true });
         t?.addEventListener?.('touchend', handler, { once: true, passive: true });
@@ -215,6 +182,7 @@
       });
     }
 
+    // Estado persistente
     const AUDIO_KEY = "apolo.audio.state"; // { muted: bool, playing: bool }
     function loadAudioState(){
       try { return JSON.parse(localStorage.getItem(AUDIO_KEY)) || { muted:false, playing:false }; }
@@ -224,19 +192,48 @@
       try { localStorage.setItem(AUDIO_KEY, JSON.stringify(next)); } catch {}
     }
 
-    function showAudioNudge(){ if (audioNudge) audioNudge.style.display = 'flex'; }
-    function hideAudioNudge(){ if (audioNudge) audioNudge.style.display = 'none'; }
+    // Render del botón Play/Pausa (no desaparece)
+    function renderAudioButton(){
+      if (!audioToggle) return;
+      const hasSrc = !!audioEl?.currentSrc;
+      if (!hasSrc) {
+        audioToggle.style.display = 'none';
+        return;
+      }
+      // Solo móvil (en desktop lo oculta el media query)
+      audioToggle.style.display = 'flex';
 
-    audioNudge?.addEventListener('click', async () => {
+      const playing = !audioEl.paused && !audioEl.ended;
+      audioToggle.setAttribute('aria-pressed', String(playing));
+      audioToggle.innerHTML = playing
+        ? `<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14M16 5v14" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg> Pausa`
+        : `<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7-11-7z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/></svg> Sonido`;
+    }
+
+    // Toggle click
+    audioToggle?.addEventListener('click', async () => {
+      if (!audioEl?.currentSrc) return;
       try {
-        await audioEl.play();
-        const st = loadAudioState();
-        saveAudioState({ ...st, playing: true });
-        hideAudioNudge();
+        if (audioEl.paused) {
+          await audioEl.play();
+          saveAudioState({ ...loadAudioState(), playing: true });
+        } else {
+          await audioEl.pause();
+          saveAudioState({ ...loadAudioState(), playing: false });
+        }
       } catch {}
+      renderAudioButton();
     });
 
-    async function setupGlobalAudioForSlug(slug, unlockTargets = []){
+    // Sincroniza UI con eventos del <audio>
+    audioEl.addEventListener('play', renderAudioButton);
+    audioEl.addEventListener('pause', renderAudioButton);
+    audioEl.addEventListener('loadeddata', renderAudioButton);
+    audioEl.addEventListener('emptied', renderAudioButton);
+    audioEl.addEventListener('error', renderAudioButton);
+
+    // Configura audio para un slug con fallback a ambiente.mp3
+    async function setupGlobalAudioForSlug(slug){
       if (!audioEl) return;
 
       // Intenta /assets/audio/<slug>.mp3; si no existe, usa ambiente.mp3
@@ -249,7 +246,7 @@
         audioEl.removeAttribute('src');
         try { audioEl.pause(); } catch {}
         audioEl.load();
-        hideAudioNudge();
+        renderAudioButton();
         return;
       }
 
@@ -262,26 +259,20 @@
       const state = loadAudioState();
       audioEl.muted = !!state.muted;
 
-      // No esperamos gesto aquí; el kick/nudge harán play() en el tap
+      // No esperamos gesto aquí; el kick o el botón harán play() pegado al tap
       if (state.playing) {
-        audioEl.play().then(hideAudioNudge).catch(() => showAudioNudge());
+        audioEl.play().catch(()=>{ /* quedará pausado hasta tap */ });
       } else {
         try { await audioEl.pause(); } catch {}
-        showAudioNudge();
       }
 
-      // Persistencia
-      audioEl.onplay = () => { hideAudioNudge(); saveAudioState({ ...loadAudioState(), playing:true }); };
-      audioEl.onpause = () => { saveAudioState({ ...loadAudioState(), playing:false }); };
-      audioEl.onvolumechange = () => saveAudioState({ ...loadAudioState(), muted: audioEl.muted });
-      audioEl.onerror = () => { saveAudioState({ ...loadAudioState(), playing:false }); };
+      renderAudioButton();
     }
 
     /* ========== AR unificado ========== */
     function openARFor(name){
       const usdz = usdzUrl(name);
       const glb  = glbUrl(name);
-
       if(/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)){
         window.location.href = usdz; // Quick Look
         return;
@@ -292,7 +283,6 @@
         window.location.href = intent;
         return;
       }
-      // Escritorio: botón oculto
     }
 
     function showHelp(){
@@ -315,7 +305,7 @@
     (async function init(){
       try{
         if(type === 'glb' && model){
-          // GLB view
+          // GLB
           document.body.classList.remove('mode-splat');
           mv.src     = glbUrl(model);
           mv.iosSrc  = usdzUrl(model);
@@ -331,11 +321,11 @@
             mv.appendChild(blocker);
           }
 
-          // Kick TEMPRANO (antes del await)
+          // Kick temprano
           kickMobileAudioOnce([mv, arBtn, document.body]);
 
-          // Audio global con fallback
-          await setupGlobalAudioForSlug(model, [mv, arBtn]);
+          // Audio global
+          await setupGlobalAudioForSlug(model);
 
           // FAB AR
           arBtn.classList.remove('hidden');
@@ -351,16 +341,16 @@
         }
 
         if(type === 'splat' && figure){
-          // SPLAT view
+          // SPLAT
           document.body.classList.add('mode-splat');
           splat.src = splatUrl(figure);
           splat.classList.remove('hidden');
 
-          // Kick TEMPRANO (antes del await)
+          // Kick temprano
           kickMobileAudioOnce([splat, arBtn, document.body]);
 
-          // Audio global con fallback
-          await setupGlobalAudioForSlug(figure, [splat, arBtn]);
+          // Audio global
+          await setupGlobalAudioForSlug(figure);
 
           // FAB AR
           arBtn.classList.remove('hidden');
@@ -369,7 +359,7 @@
           return;
         }
 
-        // Si no coincide nada:
+        // Sin parámetros válidos
         showHelp();
 
       }catch(err){
