@@ -1,49 +1,41 @@
 /*********************************************
  * 1️⃣ Ocultar botones nativos de <model-viewer>
  *********************************************/
- model-viewer::part(ar-button) {
-    display: none !important;
-  }
-  model-viewer::part(ar-prompt) {
-    display: none !important;
-  }
-  model-viewer::part(ar-status) {
-    display: none !important;
-  }
-  /* Fallback si existe elemento con slot="ar-button" */
-  model-viewer button[slot="ar-button"] {
-    display: none !important;
-  }
-  
-  /*********************************************
-   * 2️⃣ Posicionamiento inteligente del FAB "Ver en AR"
-   *    → centrado abajo por defecto (GLB)
-   *    → más alto en SPLAT para no tapar UI
-   *********************************************/
-  :root{
-    --fab-bottom: calc(18px + env(safe-area-inset-bottom));
-  }
-  
-  .ar-fab{
-    bottom: var(--fab-bottom);
-  }
-  
-  /* En SPLAT, subimos el botón */
-  body.mode-splat{
-    --fab-bottom: calc(60px + env(safe-area-inset-bottom));
-  }
-  
-  /* Ajuste para móviles muy estrechos */
-  @media (max-width: 420px){
-    body.mode-splat{
-      --fab-bottom: calc(136px + env(safe-area-inset-bottom));
-    }
-  }
-  
-  /* Ajuste para pantallas en landscape muy bajitas */
-  @media (max-height: 480px){
-    body.mode-splat{
-      --fab-bottom: calc(150px + env(safe-area-inset-bottom));
-    }
-  }
-  
+ model-viewer::part(ar-button),
+ model-viewer::part(ar-prompt),
+ model-viewer::part(ar-status),
+ model-viewer button[slot="ar-button"] {
+   display: none !important;
+ }
+ 
+ /*********************************************
+  * 2️⃣ FAB AR — Ajuste inteligente según vista
+  *********************************************/
+ :root{
+   --fab-bottom: calc(22px + env(safe-area-inset-bottom));
+ }
+ 
+ .ar-fab{
+   bottom: var(--fab-bottom);
+   border-radius: 50px; /* más redondeado ✅ */
+ }
+ 
+ /* En SPLAT: subir un poco pero no demasiado */
+ body.mode-splat{
+   --fab-bottom: calc(88px + env(safe-area-inset-bottom));
+ }
+ 
+ /* Móviles estrechos (iPhone SE/Mini) */
+ @media (max-width: 390px){
+   body.mode-splat{
+     --fab-bottom: calc(105px + env(safe-area-inset-bottom));
+   }
+ }
+ 
+ /* Landscape muy bajito: subir más */
+ @media (max-height: 480px){
+   body.mode-splat{
+     --fab-bottom: calc(120px + env(safe-area-inset-bottom));
+   }
+ }
+ 
