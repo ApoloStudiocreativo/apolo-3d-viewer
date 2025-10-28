@@ -151,36 +151,61 @@ let audio = null;
 
 function setupAudioFor(id){
   const url = `/assets/audio/${id}.mp3`;
+
+  // si había un audio anterior, paramos y limpiamos
+  if (audio) {
+    try { audio.pause(); } catch {}
+    audio = null;
+  }
+
   audio = new Audio(url);
   audio.loop = true;
   audio.preload = 'none';
 
-  // Poner el botón visible
+  // mostrar botón y estado inicial accesible
   audioBtn.classList.remove('hidden');
+  audioBtn.classList.remove('is-playing');
+  audioBtn.setAttribute('aria-pressed', 'false');
+  audioBtn.setAttribute('aria-label', 'Reproducir audio');
 
-  audioBtn.onclick = () => {
+  audioBtn.onclick = async () => {
     if (!audio) return;
+
     if (audio.paused) {
-
-  // al hacer play  
-      audio.play().then(() => {
-      audioBtn.classList.add('is-playing');
-      audioBtn.setAttribute('aria-pressed', 'true');
-      audioBtn.setAttribute('aria-label', 'Pausar audio');
-      });
-
+      try {
+        await audio.play();
+        audioBtn.classList.add('is-playing');
+        audioBtn.setAttribute('aria-pressed', 'true');
+        audioBtn.setAttribute('aria-label', 'Pausar audio');
+        // vibración sutil en móvil (opcional)
+        if (navigator.vibrate) navigator.vibrate(10);
+      } catch (err) {
+        console.log('Acción de usuario requerida / bloqueo de autoplay:', err);
+      }
     } else {
       audio.pause();
       audioBtn.classList.remove('is-playing');
+      audioBtn.setAttribute('aria-pressed', 'false');
+      audioBtn.setAttribute('aria-label', 'Reproducir audio');
     }
-
-    // al pausar
-    audio.pause();
-    audioBtn.classList.remove('is-playing');
-    audioBtn.setAttribute('aria-pressed', 'false');
-    audioBtn.setAttribute('aria-label', 'Reproducir audio');
-
   };
+
+  // opcional: si la pestaña se oculta, pausamos por cortesía
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && audio && !audio.paused) {
+      audio.pause();
+      audioBtn.classList.remove('is-playing');
+      audioBtn.setAttribute('aria-pressed', 'false');
+      audioBtn.setAttribute('aria-label', 'Reproducir audio');
+    }
+  }, { once: true });
+
+  // opcional: si el mp3 no existe, deja el botón visible pero sin acción
+  audio.addEventListener('error', () => {
+    console.warn('Audio no encontrado:', url);
+    // si prefieres, deshabilita el botón:
+    // audioBtn.disabled = true;
+  });
 }
 
 
