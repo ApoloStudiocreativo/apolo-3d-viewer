@@ -319,4 +319,18 @@ html, body{
     0 0 0 2px rgba(255, 90, 90, .18) inset;
 }
 
-/* Alternar iconos (alt*
+/* Alternar iconos del botón Audio */
+.audio-fab .icon-pause{
+  display: none;
+}
+.audio-fab .icon-play{
+  display: block;
+}
+
+.audio-fab.is-playing .icon-pause{
+  display: block;
+}
+.audio-fab.is-playing .icon-play{
+  display: none;
+}
+
