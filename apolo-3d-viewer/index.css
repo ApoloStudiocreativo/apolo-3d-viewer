@@ -48,6 +48,17 @@ model-viewer::part(ar-button) {
   }
   }
 
+  body.mode-splat .fab-row{
+    bottom: var(--fab-bottom);
+  }
+
+  @media (max-width: 420px){
+    body.mode-splat{
+      --fab-bottom: calc(170px + env(safe-area-inset-bottom));
+    }
+  }
+  
+
   /* ====== FAB AR: posicionamiento sólido con clamp + safe-area ====== */
 :root{
   /* margen inferior base en pantallas normales */
@@ -59,9 +70,9 @@ model-viewer::part(ar-button) {
   bottom: var(--fab-bottom);
 }
 
-/* en SPLAT lo subimos para no tapar su UI */
+/* En SPLAT, subimos los botones */
 body.mode-splat{
-  --fab-bottom: calc(clamp(80px, 18vh, 160px) + env(safe-area-inset-bottom));
+  --fab-bottom: calc(150px + env(safe-area-inset-bottom));
 }
 
 /* móviles muy estrechos: un poco más alto */
