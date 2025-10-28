@@ -30,8 +30,7 @@ model-viewer::part(ar-button) {
   
   /* En SPLAT, subimos el botón */
   body.mode-splat{
-      --fab-bottom: calc(118px + env(safe-area-inset-bottom));
-      --fab-bottom: calc(90px + env(safe-area-inset-bottom));
+      --fab-bottom: calc(70px + env(safe-area-inset-bottom));
   }
   
   /* Ajuste para móviles muy estrechos */
