@@ -162,6 +162,32 @@
       });
     }
 
+    // Empuje extra de audio móvil (misma interacción)
+function kickMobileAudioOnce(targets = []) {
+  const el = document.getElementById('global-audio');
+  if (!el) return;
+
+  const handler = async () => {
+    try {
+      await el.play();
+      const st = loadAudioState();
+      saveAudioState({ ...st, playing: true });
+    } catch {}
+    targets.forEach(t => {
+      t?.removeEventListener?.('click', handler);
+      t?.removeEventListener?.('touchend', handler);
+      t?.removeEventListener?.('pointerup', handler);
+    });
+  };
+
+  targets.forEach(t => {
+    t?.addEventListener?.('click', handler, { once: true });
+    t?.addEventListener?.('touchend', handler, { once: true, passive: true });
+    t?.addEventListener?.('pointerup', handler, { once: true, passive: true });
+  });
+}
+
+
     const AUDIO_KEY = "apolo.audio.state"; // { muted: bool, playing: bool }
     function loadAudioState(){
       try { return JSON.parse(localStorage.getItem(AUDIO_KEY)) || { muted:false, playing:false }; }
@@ -266,6 +292,8 @@
 
           // Audio global con fallback y desbloqueo por gesto en mv/arBtn
           await setupGlobalAudioForSlug(model, [mv, arBtn]);
+          
+          kickMobileAudioOnce([mv, arBtn, document.body]);
 
           // FAB AR
           arBtn.classList.remove('hidden');
@@ -288,6 +316,8 @@
 
           // Audio global con fallback y desbloqueo por gesto en iframe/arBtn
           await setupGlobalAudioForSlug(figure, [splat, arBtn]);
+
+          kickMobileAudioOnce([splat, arBtn, document.body]);
 
           // FAB AR para la misma figura
           arBtn.classList.remove('hidden');
