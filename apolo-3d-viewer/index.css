@@ -27,25 +27,6 @@ model-viewer::part(ar-button) {
   .ar-fab{
   bottom: var(--fab-bottom);
   }
-  
-  /* En SPLAT, subimos el botón */
-  body.mode-splat{
-      --fab-bottom: calc(20px + env(safe-area-inset-bottom));
-  }
-  
-  /* Ajuste para móviles muy estrechos */
-  @media (max-width: 420px){
-  body.mode-splat{
-  --fab-bottom: calc(136px + env(safe-area-inset-bottom));
-  }
-  }
-  
-  /* Ajuste para pantallas en landscape muy bajitas */
-  @media (max-height: 480px){
-  body.mode-splat{
-  --fab-bottom: calc(150px + env(safe-area-inset-bottom));
-  }
-  }
 
   body.mode-splat .fab-row{
     bottom: var(--fab-bottom);
@@ -71,20 +52,20 @@ model-viewer::part(ar-button) {
 
 /* En SPLAT, subimos los botones */
 body.mode-splat{
-  --fab-bottom: calc(150px + env(safe-area-inset-bottom));
+  --fab-bottom: calc(80px + env(safe-area-inset-bottom));
 }
 
 /* móviles muy estrechos: un poco más alto */
 @media (max-width: 420px){
   body.mode-splat{
-    --fab-bottom: calc(clamp(100px, 22vh, 180px) + env(safe-area-inset-bottom));
+    --fab-bottom: calc(90px + env(safe-area-inset-bottom));
   }
 }
 
 /* pantallas bajitas en horizontal */
 @media (max-height: 480px){
   body.mode-splat{
-    --fab-bottom: calc(clamp(110px, 26vh, 200px) + env(safe-area-inset-bottom));
+    --fab-bottom: calc(100px + env(safe-area-inset-bottom));
   }
 }
 
