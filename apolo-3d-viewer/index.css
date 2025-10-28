@@ -94,7 +94,7 @@ body.mode-splat{
   position:fixed;
   left: 18px;
   bottom: var(--fab-bottom);
-  width: 56px;
+  width: 120px;
   height: 56px;
   border:none;
   border-radius:16px;
