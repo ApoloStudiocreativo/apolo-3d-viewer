@@ -52,7 +52,7 @@ model-viewer::part(ar-button) {
 
 /* En SPLAT, subimos los botones */
 body.mode-splat{
-  --fab-bottom: calc(80px + env(safe-area-inset-bottom));
+  --fab-bottom: calc(70px + env(safe-area-inset-bottom));
 }
 
 /* móviles muy estrechos: un poco más alto */
