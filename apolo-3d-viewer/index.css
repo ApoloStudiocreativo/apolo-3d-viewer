@@ -47,3 +47,33 @@ model-viewer::part(ar-button) {
   --fab-bottom: calc(150px + env(safe-area-inset-bottom));
   }
   }
+
+  /* ====== FAB AR: posicionamiento sólido con clamp + safe-area ====== */
+:root{
+  /* margen inferior base en pantallas normales */
+  --fab-bottom: calc(clamp(16px, 5vh, 90px) + env(safe-area-inset-bottom));
+}
+
+/* el botón AR usa siempre esta variable */
+.ar-fab{
+  bottom: var(--fab-bottom);
+}
+
+/* en SPLAT lo subimos para no tapar su UI */
+body.mode-splat{
+  --fab-bottom: calc(clamp(80px, 18vh, 160px) + env(safe-area-inset-bottom));
+}
+
+/* móviles muy estrechos: un poco más alto */
+@media (max-width: 420px){
+  body.mode-splat{
+    --fab-bottom: calc(clamp(100px, 22vh, 180px) + env(safe-area-inset-bottom));
+  }
+}
+
+/* pantallas bajitas en horizontal */
+@media (max-height: 480px){
+  body.mode-splat{
+    --fab-bottom: calc(clamp(110px, 26vh, 200px) + env(safe-area-inset-bottom));
+  }
+}
