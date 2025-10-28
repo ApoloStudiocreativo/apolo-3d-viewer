@@ -6,8 +6,6 @@
   <title>Visor Universal 3D + AR</title>
 
   <link rel="stylesheet" href="./index.css">
-
-  <!-- model-viewer para modo GLB -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
 
   <style>
@@ -19,80 +17,64 @@
       --shadow:0 10px 30px rgba(0,0,0,.35);
     }
     html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden}
-    .full{position:fixed;inset:0}
     .hidden{display:none!important}
 
-    /* Contenedores de vista */
-    model-viewer, iframe#splat {
-      width:100vw; height:100dvh; display:block; background:var(--bg);
-    }
-    iframe#splat{border:0}
+    /* Vista */
+    model-viewer, iframe#splat { width:100vw; height:100dvh; display:block; background:var(--bg) }
+    iframe#splat{ border:0 }
 
     /* Mensaje de error/ayuda */
-    #msg{
-      position:fixed; inset:0;
-      display:flex; align-items:center; justify-content:center;
-      font:500 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      text-align:center; color:var(--muted);
-      padding:24px;
-    }
-    #msg b{color:#ff6464}
+    #msg{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+      font:500 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; text-align:center; color:var(--muted); padding:24px }
+    #msg b{ color:#ff6464 }
 
-    /* Botón AR: visible solo en móvil/tablet */
+    /* Skeleton */
+    .skeleton{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(160deg,#101319 0%,#0b0e13 100%); color:#7b8696; font:500 14px system-ui, -apple-system, Segoe UI, Roboto, Arial }
+    .spinner{ width:28px; height:28px; border-radius:50%; border:3px solid rgba(255,255,255,.15); border-top-color:#fff; animation:rot .9s linear infinite; margin-right:10px }
+    @keyframes rot{ to{ transform:rotate(360deg) } }
+
+    /* FAB AR: ahora a la IZQUIERDA, solo móvil/tablet */
     .ar-fab{
-      position:fixed; left:50%; bottom: var(--fab-bottom, 24px); transform:translateX(-50%);
+      position:fixed; left:calc(16px + env(safe-area-inset-left)); bottom:calc(16px + env(safe-area-inset-bottom));
       display:none; gap:10px; align-items:center; justify-content:center;
-      height:56px; padding:0 18px; min-width:180px;
+      height:56px; padding:0 18px; min-width:160px;
       border:none; border-radius:100px; cursor:pointer;
       background:var(--brand); color:white; font-weight:700; font-size:16px; letter-spacing:.2px;
-      box-shadow:var(--shadow);
-      z-index:20;
+      box-shadow:var(--shadow); z-index:20;
     }
-    .ar-fab:active{transform:translateX(-50%) scale(.98)}
-    .ar-fab svg{width:22px;height:22px}
-    @media (max-width:1024px){ .ar-fab{display:flex} }
+    .ar-fab svg{ width:22px; height:22px }
+    .ar-fab:active{ transform:translateY(1px) }
+    @media (max-width:1024px){ .ar-fab{ display:flex } }
 
-    /* Esqueleto */
-    .skeleton{
-      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-      background:linear-gradient(160deg,#101319 0%,#0b0e13 100%);
-      color:#7b8696; font:500 14px system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    }
-    .spinner{width:28px;height:28px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:#fff;animation:rot .9s linear infinite;margin-right:10px}
-    @keyframes rot{to{transform:rotate(360deg)}}
-
-    /* Audio global oculto */
-    #global-audio{display:none}
-
-    /* Botón de audio (toggle) móvil */
+    /* Botón de Audio (toggle) a la DERECHA, solo móvil/tablet */
     #audio-toggle{
-      position:fixed; right:16px; bottom:16px;
+      position:fixed; right:calc(16px + env(safe-area-inset-right)); bottom:calc(16px + env(safe-area-inset-bottom));
       display:none; align-items:center; gap:8px;
       padding:10px 14px; border-radius:999px; border:none; cursor:pointer;
       background:#1f2733; color:#fff; font:600 14px/1 system-ui, -apple-system, Segoe UI, Roboto, Arial;
       box-shadow:var(--shadow); z-index:30;
     }
-    #audio-toggle svg{width:18px; height:18px}
-    @media (min-width:1025px){ #audio-toggle{display:none!important} }
+    #audio-toggle svg{ width:18px; height:18px }
+    @media (max-width:1024px){ #audio-toggle{ display:flex } }
+    @media (min-width:1025px){ #audio-toggle{ display:none!important } }
+
+    /* Audio oculto */
+    #global-audio{ display:none }
   </style>
 </head>
 <body>
 
-  <!-- Mensaje si faltan parámetros -->
   <div id="msg" class="hidden"></div>
-
-  <!-- Capa skeleton mientras montamos la vista -->
   <div id="skel" class="skeleton"><div class="spinner"></div>Cargando…</div>
 
-  <!-- Vista GLB -->
+  <!-- GLB -->
   <model-viewer id="mv" class="hidden"
     alt="Modelo 3D"
-    camera-controls
-    touch-action="pan-y"
+    camera-controls touch-action="pan-y"
     ar ar-modes="webxr scene-viewer quick-look"
     environment-image="neutral"
-    shadow-intensity="1.2"
-    shadow-softness="0.9"
+    shadow-intensity="1.2" shadow-softness="0.9"
     exposure="1"
     camera-orbit="0deg 70deg 1.5m"
     min-camera-orbit="auto auto 0.4m"
@@ -100,276 +82,9 @@
     field-of-view="30deg">
   </model-viewer>
 
-  <!-- Vista SPLAT -->
+  <!-- SPLAT -->
   <iframe id="splat" class="hidden" allow="xr; xr-spatial-tracking; gyroscope; accelerometer"></iframe>
 
-  <!-- FAB AR unificado (solo móvil/tablet) -->
+  <!-- FAB AR (izquierda) -->
   <button id="arBtn" class="ar-fab hidden" type="button" aria-label="Ver en AR">
-    <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8.66 5v8L12 21l-8.66-5V8L12 3zM12 3v18M3.34 8L12 13l8.66-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    Ver en AR
-  </button>
-
-  <!-- Botón de Audio (toggle) -->
-  <button id="audio-toggle" type="button" aria-label="Reproducir audio" aria-pressed="false">
-    <!-- Icono Play por defecto -->
-    <svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7-11-7z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/></svg>
-    Sonido
-  </button>
-
-  <!-- Audio global único -->
-  <audio id="global-audio" preload="none" playsinline></audio>
-
-  <script>
-  (function(){
-    const qs = new URLSearchParams(location.search);
-    const type   = (qs.get('type')||'').toLowerCase();   // 'glb' | 'splat'
-    const model  = (qs.get('model')||'').toLowerCase();  // para glb
-    const figure = (qs.get('figure')||'').toLowerCase(); // para splat
-
-    const mv    = document.getElementById('mv');
-    const splat = document.getElementById('splat');
-    const skel  = document.getElementById('skel');
-    const msg   = document.getElementById('msg');
-    const arBtn = document.getElementById('arBtn');
-    const audioEl = document.getElementById('global-audio');
-    const audioToggle = document.getElementById('audio-toggle');
-
-    // Helpers de rutas
-    const glbUrl   = (name) => `/models/${name}/${name}.glb`;
-    const usdzUrl  = (name) => `/models/${name}/${name}.usdz`;
-    const splatUrl = (name) => `/splat/${name}/index.html`;
-
-    /* ========== AUDIO: UTILIDADES Y ESTADO ========== */
-
-    async function fileExists(url){
-      try { const r = await fetch(url, { method: 'HEAD' }); return r.ok; }
-      catch { return false; }
-    }
-
-    // Desbloqueo global en captura (muy temprano)
-    function primeGestureUnlock() {
-      if (!audioEl) return;
-      const handler = () => {
-        document.removeEventListener('touchstart', handler, true);
-        document.removeEventListener('pointerdown', handler, true);
-        document.removeEventListener('click', handler, true);
-      };
-      document.addEventListener('touchstart', handler, { once:true, passive:true, capture:true });
-      document.addEventListener('pointerdown', handler, { once:true, passive:true, capture:true });
-      document.addEventListener('click', handler, { once:true, capture:true });
-    }
-
-    // Kick: intenta play() pegado al MISMO gesto en targets que tocas
-    function kickMobileAudioOnce(targets = []) {
-      if (!audioEl) return;
-      const handler = async () => {
-        try {
-          await audioEl.play();
-          const st = loadAudioState();
-          saveAudioState({ ...st, playing: true });
-          renderAudioButton();
-        } catch {}
-        targets.forEach(t => {
-          t?.removeEventListener?.('click', handler);
-          t?.removeEventListener?.('touchend', handler);
-          t?.removeEventListener?.('pointerup', handler);
-        });
-      };
-      targets.forEach(t => {
-        t?.addEventListener?.('click', handler, { once: true });
-        t?.addEventListener?.('touchend', handler, { once: true, passive: true });
-        t?.addEventListener?.('pointerup', handler, { once: true, passive: true });
-      });
-    }
-
-    // Estado persistente
-    const AUDIO_KEY = "apolo.audio.state"; // { muted: bool, playing: bool }
-    function loadAudioState(){
-      try { return JSON.parse(localStorage.getItem(AUDIO_KEY)) || { muted:false, playing:false }; }
-      catch { return { muted:false, playing:false }; }
-    }
-    function saveAudioState(next){
-      try { localStorage.setItem(AUDIO_KEY, JSON.stringify(next)); } catch {}
-    }
-
-    // Render del botón Play/Pausa (no desaparece)
-    function renderAudioButton(){
-      if (!audioToggle) return;
-      const hasSrc = !!audioEl?.currentSrc;
-      if (!hasSrc) {
-        audioToggle.style.display = 'none';
-        return;
-      }
-      // Solo móvil (en desktop lo oculta el media query)
-      audioToggle.style.display = 'flex';
-
-      const playing = !audioEl.paused && !audioEl.ended;
-      audioToggle.setAttribute('aria-pressed', String(playing));
-      audioToggle.innerHTML = playing
-        ? `<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14M16 5v14" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg> Pausa`
-        : `<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7-11-7z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/></svg> Sonido`;
-    }
-
-    // Toggle click
-    audioToggle?.addEventListener('click', async () => {
-      if (!audioEl?.currentSrc) return;
-      try {
-        if (audioEl.paused) {
-          await audioEl.play();
-          saveAudioState({ ...loadAudioState(), playing: true });
-        } else {
-          await audioEl.pause();
-          saveAudioState({ ...loadAudioState(), playing: false });
-        }
-      } catch {}
-      renderAudioButton();
-    });
-
-    // Sincroniza UI con eventos del <audio>
-    audioEl.addEventListener('play', renderAudioButton);
-    audioEl.addEventListener('pause', renderAudioButton);
-    audioEl.addEventListener('loadeddata', renderAudioButton);
-    audioEl.addEventListener('emptied', renderAudioButton);
-    audioEl.addEventListener('error', renderAudioButton);
-
-    // Configura audio para un slug con fallback a ambiente.mp3
-    async function setupGlobalAudioForSlug(slug){
-      if (!audioEl) return;
-
-      // Intenta /assets/audio/<slug>.mp3; si no existe, usa ambiente.mp3
-      let src = null;
-      const primary = slug ? `/assets/audio/${slug}.mp3` : null;
-      if (primary && await fileExists(primary)) src = primary;
-      else if (await fileExists('/assets/audio/ambiente.mp3')) src = '/assets/audio/ambiente.mp3';
-
-      if (!src) {
-        audioEl.removeAttribute('src');
-        try { audioEl.pause(); } catch {}
-        audioEl.load();
-        renderAudioButton();
-        return;
-      }
-
-      if (audioEl.getAttribute('src') !== src) {
-        audioEl.setAttribute('src', src);
-        try { audioEl.load(); } catch {}
-      }
-
-      // Restaura estado previo
-      const state = loadAudioState();
-      audioEl.muted = !!state.muted;
-
-      // No esperamos gesto aquí; el kick o el botón harán play() pegado al tap
-      if (state.playing) {
-        audioEl.play().catch(()=>{ /* quedará pausado hasta tap */ });
-      } else {
-        try { await audioEl.pause(); } catch {}
-      }
-
-      renderAudioButton();
-    }
-
-    /* ========== AR unificado ========== */
-    function openARFor(name){
-      const usdz = usdzUrl(name);
-      const glb  = glbUrl(name);
-      if(/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)){
-        window.location.href = usdz; // Quick Look
-        return;
-      }
-      if(/Android/.test(navigator.userAgent)){
-        const file = new URL(glb, location.origin).toString();
-        const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(file)}&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(location.href)};end;`;
-        window.location.href = intent;
-        return;
-      }
-    }
-
-    function showHelp(){
-      skel.classList.add('hidden');
-      msg.classList.remove('hidden');
-      msg.innerHTML = `
-        <div>
-          <b>Falta parámetro en la URL.</b><br/><br/>
-          Usa ejemplos:<br/>
-          <code>?type=glb&model=cristo</code><br/>
-          <code>?type=splat&figure=calvo-anillo</code>
-        </div>
-      `;
-    }
-
-    // Registrar desbloqueo global cuanto antes
-    primeGestureUnlock();
-
-    /* ========== Montaje según type ========== */
-    (async function init(){
-      try{
-        if(type === 'glb' && model){
-          // GLB
-          document.body.classList.remove('mode-splat');
-          mv.src     = glbUrl(model);
-          mv.iosSrc  = usdzUrl(model);
-          mv.classList.remove('hidden');
-
-          // Oculta ar-button nativo
-          if (!mv.querySelector('[slot="ar-button"]')) {
-            const blocker = document.createElement('button');
-            blocker.setAttribute('slot', 'ar-button');
-            blocker.setAttribute('aria-hidden', 'true');
-            blocker.style.display = 'none';
-            blocker.tabIndex = -1;
-            mv.appendChild(blocker);
-          }
-
-          // Kick temprano
-          kickMobileAudioOnce([mv, arBtn, document.body]);
-
-          // Audio global
-          await setupGlobalAudioForSlug(model);
-
-          // FAB AR
-          arBtn.classList.remove('hidden');
-          arBtn.onclick = () => {
-            if (mv?.activateAR) {
-              mv.activateAR().catch(()=> openARFor(model));
-            } else {
-              openARFor(model);
-            }
-          };
-          skel.classList.add('hidden');
-          return;
-        }
-
-        if(type === 'splat' && figure){
-          // SPLAT
-          document.body.classList.add('mode-splat');
-          splat.src = splatUrl(figure);
-          splat.classList.remove('hidden');
-
-          // Kick temprano
-          kickMobileAudioOnce([splat, arBtn, document.body]);
-
-          // Audio global
-          await setupGlobalAudioForSlug(figure);
-
-          // FAB AR
-          arBtn.classList.remove('hidden');
-          arBtn.onclick = () => openARFor(figure);
-          skel.classList.add('hidden');
-          return;
-        }
-
-        // Sin parámetros válidos
-        showHelp();
-
-      }catch(err){
-        console.error(err);
-        msg.classList.remove('hidden');
-        msg.innerHTML = `<b>Error:</b> ${String(err).replace(/</g,'&lt;')}`;
-        skel.classList.add('hidden');
-      }
-    })();
-  })();
-  </script>
-</body>
-</html>
+    <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8.66 5v8L12 21l-8.66-5V8L12 3zM12 3
