@@ -60,7 +60,12 @@
     field-of-view="30deg">
   </model-viewer>
 
-  <iframe id="splat" class="hidden" allow="xr; xr-spatial-tracking; gyroscope; accelerometer"></iframe>
+  <!-- IMPORTANTE: bloqueamos autoplay dentro del iframe -->
+  <iframe
+    id="splat"
+    class="hidden"
+    allow="xr; xr-spatial-tracking; gyroscope; accelerometer; autoplay 'none'">
+  </iframe>
 
   <button id="arBtn" class="ar-fab hidden" type="button" aria-label="Ver en AR">
     <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8.66 5v8L12 21l-8.66-5V8L12 3zM12 3v18M3.34 8L12 13l8.66-5" stroke="white" stroke-width="2"/></svg>
@@ -97,7 +102,7 @@
 
     async function fileExists(url){ try{ const r=await fetch(url,{method:'HEAD'}); return r.ok; } catch{ return false; } }
 
-    // Botón Sonido: toggle manual. No hay autoplay en ningún caso.
+    // Botón Sonido: toggle manual
     audioBtn.addEventListener('click', async () => {
       if (!audioEl.currentSrc) return;
       try{
@@ -137,7 +142,7 @@
         try{ audioEl.load(); }catch{}
       }
 
-      // 🔒 Sin autoplay: quedará PAUSADO hasta que el usuario pulse el botón
+      // Nunca reproducimos automáticamente
       try{ await audioEl.pause(); }catch{}
       showAudioBtn();
     }
@@ -154,10 +159,30 @@
       }
     }
 
-    // Eventos del audio para mantener el botón sincronizado
+    // Mantener texto del botón sincronizado
     ['play','pause','loadeddata','emptied','error','ended'].forEach(ev=>{
       audioEl.addEventListener(ev, syncAudioButton);
     });
+
+    // 🔒 Al cargarse el iframe SPLAT: parar/mutear cualquier media interna
+    function hardStopIframeMedia(){
+      try{
+        const idoc = splat.contentDocument || splat.contentWindow?.document;
+        if (!idoc) return;
+        idoc.querySelectorAll('audio,video').forEach(m=>{
+          try{ m.pause(); }catch{}
+          m.muted = true;
+          try{ m.currentTime = 0; }catch{}
+        });
+        // Howler.js (si lo usaran)
+        const iw = splat.contentWindow;
+        if (iw && iw.Howler && typeof iw.Howler.stop === 'function') {
+          try{ iw.Howler.stop(); }catch{}
+        }
+      }catch{}
+    }
+
+    splat.addEventListener('load', hardStopIframeMedia);
 
     (async function init(){
       try{
