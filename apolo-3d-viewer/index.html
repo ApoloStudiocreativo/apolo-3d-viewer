@@ -10,58 +10,37 @@
 
   <style>
     :root{
-      --bg:#0f1115;
-      --text:#e9eef7;
-      --muted:#9aa4b2;
-      --brand:#40cbcb;
+      --bg:#0f1115; --text:#e9eef7; --muted:#9aa4b2; --brand:#40cbcb;
       --shadow:0 10px 30px rgba(0,0,0,.35);
     }
     html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden}
     .hidden{display:none!important}
 
-    model-viewer, iframe#splat {
-      width:100vw; height:100dvh; display:block; background:var(--bg);
-    }
+    model-viewer, iframe#splat{width:100vw;height:100dvh;display:block;background:var(--bg)}
     iframe#splat{border:0}
 
-    #msg{
-      position:fixed; inset:0;
-      display:flex; align-items:center; justify-content:center;
-      font:500 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      text-align:center; color:var(--muted); padding:24px;
-    }
+    #msg{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+      font:500 16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial;text-align:center;color:var(--muted);padding:24px}
     #msg b{color:#ff6464}
 
-    .skeleton{
-      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-      background:linear-gradient(160deg,#101319 0%,#0b0e13 100%);
-      color:#7b8696; font:500 14px system-ui, -apple-system, Segoe UI, Roboto, Arial;
-    }
+    .skeleton{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(160deg,#101319 0%,#0b0e13 100%);color:#7b8696;font:500 14px system-ui,-apple-system,Segoe UI,Roboto,Arial}
     .spinner{width:28px;height:28px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:#fff;animation:rot .9s linear infinite;margin-right:10px}
     @keyframes rot{to{transform:rotate(360deg)}}
 
-    .ar-fab{
-      position:fixed; left:50%; bottom:24px; transform:translateX(-50%);
-      display:none; gap:10px; align-items:center; justify-content:center;
-      height:56px; padding:0 18px; min-width:180px;
-      border:none; border-radius:100px; cursor:pointer;
-      background:var(--brand); color:white; font-weight:700; font-size:16px;
-      box-shadow:var(--shadow); z-index:20;
-    }
-    @media (max-width:1024px){ .ar-fab{display:flex} }
+    .ar-fab{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
+      display:none;gap:10px;align-items:center;justify-content:center;height:56px;padding:0 18px;min-width:180px;
+      border:none;border-radius:100px;cursor:pointer;background:var(--brand);color:#fff;font-weight:700;font-size:16px;box-shadow:var(--shadow);z-index:20}
+    .ar-fab svg{width:22px;height:22px}
+    @media (max-width:1024px){.ar-fab{display:flex}}
 
-    #audio-nudge{
-      position:fixed; right:16px; bottom:16px;
-      display:none; align-items:center; gap:8px;
-      padding:10px 14px; border-radius:999px;
-      background:#1f2733; border:none; cursor:pointer;
-      color:#fff; font:600 14px system-ui;
-      box-shadow:var(--shadow); z-index:30;
-    }
+    /* Botón de audio (móvil) */
+    #audio-nudge{position:fixed;right:16px;bottom:16px;display:none;align-items:center;gap:8px;
+      padding:10px 14px;border-radius:999px;background:#1f2733;border:none;cursor:pointer;color:#fff;font:600 14px system-ui;box-shadow:var(--shadow);z-index:30}
     #audio-nudge svg{width:18px;height:18px}
-    @media (min-width:1025px){ #audio-nudge{display:none!important} }
+    @media (min-width:1025px){#audio-nudge{display:none!important}}
 
-    #global-audio{ display:none }
+    #global-audio{display:none}
   </style>
 </head>
 <body>
@@ -83,14 +62,14 @@
 
   <iframe id="splat" class="hidden" allow="xr; xr-spatial-tracking; gyroscope; accelerometer"></iframe>
 
-  <button id="arBtn" class="ar-fab hidden">
+  <button id="arBtn" class="ar-fab hidden" type="button" aria-label="Ver en AR">
     <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8.66 5v8L12 21l-8.66-5V8L12 3zM12 3v18M3.34 8L12 13l8.66-5" stroke="white" stroke-width="2"/></svg>
     Ver en AR
   </button>
 
-  <button id="audio-nudge" type="button">
+  <button id="audio-nudge" type="button" aria-label="Reproducir/Pausar">
     <svg viewBox="0 0 24 24" fill="none">
-      <path d="M4 9v6h4l5 4V5L8 9H4zM16 12h2m-2 3h3m-3-6h4" stroke="white" stroke-width="1.6"/>
+      <path d="M8 5v14l11-7-11-7z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/>
     </svg>
     Sonido
   </button>
@@ -108,7 +87,7 @@
     const splat = document.getElementById('splat');
     const arBtn = document.getElementById('arBtn');
     const audioEl = document.getElementById('global-audio');
-    const audioNudge = document.getElementById('audio-nudge');
+    const audioBtn = document.getElementById('audio-nudge');
     const skel  = document.getElementById('skel');
     const msg   = document.getElementById('msg');
 
@@ -116,83 +95,122 @@
     const usdzUrl  = n => `/models/${n}/${n}.usdz`;
     const splatUrl = n => `/splat/${n}/index.html`;
 
-    async function fileExists(url){
-      try{ const r=await fetch(url,{method:'HEAD'}); return r.ok; }
-      catch{ return false; }
-    }
+    async function fileExists(url){ try{ const r=await fetch(url,{method:'HEAD'}); return r.ok; } catch{ return false; } }
 
-    function showNudge(){audioNudge.style.display='flex'}
-    function hideNudge(){audioNudge.style.display='none'}
-
-    audioNudge.addEventListener('click', async () => {
-      if(audioEl.paused) await audioEl.play();
-      else await audioEl.pause();
+    // Botón Sonido: toggle manual. No hay autoplay en ningún caso.
+    audioBtn.addEventListener('click', async () => {
+      if (!audioEl.currentSrc) return;
+      try{
+        if (audioEl.paused) await audioEl.play();
+        else await audioEl.pause();
+      }catch{}
+      syncAudioButton();
     });
 
+    function showAudioBtn(){ audioBtn.style.display='flex'; syncAudioButton(); }
+    function hideAudioBtn(){ audioBtn.style.display='none'; }
+
+    function syncAudioButton(){
+      const playing = audioEl && !audioEl.paused && !audioEl.ended && audioEl.currentSrc;
+      audioBtn.innerHTML = playing
+        ? `<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14M16 5v14" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg> Pausa`
+        : `<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7-11-7z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/></svg> Sonido`;
+    }
+
+    // Carga del audio con fallback y SIEMPRE en pausa
     async function setupAudio(slug){
       let src=null;
       const primary = slug ? `/assets/audio/${slug}.mp3` : null;
-      if(primary && await fileExists(primary)) src=primary;
-      else if(await fileExists('/assets/audio/ambiente.mp3')) src='/assets/audio/ambiente.mp3';
+      if (primary && await fileExists(primary)) src = primary;
+      else if (await fileExists('/assets/audio/ambiente.mp3')) src = '/assets/audio/ambiente.mp3';
 
-      if(!src){
+      if (!src) {
         audioEl.removeAttribute('src');
-        hideNudge();
+        try{ audioEl.pause(); }catch{}
+        audioEl.load();
+        hideAudioBtn();
         return;
       }
 
-      if(audioEl.getAttribute('src')!==src){
-        audioEl.setAttribute('src',src);
-        try{audioEl.load()}catch{}
+      if (audioEl.getAttribute('src') !== src) {
+        audioEl.setAttribute('src', src);
+        try{ audioEl.load(); }catch{}
       }
 
-      // 🔥 Nunca reproducimos automáticamente → siempre pausado
-      try{audioEl.pause()}catch{}
-      showNudge();
+      // 🔒 Sin autoplay: quedará PAUSADO hasta que el usuario pulse el botón
+      try{ await audioEl.pause(); }catch{}
+      showAudioBtn();
     }
 
+    // AR unificado
     function openAR(n){
-      if(/iPad|iPhone|iPod/.test(navigator.userAgent)
-      || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1)){
-        location.href=usdzUrl(n);return;
+      if(/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1)){
+        location.href = usdzUrl(n); return;
       }
       if(/Android/.test(navigator.userAgent)){
-        const f=new URL(glbUrl(n),location.origin).toString();
-        const intent=`intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(f)}&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;end;`;
-        location.href=intent;
+        const file = new URL(glbUrl(n), location.origin).toString();
+        const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(file)}&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;end;`;
+        location.href = intent; return;
       }
     }
+
+    // Eventos del audio para mantener el botón sincronizado
+    ['play','pause','loadeddata','emptied','error','ended'].forEach(ev=>{
+      audioEl.addEventListener(ev, syncAudioButton);
+    });
 
     (async function init(){
       try{
-        if(type==='glb' && model){
-          mv.src=glbUrl(model); mv.iosSrc=usdzUrl(model);
+        if (type==='glb' && model){
+          mv.src = glbUrl(model);
+          mv.iosSrc = usdzUrl(model);
           mv.classList.remove('hidden');
+
+          // Oculta el botón AR nativo de model-viewer
+          if (!mv.querySelector('[slot="ar-button"]')) {
+            const blocker = document.createElement('button');
+            blocker.setAttribute('slot','ar-button');
+            blocker.style.display = 'none';
+            blocker.tabIndex = -1;
+            mv.appendChild(blocker);
+          }
+
           await setupAudio(model);
+
           arBtn.classList.remove('hidden');
-          arBtn.onclick=()=>mv.activateAR?.()??openAR(model);
+          arBtn.onclick = () => {
+            if (mv?.activateAR) { mv.activateAR().catch(()=> openAR(model)); }
+            else { openAR(model); }
+          };
           skel.classList.add('hidden');
           return;
         }
 
-        if(type==='splat' && figure){
-          splat.src=splatUrl(figure);
+        if (type==='splat' && figure){
+          splat.src = splatUrl(figure);
           splat.classList.remove('hidden');
+
           await setupAudio(figure);
+
           arBtn.classList.remove('hidden');
-          arBtn.onclick=()=>openAR(figure);
+          arBtn.onclick = () => openAR(figure);
           skel.classList.add('hidden');
           return;
         }
 
         skel.classList.add('hidden');
         msg.classList.remove('hidden');
-
-      }catch(e){
-        console.error(e);
+        msg.innerHTML = `<div>
+          <b>Falta parámetro en la URL.</b><br/><br/>
+          Usa ejemplos:<br/>
+          <code>?type=glb&model=cristo</code><br/>
+          <code>?type=splat&figure=calvo-anillo</code>
+        </div>`;
+      }catch(err){
+        console.error(err);
         skel.classList.add('hidden');
         msg.classList.remove('hidden');
-        msg.textContent='Error cargando contenido';
+        msg.textContent = 'Error cargando contenido';
       }
     })();
   })();
