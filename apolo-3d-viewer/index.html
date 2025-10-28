@@ -70,6 +70,18 @@ color:#7b8696; font:500 14px system-ui, -apple-system, Segoe UI, Roboto, Arial;
 </head>
 <body>
 
+  <header id="topBar" class="hidden">
+    <h1 id="pieceTitle"></h1>
+    <button id="infoBtn" class="info-btn" type="button" aria-label="Mostrar información">
+      <svg viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+        <path d="M12 10v5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="12" cy="8" r="1.4" fill="currentColor"/>
+      </svg>
+    </button>
+  </header>
+  
+
 <!-- Mensaje si faltan parámetros -->
 <div id="msg" class="hidden"></div>
 
@@ -260,6 +272,106 @@ skel.classList.add('hidden');
 }
 })();
 })();
+
+
+  // Map sencillo con datos de cartela (rellena cuando tengas textos reales)
+  const infoData = {
+    "cristo-yacente":      { title:"Cristo Yacente", meta:"s. XVII · Autor/a desconocido/a", desc:"Descripción pendiente." },
+    "virgen-romanica":     { title:"Virgen Románica", meta:"s. XII · Talla policromada", desc:"Descripción pendiente." },
+    "bargueno-relicario":  { title:"Bargueño Relicario", meta:"s. XVI · Mueble", desc:"Descripción pendiente." },
+    "san-bernardo-con-la-virgen": { title:"San Bernardo con la Virgen", meta:"s. XVIII", desc:"Descripción pendiente." },
+    "tapiz":               { title:"Tapiz", meta:"s. XVII", desc:"Descripción pendiente." },
+    "ecce-homo":           { title:"Ecce Homo", meta:"s. XVII", desc:"Descripción pendiente." },
+    "virgen-asuncion":     { title:"Virgen Asunción", meta:"s. XVIII", desc:"Descripción pendiente." },
+    "jesus-atado-a-la-columna": { title:"Jesús atado a la columna", meta:"s. XVII", desc:"Descripción pendiente." },
+    "san-jose-con-el-nino":{ title:"San José con el niño", meta:"s. XVIII", desc:"Descripción pendiente." },
+    "virgen-de-mena":      { title:"Virgen de Mena", meta:"s. XX", desc:"Descripción pendiente." },
+    "novisimos":           { title:"Novísimos", meta:"", desc:"Descripción pendiente." },
+    "casulla-santa-ana":   { title:"Casulla Santa Ana", meta:"Textil litúrgico", desc:"Descripción pendiente." },
+    "reliquia-dorada":     { title:"Reliquia Dorada", meta:"", desc:"Descripción pendiente." },
+    "cristo-en-la-cruz":   { title:"Cristo en la Cruz", meta:"s. XVII", desc:"Descripción pendiente." }
+  };
+
+  // Helpers para obtener el slug actual
+  const qs = new URLSearchParams(location.search);
+  const type   = (qs.get('type')||'').toLowerCase();
+  const model  = (qs.get('model')||'').toLowerCase();
+  const figure = (qs.get('figure')||'').toLowerCase();
+  const slug = model || figure || '';
+
+  // Elementos UI
+  const topBar    = document.getElementById('topBar');
+  const pieceTitle= document.getElementById('pieceTitle');
+  const infoBtn   = document.getElementById('infoBtn') || null;
+  const sheet     = document.getElementById('infoSheet');
+  const sheetClose= document.getElementById('infoClose');
+  const infoTitle = document.getElementById('infoTitle');
+  const infoMeta  = document.getElementById('infoMeta');
+  const infoDesc  = document.getElementById('infoDesc');
+
+  // Pinta título arriba
+  if (topBar && slug){
+    topBar.classList.remove('hidden');
+    pieceTitle.textContent = (infoData[slug]?.title || slug.replace(/-/g,' '));
+  }
+
+  // Rellena cartela con datos del slug
+  function fillSheet(){
+    const data = infoData[slug] || { title: slug.replace(/-/g,' '), meta:'', desc:'' };
+    infoTitle.textContent = data.title;
+    infoMeta.textContent  = data.meta || '';
+    infoDesc.textContent  = data.desc || '';
+  }
+
+  // Abrir/cerrar cartela
+  function openSheet(){
+    fillSheet();
+    sheet.classList.remove('hidden');
+    sheet.setAttribute('aria-hidden','false');
+  }
+  function closeSheet(){
+    sheet.classList.add('hidden');
+    sheet.setAttribute('aria-hidden','true');
+  }
+
+  // Listeners
+  if (infoBtn) infoBtn.addEventListener('click', openSheet);
+  sheetClose.addEventListener('click', closeSheet);
+  sheet.addEventListener('click', (e)=>{ if(e.target === sheet) closeSheet(); });
+  window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeSheet(); });
+
+  // Ocultar UI al entrar en AR (cuando pulses tu botón AR)
+  const arBtn = document.getElementById('arBtn');
+  if (arBtn){
+    const original = arBtn.onclick;
+    arBtn.onclick = (ev) => {
+      document.body.classList.add('in-ar');
+      closeSheet();
+      if (typeof original === 'function') original(ev);
+    };
+  }
+
+
+
+
 </script>
+
+
+
+
+
+<!-- Panel/cartela de información del museo -->
+<div id="infoSheet" class="info-sheet hidden" aria-hidden="true">
+  <div class="info-sheet__drag"></div>
+  <button id="infoClose" class="info-sheet__close" aria-label="Cerrar">✕</button>
+
+  <div class="info-sheet__content">
+    <h2 id="infoTitle">Obra</h2>
+    <p class="info-meta" id="infoMeta"></p>
+    <p class="info-desc" id="infoDesc"></p>
+  </div>
+</div>
+
+
 </body>
 </html>
