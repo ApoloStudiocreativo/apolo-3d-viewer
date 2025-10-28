@@ -116,11 +116,19 @@
     function hideAudioBtn(){ audioBtn.style.display='none'; }
 
     function syncAudioButton(){
-      const playing = audioEl && !audioEl.paused && !audioEl.ended && audioEl.currentSrc;
-      audioBtn.innerHTML = playing
-        ? `<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14M16 5v14" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg> Pausa`
-        : `<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7-11-7z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/></svg> Sonido`;
-    }
+  const hasSrc = !!audioEl?.currentSrc;
+  if (!hasSrc) { audioBtn.style.display = 'none'; return; }
+  audioBtn.style.display = 'flex';
+
+  const playing = !audioEl.paused && !audioEl.ended;
+  audioBtn.classList.toggle('playing', playing);          // ✅ NUEVO: clase visual
+  audioBtn.setAttribute('aria-pressed', String(playing)); // ✅ NUEVO: accesibilidad
+
+  audioBtn.innerHTML = playing
+    ? `<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14M16 5v14" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg> Pausa`
+    : `<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7-11-7z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/></svg> Sonido`;
+}
+
 
     // Carga del audio con fallback y SIEMPRE en pausa
     async function setupAudio(slug){
