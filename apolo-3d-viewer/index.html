@@ -65,6 +65,9 @@
     }
     .spinner{width:28px;height:28px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:#fff;animation:rot .9s linear infinite;margin-right:10px}
     @keyframes rot{to{transform:rotate(360deg)}}
+
+    /* Audio global oculto */
+    #global-audio{display:none}
   </style>
 </head>
 <body>
@@ -100,6 +103,9 @@
     Ver en AR
   </button>
 
+  <!-- Audio global único -->
+  <audio id="global-audio" preload="none" playsinline></audio>
+
   <script>
   (function(){
     const qs = new URLSearchParams(location.search);
@@ -112,15 +118,87 @@
     const skel  = document.getElementById('skel');
     const msg   = document.getElementById('msg');
     const arBtn = document.getElementById('arBtn');
+    const audioEl = document.getElementById('global-audio');
 
     // Helpers ruta según norma confirmada
     const glbUrl  = (name) => `/models/${name}/${name}.glb`;
     const usdzUrl = (name) => `/models/${name}/${name}.usdz`;
     const splatUrl= (name) => `/splat/${name}/index.html`;
+    const audioUrl= (name) => `/assets/audio/${name}.mp3`;
 
     // Detectar plataforma
     const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const isAndroid = /Android/.test(navigator.userAgent);
+
+    // ---- Audio: estado persistente ----
+    const AUDIO_KEY = "apolo.audio.state"; // { muted: bool, playing: bool }
+    function loadAudioState(){
+      try { return JSON.parse(localStorage.getItem(AUDIO_KEY)) || { muted:false, playing:false }; }
+      catch { return { muted:false, playing:false }; }
+    }
+    function saveAudioState(next){
+      try { localStorage.setItem(AUDIO_KEY, JSON.stringify(next)); } catch {}
+    }
+
+    // Desbloqueo por gesto de usuario
+    function waitUserGestureOnce(){
+      return new Promise(resolve => {
+        const done = () => {
+          window.removeEventListener('pointerdown', done);
+          window.removeEventListener('keydown', done);
+          window.removeEventListener('touchstart', done);
+          resolve();
+        };
+        window.addEventListener('pointerdown', done, { once:true, passive:true });
+        window.addEventListener('keydown', done, { once:true });
+        window.addEventListener('touchstart', done, { once:true, passive:true });
+      });
+    }
+
+    async function setupGlobalAudioForSlug(slug){
+      if (!audioEl) return;
+
+      // Si no hay slug, limpia
+      if (!slug) {
+        audioEl.removeAttribute('src');
+        try { audioEl.pause(); } catch {}
+        audioEl.load();
+        return;
+      }
+
+      const src = audioUrl(slug);
+      if (audioEl.getAttribute('src') !== src) {
+        audioEl.setAttribute('src', src);
+        try { audioEl.load(); } catch {}
+      }
+
+      // Restaura estado previo
+      const state = loadAudioState();
+      audioEl.muted = !!state.muted;
+
+      // Arranque si el usuario lo dejó en "playing"
+      if (state.playing) {
+        try {
+          await waitUserGestureOnce();
+          await audioEl.play();
+        } catch {
+          // Si falla, quedará en pausa hasta que el usuario interactúe
+        }
+      } else {
+        try { await audioEl.pause(); } catch {}
+      }
+
+      // Persistencia en cambios manuales
+      audioEl.onplay = () => saveAudioState({ ...loadAudioState(), playing:true });
+      audioEl.onpause = () => saveAudioState({ ...loadAudioState(), playing:false });
+      audioEl.onvolumechange = () => saveAudioState({ ...loadAudioState(), muted: audioEl.muted });
+
+      // Manejo de error de carga 404
+      audioEl.onerror = () => {
+        // Silencioso: no rompe nada
+        saveAudioState({ ...loadAudioState(), playing:false });
+      };
+    }
 
     // AR launcher unificado
     function openARFor(name){
@@ -168,21 +246,21 @@
 
           // Bloquear el botón AR por defecto de <model-viewer> con un slot "fantasma"
           if (!mv.querySelector('[slot="ar-button"]')) {
-          const blocker = document.createElement('button');
-          blocker.setAttribute('slot', 'ar-button');
-          blocker.setAttribute('aria-hidden', 'true');
-          blocker.style.display = 'none';
-          blocker.tabIndex = -1;
-          mv.appendChild(blocker);
+            const blocker = document.createElement('button');
+            blocker.setAttribute('slot', 'ar-button');
+            blocker.setAttribute('aria-hidden', 'true');
+            blocker.style.display = 'none';
+            blocker.tabIndex = -1;
+            mv.appendChild(blocker);
           }
 
+          // Audio global según slug
+          await setupGlobalAudioForSlug(model);
 
           // FAB AR: siempre disponible en móvil/tablet
           arBtn.classList.remove('hidden');
           arBtn.onclick = () => {
-            // si model-viewer puede abrir AR nativo, úsalo:
             if (mv?.activateAR) {
-              // Algunos navegadores bloquean si no hay user gesture; este handler ya es gesture
               mv.activateAR().catch(()=> openARFor(model));
             } else {
               openARFor(model);
@@ -197,6 +275,10 @@
           document.body.classList.add('mode-splat'); 
           splat.src = splatUrl(figure);
           splat.classList.remove('hidden');
+
+          // Audio global según slug
+          await setupGlobalAudioForSlug(figure);
+
           // FAB AR para la misma figura (usa GLB/USDZ homónimo)
           arBtn.classList.remove('hidden');
           arBtn.onclick = () => openARFor(figure);
