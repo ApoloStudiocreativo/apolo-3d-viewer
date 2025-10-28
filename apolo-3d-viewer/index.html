@@ -101,6 +101,16 @@ field-of-view="30deg">
 Ver en AR
 </button>
 
+<!-- FAB AUDIO (siempre en móviles/tablets) -->
+<button id="audioBtn" class="audio-fab hidden" type="button" aria-label="Audio">
+  <svg viewBox="0 0 24 24" fill="none">
+    <path d="M4 9v6h3l5 4V5L7 9H4z" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M15 10.5a3.5 3.5 0 010 3" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+    <path d="M17.5 8a6 6 0 010 8" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+  </svg>
+</button>
+
+
 <script>
 (function(){
 const qs = new URLSearchParams(location.search);
@@ -113,6 +123,34 @@ const splat = document.getElementById('splat');
 const skel  = document.getElementById('skel');
 const msg   = document.getElementById('msg');
 const arBtn = document.getElementById('arBtn');
+
+const audioBtn = document.getElementById('audioBtn');
+let audio = null;
+
+function setupAudioFor(id){
+  const url = `/assets/audio/${id}.mp3`;
+  audio = new Audio(url);
+  audio.loop = true;
+  audio.preload = 'none';
+
+  // Poner el botón visible
+  audioBtn.classList.remove('hidden');
+
+  audioBtn.onclick = () => {
+    if (!audio) return;
+    if (audio.paused) {
+      audio.play().then(() => {
+        audioBtn.classList.add('is-playing');
+      }).catch(err=>{
+        console.log('Acción de usuario requerida:',err);
+      });
+    } else {
+      audio.pause();
+      audioBtn.classList.remove('is-playing');
+    }
+  };
+}
+
 
 // Helpers ruta según norma confirmada
 const glbUrl  = (name) => `/models/${name}/${name}.glb`;
@@ -161,7 +199,9 @@ msg.innerHTML = `
 (async function init(){
 try{
 if(type === 'glb' && model){
-// GLB view
+
+
+  // GLB view
 document.body.classList.remove('mode-splat');
 mv.src     = glbUrl(model);
 mv.iosSrc  = usdzUrl(model);
@@ -189,6 +229,7 @@ mv.activateAR().catch(()=> openARFor(model));
 openARFor(model);
 }
 };
+setupAudioFor(model);
 skel.classList.add('hidden');
 return;
 }
@@ -201,6 +242,7 @@ splat.classList.remove('hidden');
 // FAB AR para la misma figura (usa GLB/USDZ homónimo)
 arBtn.classList.remove('hidden');
 arBtn.onclick = () => openARFor(figure);
+setupAudioFor(figure);
 skel.classList.add('hidden');
 return;
 }

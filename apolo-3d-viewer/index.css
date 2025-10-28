@@ -77,3 +77,48 @@ body.mode-splat{
     --fab-bottom: calc(clamp(110px, 26vh, 200px) + env(safe-area-inset-bottom));
   }
 }
+
+/* === Posición de FABs === */
+
+/* AR a la derecha */
+.ar-fab{
+  position:fixed;
+  right: 18px;
+  bottom: var(--fab-bottom);
+  left:auto;
+  transform:none;
+}
+
+/* AUDIO a la izquierda */
+.audio-fab{
+  position:fixed;
+  left: 18px;
+  bottom: var(--fab-bottom);
+  width: 56px;
+  height: 56px;
+  border:none;
+  border-radius:16px;
+  background:rgba(255,255,255,0.10);
+  display:none; /* se muestra por media query */
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  z-index:20;
+  backdrop-filter: saturate(180%) blur(8px);
+  box-shadow: var(--shadow);
+}
+.audio-fab:active{ transform:scale(.96) }
+.audio-fab svg{ width:24px;height:24px }
+
+/* Estado activo (sonando) */
+.audio-fab.is-playing{
+  background: var(--brand);
+}
+
+/* Mostrar ambos solo en móvil/tablet */
+@media (max-width:1024px){
+  .ar-fab,
+  .audio-fab{
+    display:flex;
+  }
+}
