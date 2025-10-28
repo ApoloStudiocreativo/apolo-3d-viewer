@@ -185,16 +185,15 @@
 
     function syncAudioButton(){
   const hasSrc = !!audioEl?.currentSrc;
-  if (!hasSrc) { audioBtn.classList.add('hidden'); return; }
-  audioBtn.classList.remove('hidden');
-
-  const playing = !audioEl.paused && !audioEl.ended;
+  if (!hasSrc) { audioBtn.classList.remove('playing'); audioBtn.setAttribute('aria-pressed','false'); }
+  const playing = hasSrc && !audioEl.paused && !audioEl.ended;
   audioBtn.classList.toggle('playing', playing);
   audioBtn.setAttribute('aria-pressed', String(playing));
   audioBtn.innerHTML = playing
     ? `<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14M16 5v14" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg> Pausa`
     : `<svg viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7-11-7z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/></svg> Sonido`;
 }
+
 
 
     // Carga del audio con fallback y SIEMPRE en pausa
@@ -205,12 +204,14 @@
       else if (await fileExists('/assets/audio/ambiente.mp3')) src = '/assets/audio/ambiente.mp3';
 
       if (!src) {
-        audioEl.removeAttribute('src');
-        try{ audioEl.pause(); }catch{}
-        audioEl.load();
-        hideAudioBtn();
-        return;
-      }
+  // Mostramos el botón igualmente; todas las figuras tendrán sonido.
+  audioEl.removeAttribute('src');
+  try{ audioEl.pause(); }catch{}
+  audioEl.load();
+  showAudioBtn();     // << antes se ocultaba
+  return;
+}
+
 
       if (audioEl.getAttribute('src') !== src) {
         audioEl.setAttribute('src', src);
