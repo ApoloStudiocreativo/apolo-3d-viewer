@@ -282,7 +282,27 @@ field-of-view="30deg">
       "reliquia-dorada":     { title:"Reliquia Dorada", meta:"", desc:"Descripción pendiente." },
       "cristo-en-la-cruz":   { title:"Cristo en la Cruz", meta:"s. XVII", desc:"Descripción pendiente." }
     };
-  
+
+      // Zoom/órbita por figura (ajusta a tu gusto)
+      const cameraConfig = {
+        // EJEMPLO: Cristo Yacente
+        "cristo-yacente": {
+          // posición inicial de cámara (theta, phi, radio)
+          orbit: "0deg 70deg 2.2m",
+
+          // límites de zoom por distancia (radio)
+          minRadius: "1.2m",   // qué tan cerca como máximo
+          maxRadius: "6m",     // qué tan lejos como máximo
+
+          // límites de zoom por apertura (opcional)
+          minFov: "22deg",     // no cerrar más de esto
+          maxFov: "45deg"      // no abrir más de esto
+        },
+
+        // añade más piezas si lo necesitas:
+        // "virgen-romanica": { orbit:"-30deg 65deg 1.8m", minRadius:"1.0m", maxRadius:"5.5m", minFov:"20deg", maxFov:"45deg" },
+      };
+
     function buildMeta(d){
       if (!d) return '';
       if (d.author || d.year || d.material) {
@@ -347,6 +367,22 @@ field-of-view="30deg">
         if (type === 'glb' && model){
           document.body.classList.remove('mode-splat');
           mv.src    = glbUrl(model);
+
+          // === Aplicar límites de zoom/órbita por figura ===
+        const cfg = cameraConfig[model];
+        if (cfg) {
+          // posición inicial
+          if (cfg.orbit) mv.cameraOrbit = cfg.orbit;
+
+          // límites de distancia (radio) → tercer valor de min/max-camera-orbit
+          if (cfg.minRadius) mv.minCameraOrbit = `auto auto ${cfg.minRadius}`;
+          if (cfg.maxRadius) mv.maxCameraOrbit = `auto auto ${cfg.maxRadius}`;
+
+          // límites de apertura del zoom (opcional)
+          if (cfg.minFov) mv.minFieldOfView = cfg.minFov;
+          if (cfg.maxFov) mv.maxFieldOfView = cfg.maxFov;
+        }
+
 
             // Aplicar HDR suave al cargar modelos GLB
             (async () => {
