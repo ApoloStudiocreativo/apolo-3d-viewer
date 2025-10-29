@@ -407,15 +407,16 @@ field-of-view="30deg">
           mv.src    = glbUrl(model);
 
           // Espera a que <model-viewer> termine de encuadrar el modelo
-          mv.addEventListener('load', () => {
-            mv.cameraOrbit = 'auto auto 6m'; // ← ajusta 2.6m a tu gusto
-            const t = cameraTargetBySlug[model];
-            if (t) mv.cameraTarget = t;
-          });
+            
+// mv.addEventListener('load', () => {
+//   mv.cameraOrbit = 'auto auto 6m';
+//   const t = cameraTargetBySlug[model];
+//   if (t) mv.cameraTarget = t;
+// });
 
-            mv.addEventListener('load', () => {
-            mv.cameraTarget = '0m 0.45m 0m'; // ← ELIMINAR o comentar
-            });
+// mv.addEventListener('load', () => {
+//   mv.cameraTarget = '0m 0.45m 0m';
+// });
 
 
             // === Aplicar configuración de cámara por figura ===
