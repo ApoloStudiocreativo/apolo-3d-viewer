@@ -6,7 +6,7 @@
 <title>Visor Universal 3D + AR</title>
 
 <link rel="stylesheet" href="./index.css">
-<link rel="preload" href="/assets/info.json" as="fetch" crossorigin="anonymous">
+<link rel="preload" href="/assets/info.json" as="fetch" type="application/json" crossorigin="anonymous">
 
 
 <!-- model-viewer para modo GLB -->
@@ -19,6 +19,7 @@
 --muted:#9aa4b2;
 --brand:#40cbcb;
 --shadow:0 10px 30px rgba(0,0,0,.35);
+--fab-bottom: max(18px, env(safe-area-inset-bottom));
 }
 html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden}
 .full{position:fixed;inset:0}
@@ -95,7 +96,7 @@ color:#7b8696; font:500 14px system-ui, -apple-system, Segoe UI, Roboto, Arial;
 alt="Modelo 3D"
 camera-controls
 touch-action="pan-y"
-ar ar-modes="webxr scene-viewer quick-look"
+ar ar-modes="scene-viewer quick-look webxr"
 environment-image="neutral"
 shadow-intensity="1.2"
 shadow-softness="0.9"
@@ -107,7 +108,12 @@ field-of-view="30deg">
 </model-viewer>
 
 <!-- Vista SPLAT -->
-<iframe id="splat" class="hidden" allow="xr; xr-spatial-tracking; gyroscope; accelerometer"></iframe>
+<iframe
+  id="splat"
+  class="hidden"
+  allow="autoplay; fullscreen; xr-spatial-tracking; camera; microphone; gyroscope; accelerometer">
+</iframe>
+
 
 <!-- BARRA DE FABs -->
 <div id="fabRow" class="fab-row">
@@ -135,291 +141,6 @@ field-of-view="30deg">
   </button>
 </div>
 
-<script>
-(function(){
-const qs = new URLSearchParams(location.search);
-const type   = (qs.get('type')||'').toLowerCase();          // 'glb' | 'splat'
-const model  = (qs.get('model')||'').toLowerCase();         // para glb
-const figure = (qs.get('figure')||'').toLowerCase();        // para splat
-
-const mv    = document.getElementById('mv');
-const splat = document.getElementById('splat');
-const skel  = document.getElementById('skel');
-const msg   = document.getElementById('msg');
-const arBtn = document.getElementById('arBtn');
-
-const audioBtn = document.getElementById('audioBtn');
-let audio = null;
-
-function setupAudioFor(id){
-  const url = `/assets/audio/${id}.mp3`;
-
-  // si había un audio anterior, paramos y limpiamos
-  if (audio) {
-    try { audio.pause(); } catch {}
-    audio = null;
-  }
-
-  audio = new Audio(url);
-  audio.loop = true;
-  audio.preload = 'none';
-
-  // mostrar botón y estado inicial accesible
-  audioBtn.classList.remove('hidden');
-  audioBtn.classList.remove('is-playing');
-  audioBtn.setAttribute('aria-pressed', 'false');
-  audioBtn.setAttribute('aria-label', 'Reproducir audio');
-
-  audioBtn.onclick = async () => {
-    if (!audio) return;
-
-    if (audio.paused) {
-      try {
-        await audio.play();
-        audioBtn.classList.add('is-playing');
-        audioBtn.setAttribute('aria-pressed', 'true');
-        audioBtn.setAttribute('aria-label', 'Pausar audio');
-        // vibración sutil en móvil (opcional)
-        if (navigator.vibrate) navigator.vibrate(10);
-      } catch (err) {
-        console.log('Acción de usuario requerida / bloqueo de autoplay:', err);
-      }
-    } else {
-      audio.pause();
-      audioBtn.classList.remove('is-playing');
-      audioBtn.setAttribute('aria-pressed', 'false');
-      audioBtn.setAttribute('aria-label', 'Reproducir audio');
-    }
-  };
-
-  // opcional: si la pestaña se oculta, pausamos por cortesía
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden && audio && !audio.paused) {
-      audio.pause();
-      audioBtn.classList.remove('is-playing');
-      audioBtn.setAttribute('aria-pressed', 'false');
-      audioBtn.setAttribute('aria-label', 'Reproducir audio');
-    }
-  }, { once: true });
-
-  // opcional: si el mp3 no existe, deja el botón visible pero sin acción
-  audio.addEventListener('error', () => {
-    console.warn('Audio no encontrado:', url);
-    // si prefieres, deshabilita el botón:
-    // audioBtn.disabled = true;
-  });
-}
-
-
-// Helpers ruta según norma confirmada
-const glbUrl  = (name) => `/models/${name}/${name}.glb`;
-const usdzUrl = (name) => `/models/${name}/${name}.usdz`;
-const splatUrl= (name) => `/splat/${name}/index.html`;
-
-// Detectar plataforma
-const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-const isAndroid = /Android/.test(navigator.userAgent);
-
-// AR launcher unificado
-function openARFor(name){
-const usdz = usdzUrl(name);
-const glb  = glbUrl(name);
-
-if(isIOS){
-// Quick Look: abrir el .usdz directamente
-window.location.href = usdz;
-return;
-}
-if(isAndroid){
-// Scene Viewer intent
-const file = new URL(glb, location.origin).toString();
-const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(file)}&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(location.href)};end;`;
-window.location.href = intent;
-return;
-}
-// Escritorio: no hacemos nada (el botón no se muestra en desktop)
-}
-
-// Mostrar mensaje de ayuda
-function showHelp(){
-skel.classList.add('hidden');
-msg.classList.remove('hidden');
-msg.innerHTML = `
-       <div>
-         <b>Falta parámetro en la URL.</b><br/><br/>
-         Usa ejemplos:<br/>
-         <code>?type=glb&model=cristo</code><br/>
-         <code>?type=splat&figure=calvo-anillo</code>
-       </div>
-     `;
-}
-
-// Montaje según type
-(async function init(){
-try{
-if(type === 'glb' && model){
-
-
-  // GLB view
-document.body.classList.remove('mode-splat');
-mv.src     = glbUrl(model);
-mv.iosSrc  = usdzUrl(model);
-mv.classList.remove('hidden');
-
-// Bloquear el botón AR por defecto de <model-viewer> con un slot "fantasma"
-if (!mv.querySelector('[slot="ar-button"]')) {
-const blocker = document.createElement('button');
-blocker.setAttribute('slot', 'ar-button');
-blocker.setAttribute('aria-hidden', 'true');
-blocker.style.display = 'none';
-blocker.tabIndex = -1;
-mv.appendChild(blocker);
-}
-
-
-// FAB AR: siempre disponible en móvil/tablet
-arBtn.classList.remove('hidden');
-arBtn.onclick = () => {
-// si model-viewer puede abrir AR nativo, úsalo:
-if (mv?.activateAR) {
-// Algunos navegadores bloquean si no hay user gesture; este handler ya es gesture
-mv.activateAR().catch(()=> openARFor(model));
-} else {
-openARFor(model);
-}
-};
-setupAudioFor(model);
-skel.classList.add('hidden');
-return;
-}
-
-if(type === 'splat' && figure){
-// SPLAT view
-document.body.classList.add('mode-splat'); 
-splat.src = splatUrl(figure);
-splat.classList.remove('hidden');
-// FAB AR para la misma figura (usa GLB/USDZ homónimo)
-arBtn.classList.remove('hidden');
-arBtn.onclick = () => openARFor(figure);
-setupAudioFor(figure);
-skel.classList.add('hidden');
-return;
-}
-
-// Si no coincide nada:
-showHelp();
-
-}catch(err){
-console.error(err);
-msg.classList.remove('hidden');
-msg.innerHTML = `<b>Error:</b> ${String(err).replace(/</g,'&lt;')}`;
-skel.classList.add('hidden');
-}
-})();
-})();
-
-
-  // Map sencillo con datos de cartela (rellena cuando tengas textos reales)
-  let infoData = {
-    "cristo-yacente":      { title:"Cristo Yacente", meta:"s. XVII · Autor/a desconocido/a", desc:"Descripción pendiente." },
-    "virgen-romanica":     { title:"Virgen Románica", meta:"s. XII · Talla policromada", desc:"Descripción pendiente." },
-    "bargueno-relicario":  { title:"Bargueño Relicario", meta:"s. XVI · Mueble", desc:"Descripción pendiente." },
-    "san-bernardo-con-la-virgen": { title:"San Bernardo con la Virgen", meta:"s. XVIII", desc:"Descripción pendiente." },
-    "tapiz":               { title:"Tapiz", meta:"s. XVII", desc:"Descripción pendiente." },
-    "ecce-homo":           { title:"Ecce Homo", meta:"s. XVII", desc:"Descripción pendiente." },
-    "virgen-asuncion":     { title:"Virgen Asunción", meta:"s. XVIII", desc:"Descripción pendiente." },
-    "jesus-atado-a-la-columna": { title:"Jesús atado a la columna", meta:"s. XVII", desc:"Descripción pendiente." },
-    "san-jose-con-el-nino":{ title:"San José con el niño", meta:"s. XVIII", desc:"Descripción pendiente." },
-    "virgen-de-mena":      { title:"Virgen de Mena", meta:"s. XX", desc:"Descripción pendiente." },
-    "novisimos":           { title:"Novísimos", meta:"", desc:"Descripción pendiente." },
-    "casulla-santa-ana":   { title:"Casulla Santa Ana", meta:"Textil litúrgico", desc:"Descripción pendiente." },
-    "reliquia-dorada":     { title:"Reliquia Dorada", meta:"", desc:"Descripción pendiente." },
-    "cristo-en-la-cruz":   { title:"Cristo en la Cruz", meta:"s. XVII", desc:"Descripción pendiente." }
-  };
-
-  // Helpers para obtener el slug actual
-  const qs = new URLSearchParams(location.search);
-  const type   = (qs.get('type')||'').toLowerCase();
-  const model  = (qs.get('model')||'').toLowerCase();
-  const figure = (qs.get('figure')||'').toLowerCase();
-  const slug = model || figure || '';
-
-  // Elementos UI
-  const topBar    = document.getElementById('topBar');
-  const pieceTitle= document.getElementById('pieceTitle');
-  const infoBtn   = document.getElementById('infoBtn') || null;
-  const sheet     = document.getElementById('infoSheet');
-  const sheetClose= document.getElementById('infoClose');
-  const infoTitle = document.getElementById('infoTitle');
-  const infoMeta  = document.getElementById('infoMeta');
-  const infoDesc  = document.getElementById('infoDesc');
-
-  // Pinta título arriba
-  if (topBar && slug){
-    topBar.classList.remove('hidden');
-    pieceTitle.textContent = (infoData[slug]?.title || slug.replace(/-/g,' '));
-  }
-
-  // Rellena cartela con datos del slug
-  function fillSheet(){
-    const data = infoData[slug] || { title: slug.replace(/-/g,' '), meta:'', desc:'' };
-    infoTitle.textContent = data.title;
-    infoMeta.textContent  = data.meta || '';
-    infoDesc.textContent  = data.desc || '';
-  }
-
-  // Abrir/cerrar cartela
-  function openSheet(){
-    fillSheet();
-    sheet.classList.remove('hidden');
-    sheet.setAttribute('aria-hidden','false');
-  }
-  function closeSheet(){
-    sheet.classList.add('hidden');
-    sheet.setAttribute('aria-hidden','true');
-  }
-
-  // Listeners
-  if (infoBtn) infoBtn.addEventListener('click', openSheet);
-  sheetClose.addEventListener('click', closeSheet);
-  sheet.addEventListener('click', (e)=>{ if(e.target === sheet) closeSheet(); });
-  window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeSheet(); });
-
-  // Ocultar UI al entrar en AR (cuando pulses tu botón AR)
-  const arBtn = document.getElementById('arBtn');
-  if (arBtn){
-    const original = arBtn.onclick;
-    arBtn.onclick = (ev) => {
-      document.body.classList.add('in-ar');
-      closeSheet();
-      if (typeof original === 'function') original(ev);
-    };
-  }
-
-  (async function loadExternalInfoData() {
-  try {
-    // 1) Intentamos cargar el JSON externo (sin cacheo agresivo al principio)
-    const res = await fetch('/assets/info.json', { cache: 'default' });
-    if (!res.ok) throw new Error('info.json not OK');
-    const external = await res.json();
-
-    // 2) Validación básica: debe ser objeto y tener al menos una clave
-    if (external && typeof external === 'object' && Object.keys(external).length) {
-      // 3) Sobrescribimos el fallback inline de forma segura
-      infoData = external;
-      console.debug('[infoData] usando /assets/info.json');
-    }
-  } catch (err) {
-    // Si falla, no pasa nada: se queda el inline
-    console.warn('[infoData] usando inline fallback:', err?.message || err);
-  }
-})();
-</script>
-
-
-
-
-
 <!-- Panel/cartela de información del museo -->
 <div id="infoSheet" class="info-sheet hidden" aria-hidden="true">
   <div class="info-sheet__drag"></div>
@@ -431,6 +152,298 @@ skel.classList.add('hidden');
     <p class="info-desc" id="infoDesc"></p>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+  (function(){
+  const qs = new URLSearchParams(location.search);
+  const type   = (qs.get('type')||'').toLowerCase();          // 'glb' | 'splat'
+  const model  = (qs.get('model')||'').toLowerCase();         // para glb
+  const figure = (qs.get('figure')||'').toLowerCase();        // para splat
+  
+
+
+  if (mv) {
+  mv.addEventListener('ar-status', (e) => {
+  console.log('[AR status]', e.detail?.status);
+  });
+  }
+
+  const mv    = document.getElementById('mv');
+  const splat = document.getElementById('splat');
+  const skel  = document.getElementById('skel');
+  const msg   = document.getElementById('msg');
+  const arBtn = document.getElementById('arBtn');
+  
+  const audioBtn = document.getElementById('audioBtn');
+  let audio = null;
+  
+  function setupAudioFor(id){
+    const url = `/assets/audio/${id}.mp3`;
+  
+    // si había un audio anterior, paramos y limpiamos
+    if (audio) {
+      try { audio.pause(); } catch {}
+      audio = null;
+    }
+  
+    audio = new Audio(url);
+    audio.loop = true;
+    audio.preload = 'none';
+  
+    // mostrar botón y estado inicial accesible
+    audioBtn.classList.remove('hidden');
+    audioBtn.classList.remove('is-playing');
+    audioBtn.setAttribute('aria-pressed', 'false');
+    audioBtn.setAttribute('aria-label', 'Reproducir audio');
+  
+    audioBtn.onclick = async () => {
+      if (!audio) return;
+  
+      if (audio.paused) {
+        try {
+          await audio.play();
+          audioBtn.classList.add('is-playing');
+          audioBtn.setAttribute('aria-pressed', 'true');
+          audioBtn.setAttribute('aria-label', 'Pausar audio');
+          // vibración sutil en móvil (opcional)
+          if (navigator.vibrate) navigator.vibrate(10);
+        } catch (err) {
+          console.log('Acción de usuario requerida / bloqueo de autoplay:', err);
+        }
+      } else {
+        audio.pause();
+        audioBtn.classList.remove('is-playing');
+        audioBtn.setAttribute('aria-pressed', 'false');
+        audioBtn.setAttribute('aria-label', 'Reproducir audio');
+      }
+    };
+  
+    // opcional: si la pestaña se oculta, pausamos por cortesía
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && audio && !audio.paused) {
+        audio.pause();
+        audioBtn.classList.remove('is-playing');
+        audioBtn.setAttribute('aria-pressed', 'false');
+        audioBtn.setAttribute('aria-label', 'Reproducir audio');
+      }
+    }, { once: true });
+  
+    // opcional: si el mp3 no existe, deja el botón visible pero sin acción
+    audio.addEventListener('error', () => {
+      console.warn('Audio no encontrado:', url);
+      // si prefieres, deshabilita el botón:
+      // audioBtn.disabled = true;
+    });
+  }
+  
+  
+  // Helpers ruta según norma confirmada
+  const glbUrl  = (name) => `/models/${name}/${name}.glb`;
+  const usdzUrl = (name) => `/models/${name}/${name}.usdz`;
+  const splatUrl= (name) => `/splat/${name}/index.html`;
+  
+  // Detectar plataforma
+  const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const isAndroid = /Android/.test(navigator.userAgent);
+  
+  // AR launcher unificado
+  function openARFor(name){
+  const usdz = usdzUrl(name);
+  const glb  = glbUrl(name);
+  
+  if(isIOS){
+  // Quick Look: abrir el .usdz directamente
+  window.location.href = usdz;
+  return;
+  }
+  if(isAndroid){
+  // Scene Viewer intent
+  const file = new URL(glb, location.origin).toString();
+  const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(file)}&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(location.href)};end;`;
+  window.location.href = intent;
+  return;
+  }
+  // Escritorio: no hacemos nada (el botón no se muestra en desktop)
+  }
+  
+  // Mostrar mensaje de ayuda
+  function showHelp(){
+  skel.classList.add('hidden');
+  msg.classList.remove('hidden');
+  msg.innerHTML = `
+         <div>
+           <b>Falta parámetro en la URL.</b><br/><br/>
+           Usa ejemplos:<br/>
+           <code>?type=glb&model=cristo</code><br/>
+           <code>?type=splat&figure=calvo-anillo</code>
+         </div>
+       `;
+  }
+  
+  // Montaje según type
+  (async function init(){
+  try{
+  if(type === 'glb' && model){
+  
+  
+    // GLB view
+  document.body.classList.remove('mode-splat');
+  mv.src     = glbUrl(model);
+  mv.iosSrc  = usdzUrl(model);
+  mv.classList.remove('hidden');
+  
+  // Bloquear el botón AR por defecto de <model-viewer> con un slot "fantasma"
+  if (!mv.querySelector('[slot="ar-button"]')) {
+  const blocker = document.createElement('button');
+  blocker.setAttribute('slot', 'ar-button');
+  blocker.setAttribute('aria-hidden', 'true');
+  blocker.style.display = 'none';
+  blocker.tabIndex = -1;
+  mv.appendChild(blocker);
+  }
+  
+  
+  // FAB AR: siempre disponible en móvil/tablet
+  arBtn.classList.remove('hidden');
+  arBtn.onclick = () => {
+  // si model-viewer puede abrir AR nativo, úsalo:
+  if (mv?.activateAR) {
+  // Algunos navegadores bloquean si no hay user gesture; este handler ya es gesture
+  mv.activateAR().catch(()=> openARFor(model));
+  } else {
+  openARFor(model);
+  }
+  };
+  setupAudioFor(model);
+  skel.classList.add('hidden');
+  return;
+  }
+  
+  if(type === 'splat' && figure){
+  // SPLAT view
+  document.body.classList.add('mode-splat'); 
+  splat.src = splatUrl(figure);
+  splat.classList.remove('hidden');
+  // FAB AR para la misma figura (usa GLB/USDZ homónimo)
+  arBtn.classList.remove('hidden');
+  arBtn.onclick = () => openARFor(figure);
+  setupAudioFor(figure);
+  skel.classList.add('hidden');
+  return;
+  }
+  
+  // Si no coincide nada:
+  showHelp();
+  
+  }catch(err){
+  console.error(err);
+  msg.classList.remove('hidden');
+  msg.innerHTML = `<b>Error:</b> ${String(err).replace(/</g,'&lt;')}`;
+  skel.classList.add('hidden');
+  }
+  })();
+  })();
+  
+  
+    // Map sencillo con datos de cartela (rellena cuando tengas textos reales)
+    let infoData = {
+      "cristo-yacente":      { title:"Cristo Yacente", meta:"s. XVII · Autor/a desconocido/a", desc:"Descripción pendiente." },
+      "virgen-romanica":     { title:"Virgen Románica", meta:"s. XII · Talla policromada", desc:"Descripción pendiente." },
+      "bargueno-relicario":  { title:"Bargueño Relicario", meta:"s. XVI · Mueble", desc:"Descripción pendiente." },
+      "san-bernardo-con-la-virgen": { title:"San Bernardo con la Virgen", meta:"s. XVIII", desc:"Descripción pendiente." },
+      "tapiz":               { title:"Tapiz", meta:"s. XVII", desc:"Descripción pendiente." },
+      "ecce-homo":           { title:"Ecce Homo", meta:"s. XVII", desc:"Descripción pendiente." },
+      "virgen-asuncion":     { title:"Virgen Asunción", meta:"s. XVIII", desc:"Descripción pendiente." },
+      "jesus-atado-a-la-columna": { title:"Jesús atado a la columna", meta:"s. XVII", desc:"Descripción pendiente." },
+      "san-jose-con-el-nino":{ title:"San José con el niño", meta:"s. XVIII", desc:"Descripción pendiente." },
+      "virgen-de-mena":      { title:"Virgen de Mena", meta:"s. XX", desc:"Descripción pendiente." },
+      "novisimos":           { title:"Novísimos", meta:"", desc:"Descripción pendiente." },
+      "casulla-santa-ana":   { title:"Casulla Santa Ana", meta:"Textil litúrgico", desc:"Descripción pendiente." },
+      "reliquia-dorada":     { title:"Reliquia Dorada", meta:"", desc:"Descripción pendiente." },
+      "cristo-en-la-cruz":   { title:"Cristo en la Cruz", meta:"s. XVII", desc:"Descripción pendiente." }
+    };
+  
+    // Helpers para obtener el slug actual
+    const qs = new URLSearchParams(location.search);
+    const type   = (qs.get('type')||'').toLowerCase();
+    const model  = (qs.get('model')||'').toLowerCase();
+    const figure = (qs.get('figure')||'').toLowerCase();
+    const slug = model || figure || '';
+  
+    // Elementos UI
+    const topBar    = document.getElementById('topBar');
+    const pieceTitle= document.getElementById('pieceTitle');
+    const infoBtn   = document.getElementById('infoBtn') || null;
+    const sheet     = document.getElementById('infoSheet');
+    const sheetClose= document.getElementById('infoClose');
+    const infoTitle = document.getElementById('infoTitle');
+    const infoMeta  = document.getElementById('infoMeta');
+    const infoDesc  = document.getElementById('infoDesc');
+  
+    // Pinta título arriba
+    if (topBar && slug){
+      topBar.classList.remove('hidden');
+      pieceTitle.textContent = (infoData[slug]?.title || slug.replace(/-/g,' '));
+    }
+  
+    // Rellena cartela con datos del slug
+    function fillSheet(){
+      const data = infoData[slug] || { title: slug.replace(/-/g,' '), meta:'', desc:'' };
+      infoTitle.textContent = data.title;
+      infoMeta.textContent  = data.meta || '';
+      infoDesc.textContent  = data.desc || '';
+    }
+  
+    // Abrir/cerrar cartela
+    function openSheet(){
+      fillSheet();
+      sheet.classList.remove('hidden');
+      sheet.setAttribute('aria-hidden','false');
+    }
+    function closeSheet(){
+      sheet.classList.add('hidden');
+      sheet.setAttribute('aria-hidden','true');
+    }
+  
+    // Listeners
+    if (infoBtn) infoBtn.addEventListener('click', openSheet);
+    sheetClose.addEventListener('click', closeSheet);
+    sheet.addEventListener('click', (e)=>{ if(e.target === sheet) closeSheet(); });
+    window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeSheet(); });
+  
+    // Ocultar UI al entrar en AR (cuando pulses tu botón AR)
+    const arBtn = document.getElementById('arBtn');
+    if (arBtn){
+      const original = arBtn.onclick;
+      arBtn.onclick = (ev) => {
+        document.body.classList.add('in-ar');
+        closeSheet();
+        if (typeof original === 'function') original(ev);
+      };
+    }
+  
+    (async function loadExternalInfoData() {
+    try {
+      // 1) Intentamos cargar el JSON externo (sin cacheo agresivo al principio)
+      const res = await fetch('/assets/info.json', { cache: 'no-store' });
+      if (!res.ok) throw new Error('info.json not OK');
+      const external = await res.json();
+  
+      // 2) Validación básica: debe ser objeto y tener al menos una clave
+      if (external && typeof external === 'object' && Object.keys(external).length) {
+        // 3) Sobrescribimos el fallback inline de forma segura
+        infoData = external;
+        console.debug('[infoData] usando /assets/info.json');
+      }
+    } catch (err) {
+      // Si falla, no pasa nada: se queda el inline
+      console.warn('[infoData] usando inline fallback:', err?.message || err);
+    }
+  })();
+  });
+  </script>
+
 
 
 </body>
