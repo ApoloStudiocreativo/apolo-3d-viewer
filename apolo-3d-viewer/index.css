@@ -277,8 +277,28 @@ body.in-ar .info-sheet{ display:none !important }
 }
 
 .info-btn{
-  flex: 0 0 auto;                       /* NO se encoge nunca */
-  min-width: 42px;                      /* asegura anchura mínima visible */
+  background: transparent;
+  border: 2px solid var(--brand);
+  color: var(--brand);
+  font-weight: 600;
+  font-size: 15px;
+  border-radius: 12px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: var(--shadow);
+}
+
+.info-btn:hover {
+  background: var(--brand);
+  color: white;
+}
+
+@media (max-width: 600px) {
+  .info-btn {
+    font-size: 14px;
+    padding: 5px 12px;
+  }
 }
 
 /* Safe areas globales (evitan recortes por la UI del navegador) */
