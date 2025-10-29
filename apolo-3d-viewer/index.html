@@ -6,6 +6,8 @@
 <title>Visor Universal 3D + AR</title>
 
 <link rel="stylesheet" href="./index.css">
+<link rel="preload" href="/assets/info.json" as="fetch" crossorigin="anonymous">
+
 
 <!-- model-viewer para modo GLB -->
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
@@ -318,7 +320,7 @@ skel.classList.add('hidden');
 
 
   // Map sencillo con datos de cartela (rellena cuando tengas textos reales)
-  const infoData = {
+  let infoData = {
     "cristo-yacente":      { title:"Cristo Yacente", meta:"s. XVII · Autor/a desconocido/a", desc:"Descripción pendiente." },
     "virgen-romanica":     { title:"Virgen Románica", meta:"s. XII · Talla policromada", desc:"Descripción pendiente." },
     "bargueno-relicario":  { title:"Bargueño Relicario", meta:"s. XVI · Mueble", desc:"Descripción pendiente." },
@@ -394,9 +396,24 @@ skel.classList.add('hidden');
     };
   }
 
+  (async function loadExternalInfoData() {
+  try {
+    // 1) Intentamos cargar el JSON externo (sin cacheo agresivo al principio)
+    const res = await fetch('/assets/info.json', { cache: 'default' });
+    if (!res.ok) throw new Error('info.json not OK');
+    const external = await res.json();
 
-
-
+    // 2) Validación básica: debe ser objeto y tener al menos una clave
+    if (external && typeof external === 'object' && Object.keys(external).length) {
+      // 3) Sobrescribimos el fallback inline de forma segura
+      infoData = external;
+      console.debug('[infoData] usando /assets/info.json');
+    }
+  } catch (err) {
+    // Si falla, no pasa nada: se queda el inline
+    console.warn('[infoData] usando inline fallback:', err?.message || err);
+  }
+})();
 </script>
 
 
