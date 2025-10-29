@@ -271,32 +271,130 @@ field-of-view="30deg">
     };
   
     // === Configuración de cámara por figura ===
-    const cameraSettings = {
-      "cristo-yacente": {
-        orbit: "0deg 70deg 6m",     // sube la cámara
-        target: "0m 1.55m 0m",      // sube el punto de mira
-        minRadius: "2.5m",
-        maxRadius: "7m",
-        minFov: "22deg",
-        maxFov: "45deg"
-      },
-      "virgen-romanica": {
-        orbit: "0deg 55deg 2.5m",
-        target: "0m 0.35m 0m",
-        minRadius: "1.2m",
-        maxRadius: "5m",
-        minFov: "20deg",
-        maxFov: "45deg"
-      },
-      "san-jose-con-el-nino": {
-        orbit: "0deg 65deg 3m",
-        target: "0m 0.6m 0m",
-        minRadius: "1.5m",
-        maxRadius: "6m",
-        minFov: "22deg",
-        maxFov: "45deg"
-      },
-    };
+        // Valores equilibrados sugeridos para cada tipo de pieza del museo
+        const cameraSettings = {
+
+        // 🕊️ Esculturas grandes o de cuerpo entero
+        "cristo-yacente": {
+          orbit: "0deg 75deg 6m",     // vista más elevada
+          target: "0m 1.7m 0m",      // mira al rostro
+          minRadius: "2.5m",
+          maxRadius: "7m",
+          minFov: "22deg",
+          maxFov: "45deg"
+        },
+        "cristo-en-la-cruz": {
+          orbit: "0deg 60deg 3.5m",
+          target: "0m 1.8m 0m",
+          minRadius: "2m",
+          maxRadius: "5m",
+          minFov: "22deg",
+          maxFov: "45deg"
+        },
+        "san-jose-con-el-nino": {
+          orbit: "0deg 65deg 3m",
+          target: "0m 0.8m 0m",
+          minRadius: "1.5m",
+          maxRadius: "6m",
+          minFov: "22deg",
+          maxFov: "45deg"
+        },
+        "san-bernardo-con-la-virgen": {
+          orbit: "0deg 65deg 3m",
+          target: "0m 0.8m 0m",
+          minRadius: "1.5m",
+          maxRadius: "5m",
+          minFov: "22deg",
+          maxFov: "45deg"
+        },
+        "virgen-asuncion": {
+          orbit: "0deg 60deg 2.8m",
+          target: "0m 0.75m 0m",
+          minRadius: "1.5m",
+          maxRadius: "5m",
+          minFov: "20deg",
+          maxFov: "45deg"
+        },
+        "virgen-de-mena": {
+          orbit: "0deg 60deg 3m",
+          target: "0m 0.8m 0m",
+          minRadius: "1.5m",
+          maxRadius: "6m",
+          minFov: "22deg",
+          maxFov: "45deg"
+        },
+
+        // 🕯️ Esculturas pequeñas, bustos o reliquias
+        "virgen-romanica": {
+          orbit: "0deg 55deg 2.5m",
+          target: "0m 0.35m 0m",
+          minRadius: "1.2m",
+          maxRadius: "5m",
+          minFov: "20deg",
+          maxFov: "45deg"
+        },
+        "ecce-homo": {
+          orbit: "0deg 60deg 2.2m",
+          target: "0m 0.4m 0m",
+          minRadius: "1.0m",
+          maxRadius: "4m",
+          minFov: "20deg",
+          maxFov: "45deg"
+        },
+        "reliquia-dorada": {
+          orbit: "0deg 60deg 1.8m",
+          target: "0m 0.25m 0m",
+          minRadius: "0.8m",
+          maxRadius: "3m",
+          minFov: "20deg",
+          maxFov: "45deg"
+        },
+        "bargueno-relicario": {
+          orbit: "0deg 55deg 2.8m",
+          target: "0m 0.4m 0m",
+          minRadius: "1.2m",
+          maxRadius: "5m",
+          minFov: "20deg",
+          maxFov: "45deg"
+        },
+
+        // 🎨 Obras planas o textiles
+        "tapiz": {
+          orbit: "0deg 90deg 3m",     // vista totalmente frontal
+          target: "0m 1.2m 0m",       // centra la zona media del tapiz
+          minRadius: "2m",
+          maxRadius: "6m",
+          minFov: "25deg",
+          maxFov: "45deg"
+        },
+        "casulla-santa-ana": {
+          orbit: "0deg 85deg 2.5m",
+          target: "0m 1.0m 0m",
+          minRadius: "1.5m",
+          maxRadius: "5m",
+          minFov: "25deg",
+          maxFov: "45deg"
+        },
+
+        // ⚰️ Otras piezas varias
+        "novisimos": {
+          orbit: "0deg 60deg 2.8m",
+          target: "0m 0.6m 0m",
+          minRadius: "1.2m",
+          maxRadius: "5m",
+          minFov: "22deg",
+          maxFov: "45deg"
+        },
+        "jesus-atado-a-la-columna": {
+          orbit: "0deg 65deg 2.8m",
+          target: "0m 0.8m 0m",
+          minRadius: "1.2m",
+          maxRadius: "5m",
+          minFov: "22deg",
+          maxFov: "45deg"
+        }
+        };
+
   
     function buildMeta(d){
       if (!d) return '';
