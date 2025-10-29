@@ -160,208 +160,112 @@ field-of-view="30deg">
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-  (function(){
-    // --- URL params (query) ---
-    const qs = new URLSearchParams(location.search);
-    let type   = (qs.get('type')||'').toLowerCase();
-    let model  = (qs.get('model')||'').toLowerCase();
-    let figure = (qs.get('figure')||'').toLowerCase();
-
-// --- URL limpia (pathname) si no hay query ---
-if (!type && !model && !figure) {
-  const segs = location.pathname.replace(/\/+/g,'/').split('/').filter(Boolean);
-  if (segs.length) {
-    if (segs[0] === 'glb' && segs[1])       { type='glb';   model  = segs[1].toLowerCase(); }
-    else if (segs[0] === 'splat' && segs[1]){ type='splat'; figure = segs[1].toLowerCase(); }
-    else                                    { type='glb';   model  = segs[0].toLowerCase(); } // /:slug → GLB
-  }
-}
-
-// --- SLUG único para la UI ---
-const slug = model || figure || '';
-
-
-    // 3) Slug unificado para la UI (topbar/cartela/audio)
-    const slug = model || figure || '';
-
-  const mv    = document.getElementById('mv');
-  const splat = document.getElementById('splat');
-  const skel  = document.getElementById('skel');
-  const msg   = document.getElementById('msg');
-  const arBtn = document.getElementById('arBtn');
+    // ---------------- URL (solo query params, como antes) ----------------
+    const qs     = new URLSearchParams(location.search);
+    const type   = (qs.get('type')||'').toLowerCase();   // 'glb' | 'splat'
+    const model  = (qs.get('model')||'').toLowerCase();  // slug para glb
+    const figure = (qs.get('figure')||'').toLowerCase(); // slug para splat
+    const slug   = model || figure || '';
   
-  const audioBtn = document.getElementById('audioBtn');
-  let audio = null;
-
-  function setupAudioFor(id){
-    const url = `/assets/audio/${id}.mp3`;
+    // ---------------- Elementos del DOM ----------------
+    const mv      = document.getElementById('mv');
+    const splat   = document.getElementById('splat');
+    const skel    = document.getElementById('skel');
+    const msg     = document.getElementById('msg');
+    const arBtn   = document.getElementById('arBtn');
+    const topBar  = document.getElementById('topBar');
+    const pieceTitle = document.getElementById('pieceTitle');
+    const infoBtn = document.getElementById('infoBtn');
+    const sheet   = document.getElementById('infoSheet');
+    const sheetClose = document.getElementById('infoClose');
+    const infoTitle  = document.getElementById('infoTitle');
+    const infoMeta   = document.getElementById('infoMeta');
+    const infoDesc   = document.getElementById('infoDesc');
+    const audioBtn   = document.getElementById('audioBtn');
   
-    // si había un audio anterior, paramos y limpiamos
-    if (audio) {
-      try { audio.pause(); } catch {}
-      audio = null;
+    // ---------------- Rutas y plataforma ----------------
+    const glbUrl   = (name) => `/models/${name}/${name}.glb`;
+    const usdzUrl  = (name) => `/models/${name}/${name}.usdz`;
+    const splatUrl = (name) => `/splat/${name}/index.html`;
+  
+    const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/.test(navigator.userAgent);
+  
+    // ---------------- Audio por pieza ----------------
+    let audio = null;
+    function setupAudioFor(id){
+      const url = `/assets/audio/${id}.mp3`;
+  
+      if (audio) { try { audio.pause(); } catch{} audio = null; }
+  
+      audio = new Audio(url);
+      audio.loop = true;
+      audio.preload = 'none';
+  
+      audioBtn.classList.remove('hidden');
+      audioBtn.classList.remove('is-playing');
+      audioBtn.setAttribute('aria-pressed','false');
+      audioBtn.setAttribute('aria-label','Reproducir audio');
+  
+      audioBtn.onclick = async () => {
+        if (!audio) return;
+        if (audio.paused) {
+          try {
+            await audio.play();
+            audioBtn.classList.add('is-playing');
+            audioBtn.setAttribute('aria-pressed','true');
+            audioBtn.setAttribute('aria-label','Pausar audio');
+            if (navigator.vibrate) navigator.vibrate(10);
+          } catch(e){ console.log('Bloqueo autoplay:', e); }
+        } else {
+          audio.pause();
+          audioBtn.classList.remove('is-playing');
+          audioBtn.setAttribute('aria-pressed','false');
+          audioBtn.setAttribute('aria-label','Reproducir audio');
+        }
+      };
+  
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden && audio && !audio.paused) {
+          audio.pause();
+          audioBtn.classList.remove('is-playing');
+          audioBtn.setAttribute('aria-pressed','false');
+          audioBtn.setAttribute('aria-label','Reproducir audio');
+        }
+      }, { once:true });
+  
+      audio.addEventListener('error', () => {
+        console.warn('Audio no encontrado:', url);
+      });
     }
   
-    audio = new Audio(url);
-    audio.loop = true;
-    audio.preload = 'none';
+    // ---------------- AR unificado ----------------
+    function openARFor(name){
+      const usdz = usdzUrl(name);
+      const glb  = glbUrl(name);
   
-    // mostrar botón y estado inicial accesible
-    audioBtn.classList.remove('hidden');
-    audioBtn.classList.remove('is-playing');
-    audioBtn.setAttribute('aria-pressed', 'false');
-    audioBtn.setAttribute('aria-label', 'Reproducir audio');
-  
-    audioBtn.onclick = async () => {
-      if (!audio) return;
-  
-      if (audio.paused) {
-        try {
-          await audio.play();
-          audioBtn.classList.add('is-playing');
-          audioBtn.setAttribute('aria-pressed', 'true');
-          audioBtn.setAttribute('aria-label', 'Pausar audio');
-          // vibración sutil en móvil (opcional)
-          if (navigator.vibrate) navigator.vibrate(10);
-        } catch (err) {
-          console.log('Acción de usuario requerida / bloqueo de autoplay:', err);
-        }
-      } else {
-        audio.pause();
-        audioBtn.classList.remove('is-playing');
-        audioBtn.setAttribute('aria-pressed', 'false');
-        audioBtn.setAttribute('aria-label', 'Reproducir audio');
+      if (isIOS)    { window.location.href = usdz; return; }
+      if (isAndroid){
+        const file = new URL(glb, location.origin).toString();
+        const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(file)}&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(location.href)};end;`;
+        window.location.href = intent; return;
       }
-    };
+    }
   
-    // opcional: si la pestaña se oculta, pausamos por cortesía
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden && audio && !audio.paused) {
-        audio.pause();
-        audioBtn.classList.remove('is-playing');
-        audioBtn.setAttribute('aria-pressed', 'false');
-        audioBtn.setAttribute('aria-label', 'Reproducir audio');
-      }
-    }, { once: true });
+    // ---------------- Mensaje de ayuda ----------------
+    function showHelp(){
+      skel.classList.add('hidden');
+      msg.classList.remove('hidden');
+      msg.innerHTML = `
+        <div>
+          <b>Falta parámetro en la URL.</b><br/><br/>
+          Usa ejemplos:<br/>
+          <code>?type=glb&model=cristo</code><br/>
+          <code>?type=splat&figure=calvo-anillo</code>
+        </div>`;
+    }
   
-    // opcional: si el mp3 no existe, deja el botón visible pero sin acción
-    audio.addEventListener('error', () => {
-      console.warn('Audio no encontrado:', url);
-      // si prefieres, deshabilita el botón:
-      // audioBtn.disabled = true;
-    });
-  }
-  
-  
-  // Helpers ruta según norma confirmada
-  const glbUrl  = (name) => `/models/${name}/${name}.glb`;
-  const usdzUrl = (name) => `/models/${name}/${name}.usdz`;
-  const splatUrl= (name) => `/splat/${name}/index.html`;
-  
-  // Detectar plataforma
-  const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const isAndroid = /Android/.test(navigator.userAgent);
-  
-  // AR launcher unificado
-  function openARFor(name){
-  const usdz = usdzUrl(name);
-  const glb  = glbUrl(name);
-  
-  if(isIOS){
-  // Quick Look: abrir el .usdz directamente
-  window.location.href = usdz;
-  return;
-  }
-  if(isAndroid){
-  // Scene Viewer intent
-  const file = new URL(glb, location.origin).toString();
-  const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(file)}&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(location.href)};end;`;
-  window.location.href = intent;
-  return;
-  }
-  // Escritorio: no hacemos nada (el botón no se muestra en desktop)
-  }
-  
-  // Mostrar mensaje de ayuda
-  function showHelp(){
-  skel.classList.add('hidden');
-  msg.classList.remove('hidden');
-  msg.innerHTML = `
-         <div>
-           <b>Falta parámetro en la URL.</b><br/><br/>
-           Usa ejemplos:<br/>
-           <code>?type=glb&model=cristo</code><br/>
-           <code>?type=splat&figure=calvo-anillo</code>
-         </div>
-       `;
-  }
-  
-  // Montaje según type
-  (async function init(){
-  try{
-  if(type === 'glb' && model){
-  
-  
-    // GLB view
-  document.body.classList.remove('mode-splat');
-  mv.src     = glbUrl(model);
-  mv.iosSrc  = usdzUrl(model);
-  mv.classList.remove('hidden');
-  
-  // Bloquear el botón AR por defecto de <model-viewer> con un slot "fantasma"
-  if (!mv.querySelector('[slot="ar-button"]')) {
-  const blocker = document.createElement('button');
-  blocker.setAttribute('slot', 'ar-button');
-  blocker.setAttribute('aria-hidden', 'true');
-  blocker.style.display = 'none';
-  blocker.tabIndex = -1;
-  mv.appendChild(blocker);
-  }
-  
-  
-  // FAB AR: siempre disponible en móvil/tablet
-  arBtn.classList.remove('hidden');
-  arBtn.onclick = () => {
-  // si model-viewer puede abrir AR nativo, úsalo:
-  if (mv?.activateAR) {
-  // Algunos navegadores bloquean si no hay user gesture; este handler ya es gesture
-  mv.activateAR().catch(()=> openARFor(model));
-  } else {
-  openARFor(model);
-  }
-  };
-  setupAudioFor(model);
-  skel.classList.add('hidden');
-  return;
-  }
-  
-  if(type === 'splat' && figure){
-  // SPLAT view
-  document.body.classList.add('mode-splat'); 
-  splat.src = splatUrl(figure);
-  splat.classList.remove('hidden');
-  // FAB AR para la misma figura (usa GLB/USDZ homónimo)
-  arBtn.classList.remove('hidden');
-  arBtn.onclick = () => openARFor(figure);
-  setupAudioFor(figure);
-  skel.classList.add('hidden');
-  return;
-  }
-  
-  // Si no coincide nada:
-  showHelp();
-  
-  }catch(err){
-  console.error(err);
-  msg.classList.remove('hidden');
-  msg.innerHTML = `<b>Error:</b> ${String(err).replace(/</g,'&lt;')}`;
-  skel.classList.add('hidden');
-  }
-  })();
-  })();
-  
-  
-    // Map sencillo con datos de cartela (rellena cuando tengas textos reales)
+    // ---------------- Datos de cartela (fallback inline) ----------------
     let infoData = {
       "cristo-yacente":      { title:"Cristo Yacente", meta:"s. XVII · Autor/a desconocido/a", desc:"Descripción pendiente." },
       "virgen-romanica":     { title:"Virgen Románica", meta:"s. XII · Talla policromada", desc:"Descripción pendiente." },
@@ -378,75 +282,40 @@ const slug = model || figure || '';
       "reliquia-dorada":     { title:"Reliquia Dorada", meta:"", desc:"Descripción pendiente." },
       "cristo-en-la-cruz":   { title:"Cristo en la Cruz", meta:"s. XVII", desc:"Descripción pendiente." }
     };
-
-    // Construye la línea "meta" de forma elegante si vienen campos sueltos
-    function buildMeta(d) {
-    // Prioridad: usar campos nuevos si existen; si no, usar d.meta (legacy)
-    if (!d) return '';
-    if (d.author || d.year || d.material) {
-    const parts = [];
-    if (d.year) parts.push(d.year);
-    if (d.author) parts.push(d.author);
-    if (d.material) parts.push(d.material);
-    return parts.filter(Boolean).join(' · ');
-    }
-    return d.meta || '';
-}
-
-// Refresca título TopBar + cartela con el slug actual
-function renderInfo(slug) {
-  const d = (infoData && infoData[slug]) || null;
-  const nice = (s) => (s || slug || '').replace(/-/g, ' ').trim();
-
-  if (topBar && slug) {
-    topBar.classList.remove('hidden');
-    pieceTitle.textContent = d?.title || nice(slug);
-  }
-  infoTitle.textContent = d?.title || nice(slug);
-  infoMeta.textContent  = buildMeta(d);
-  infoDesc.textContent  = d?.desc || '';
-}
   
-    // Elementos UI
-    const topBar    = document.getElementById('topBar');
-    const pieceTitle= document.getElementById('pieceTitle');
-    const infoBtn   = document.getElementById('infoBtn') || null;
-    const sheet     = document.getElementById('infoSheet');
-    const sheetClose= document.getElementById('infoClose');
-    const infoTitle = document.getElementById('infoTitle');
-    const infoMeta  = document.getElementById('infoMeta');
-    const infoDesc  = document.getElementById('infoDesc');
-  
-    // Pinta título arriba
-    if (slug) {
-  // si tienes renderInfo(slug) úsalo:
-  // renderInfo(slug);
-  topBar.classList.remove('hidden');
-  pieceTitle.textContent = (infoData[slug]?.title || slug.replace(/-/g,' '));
-}
-  
-    // Rellena cartela con datos del slug
-    function fillSheet(){renderInfo(slug);}
-
-    // Abrir/cerrar cartela
-    function openSheet(){
-      fillSheet();
-      sheet.classList.remove('hidden');
-      sheet.setAttribute('aria-hidden','false');
-    }
-    function closeSheet(){
-      sheet.classList.add('hidden');
-      sheet.setAttribute('aria-hidden','true');
+    function buildMeta(d){
+      if (!d) return '';
+      if (d.author || d.year || d.material) {
+        const parts = [];
+        if (d.year) parts.push(d.year);
+        if (d.author) parts.push(d.author);
+        if (d.material) parts.push(d.material);
+        return parts.filter(Boolean).join(' · ');
+      }
+      return d.meta || '';
     }
   
-    // Listeners
+    function renderInfo(s){
+      const d = (infoData && infoData[s]) || null;
+      const nice = (x) => (x||s||'').replace(/-/g,' ').trim();
+      if (topBar && s){
+        topBar.classList.remove('hidden');
+        pieceTitle.textContent = d?.title || nice(s);
+      }
+      infoTitle.textContent = d?.title || nice(s);
+      infoMeta.textContent  = buildMeta(d);
+      infoDesc.textContent  = d?.desc || '';
+    }
+  
+    // ---------------- Listeners UI (cartela) ----------------
+    function openSheet(){ renderInfo(slug); sheet.classList.remove('hidden'); sheet.setAttribute('aria-hidden','false'); }
+    function closeSheet(){ sheet.classList.add('hidden'); sheet.setAttribute('aria-hidden','true'); }
+  
     if (infoBtn) infoBtn.addEventListener('click', openSheet);
     sheetClose.addEventListener('click', closeSheet);
-    sheet.addEventListener('click', (e)=>{ if(e.target === sheet) closeSheet(); });
-    window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeSheet(); });
+    sheet.addEventListener('click', (e)=>{ if (e.target === sheet) closeSheet(); });
+    window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeSheet(); });
   
-    // Ocultar UI al entrar en AR (cuando pulses tu botón AR)
-    const arBtn = document.getElementById('arBtn');
     if (arBtn){
       const original = arBtn.onclick;
       arBtn.onclick = (ev) => {
@@ -456,34 +325,80 @@ function renderInfo(slug) {
       };
     }
   
-    (async function loadExternalInfoData() {
-    try {
-      // 1) Intentamos cargar el JSON externo (sin cacheo agresivo al principio)
-      const res = await fetch('/assets/info.json', { cache: 'no-store' });
-      if (!res.ok) throw new Error('info.json not OK');
-      const external = await res.json();
+    // ---------------- Carga JSON externo (con fallback) ----------------
+    (async function loadExternalInfoData(){
+      try {
+        const res = await fetch('/assets/info.json', { cache:'no-store' });
+        if (!res.ok) throw new Error('info.json not OK');
+        const external = await res.json();
+        if (external && typeof external === 'object' && Object.keys(external).length){
+          infoData = external;
+          console.debug('[infoData] usando /assets/info.json');
+          if (slug) renderInfo(slug);
+        }
+      } catch (err) {
+        console.warn('[infoData] usando inline fallback:', err?.message || err);
+      }
+    })();
   
-      // 2) Validación básica: debe ser objeto y tener al menos una clave
-      if (external && typeof external === 'object' && Object.keys(external).length) {
-        // 3) Sobrescribimos el fallback inline de forma segura
-        infoData = external;
-        console.debug('[infoData] usando /assets/info.json');
-
-        // Re-pinta topbar/cartela por si el usuario abrió la sheet antes
-        if (slug) {
-  // renderInfo(slug);
-  topBar.classList.remove('hidden');
-  pieceTitle.textContent = (infoData[slug]?.title || slug.replace(/-/g,' '));
-}
-
-
-    } catch (err) {
-      // Si falla, no pasa nada: se queda el inline
-      console.warn('[infoData] usando inline fallback:', err?.message || err);
-    }
-  })();
-  });
+    // ---------------- Montaje de la vista (GLB/SPLAT) ----------------
+    (async function init(){
+      try{
+        if (type === 'glb' && model){
+          document.body.classList.remove('mode-splat');
+          mv.src    = glbUrl(model);
+          mv.iosSrc = usdzUrl(model);
+          mv.classList.remove('hidden');
+  
+          // Oculta botón AR nativo de <model-viewer>
+          if (!mv.querySelector('[slot="ar-button"]')) {
+            const blocker = document.createElement('button');
+            blocker.setAttribute('slot','ar-button');
+            blocker.setAttribute('aria-hidden','true');
+            blocker.style.display = 'none';
+            blocker.tabIndex = -1;
+            mv.appendChild(blocker);
+          }
+  
+          arBtn.classList.remove('hidden');
+          arBtn.onclick = () => {
+            if (mv?.activateAR) mv.activateAR().catch(()=> openARFor(model));
+            else openARFor(model);
+          };
+  
+          if (slug) renderInfo(slug);
+          setupAudioFor(model);
+          skel.classList.add('hidden');
+          return;
+        }
+  
+        if (type === 'splat' && figure){
+          document.body.classList.add('mode-splat');
+          splat.src = splatUrl(figure);
+          splat.classList.remove('hidden');
+  
+          arBtn.classList.remove('hidden');
+          arBtn.onclick = () => openARFor(figure);
+  
+          if (slug) renderInfo(slug);
+          setupAudioFor(figure);
+          skel.classList.add('hidden');
+          return;
+        }
+  
+        // Sin parámetros válidos:
+        showHelp();
+      } catch(err){
+        console.error(err);
+        msg.classList.remove('hidden');
+        msg.innerHTML = `<b>Error:</b> ${String(err).replace(/</g,'&lt;')}`;
+        skel.classList.add('hidden');
+      }
+    })();
+  
+  }); // DOMContentLoaded
   </script>
+  
 
 
 
