@@ -93,6 +93,7 @@ color:#7b8696; font:500 14px system-ui, -apple-system, Segoe UI, Roboto, Arial;
 
 <!-- Vista GLB -->
 <model-viewer id="mv" class="hidden"
+poster="/models/placeholder.webp"
 alt="Modelo 3D"
 camera-controls
 touch-action="pan-y"
@@ -111,6 +112,7 @@ field-of-view="30deg">
 <iframe
   id="splat"
   class="hidden"
+  loading="lazy"
   allow="autoplay; fullscreen; xr-spatial-tracking; camera; microphone; gyroscope; accelerometer">
 </iframe>
 
@@ -355,6 +357,35 @@ field-of-view="30deg">
       "reliquia-dorada":     { title:"Reliquia Dorada", meta:"", desc:"Descripción pendiente." },
       "cristo-en-la-cruz":   { title:"Cristo en la Cruz", meta:"s. XVII", desc:"Descripción pendiente." }
     };
+
+    // Construye la línea "meta" de forma elegante si vienen campos sueltos
+    function buildMeta(d) {
+    // Prioridad: usar campos nuevos si existen; si no, usar d.meta (legacy)
+    if (!d) return '';
+    if (d.author || d.year || d.material) {
+    const parts = [];
+    if (d.year) parts.push(d.year);
+    if (d.author) parts.push(d.author);
+    if (d.material) parts.push(d.material);
+    return parts.filter(Boolean).join(' · ');
+    }
+    return d.meta || '';
+}
+
+// Refresca título TopBar + cartela con el slug actual
+function renderInfo(slug) {
+  const d = (infoData && infoData[slug]) || null;
+  const nice = (s) => (s || slug || '').replace(/-/g, ' ').trim();
+
+  if (topBar && slug) {
+    topBar.classList.remove('hidden');
+    pieceTitle.textContent = d?.title || nice(slug);
+  }
+  infoTitle.textContent = d?.title || nice(slug);
+  infoMeta.textContent  = buildMeta(d);
+  infoDesc.textContent  = d?.desc || '';
+}
+
   
     // Helpers para obtener el slug actual
     const qs = new URLSearchParams(location.search);
@@ -381,12 +412,9 @@ field-of-view="30deg">
   
     // Rellena cartela con datos del slug
     function fillSheet(){
-      const data = infoData[slug] || { title: slug.replace(/-/g,' '), meta:'', desc:'' };
-      infoTitle.textContent = data.title;
-      infoMeta.textContent  = data.meta || '';
-      infoDesc.textContent  = data.desc || '';
+    renderInfo(slug);
     }
-  
+
     // Abrir/cerrar cartela
     function openSheet(){
       fillSheet();
@@ -427,6 +455,8 @@ field-of-view="30deg">
         // 3) Sobrescribimos el fallback inline de forma segura
         infoData = external;
         console.debug('[infoData] usando /assets/info.json');
+        // Re-pinta topbar/cartela por si el usuario abrió la sheet antes
+      if (slug) renderInfo(slug);
       }
     } catch (err) {
       // Si falla, no pasa nada: se queda el inline
