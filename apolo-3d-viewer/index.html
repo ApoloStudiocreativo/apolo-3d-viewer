@@ -368,6 +368,13 @@ field-of-view="30deg">
           document.body.classList.remove('mode-splat');
           mv.src    = glbUrl(model);
 
+          // Espera a que <model-viewer> termine de encuadrar el modelo
+          mv.addEventListener('load', () => {
+            // Solo distancia: más lejos sin tocar el ángulo
+            mv.cameraOrbit = 'auto auto 2.6m'; // ← ajusta 2.6m a tu gusto
+          });
+
+
           // === Aplicar límites de zoom/órbita por figura ===
         const cfg = cameraConfig[model];
         if (cfg) {
