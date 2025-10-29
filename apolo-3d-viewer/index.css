@@ -244,14 +244,23 @@ body.mode-splat{
   z-index: 15;
 
   display: flex;
-  align-items: center;       /* ← centra verticalmente título y botón */
+  align-items: center;           /* centra verticalmente */
   justify-content: space-between;
 
-  padding: 10px 14px;
-  height: 48px;              /* altura coherente con notch y pill */
-  background: rgba(15,17,21,0.35); /* ligero fondo cristalino si quieres */
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  height: 56px;                  /* altura visible de la barra */
+  padding: 0 16px;
+  background: rgba(15,17,21,0.65); /* franja oscura semi-transparente */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+#topBar h1 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1;
+  display: flex;
+  align-items: center;
 }
 
 #topBar *{ pointer-events:auto }
@@ -264,8 +273,9 @@ body.mode-splat{
   justify-content: center;
 
   min-width: 120px;
-  height: 34px;
+  height: 36px;
   padding: 0 14px;
+  box-sizing: border-box;
 
   border: 2px solid var(--brand);
   border-radius: 12px;
@@ -294,7 +304,7 @@ body.mode-splat{
 
 /* En pantallas pequeñas, un pelín más compacto */
 @media (max-width: 480px) {
-  .info-btn { min-width: 108px; height: 32px; font-size: 13px; }
+  .info-btn { min-width: 108px; height: 34px; font-size: 13px; }
 }
 
 /* Ocultar UI al entrar en AR si hace falta */
