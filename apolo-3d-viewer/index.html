@@ -160,11 +160,11 @@ field-of-view="30deg">
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // ---------------- URL (solo query params, como antes) ----------------
+    // ---------------- URL ----------------
     const qs     = new URLSearchParams(location.search);
-    const type   = (qs.get('type')||'').toLowerCase();   // 'glb' | 'splat'
-    const model  = (qs.get('model')||'').toLowerCase();  // slug para glb
-    const figure = (qs.get('figure')||'').toLowerCase(); // slug para splat
+    const type   = (qs.get('type')||'').toLowerCase();
+    const model  = (qs.get('model')||'').toLowerCase();
+    const figure = (qs.get('figure')||'').toLowerCase();
     const slug   = model || figure || '';
   
     // ---------------- Elementos del DOM ----------------
@@ -182,9 +182,8 @@ field-of-view="30deg">
     const infoMeta   = document.getElementById('infoMeta');
     const infoDesc   = document.getElementById('infoDesc');
     const audioBtn   = document.getElementById('audioBtn');
-
   
-    // ---------------- Rutas y plataforma ----------------
+    // ---------------- Rutas ----------------
     const glbUrl   = (name) => `/models/${name}/${name}.glb`;
     const usdzUrl  = (name) => `/models/${name}/${name}.usdz`;
     const splatUrl = (name) => `/splat/${name}/index.html`;
@@ -192,11 +191,10 @@ field-of-view="30deg">
     const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const isAndroid = /Android/.test(navigator.userAgent);
   
-    // ---------------- Audio por pieza ----------------
+    // ---------------- Audio por figura ----------------
     let audio = null;
     function setupAudioFor(id){
       const url = `/assets/audio/${id}.mp3`;
-  
       if (audio) { try { audio.pause(); } catch{} audio = null; }
   
       audio = new Audio(url);
@@ -244,16 +242,15 @@ field-of-view="30deg">
     function openARFor(name){
       const usdz = usdzUrl(name);
       const glb  = glbUrl(name);
-  
-      if (isIOS)    { window.location.href = usdz; return; }
+      if (isIOS) { window.location.href = usdz; return; }
       if (isAndroid){
         const file = new URL(glb, location.origin).toString();
         const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(file)}&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(location.href)};end;`;
-        window.location.href = intent; return;
+        window.location.href = intent;
       }
     }
   
-    // ---------------- Mensaje de ayuda ----------------
+    // ---------------- Cartela ----------------
     function showHelp(){
       skel.classList.add('hidden');
       msg.classList.remove('hidden');
@@ -261,86 +258,46 @@ field-of-view="30deg">
         <div>
           <b>Falta parámetro en la URL.</b><br/><br/>
           Usa ejemplos:<br/>
-          <code>?type=glb&model=cristo</code><br/>
+          <code>?type=glb&model=cristo-yacente</code><br/>
           <code>?type=splat&figure=calvo-anillo</code>
         </div>`;
     }
   
-    // ---------------- Datos de cartela (fallback inline) ----------------
     let infoData = {
       "cristo-yacente":      { title:"Cristo Yacente", meta:"s. XVII · Autor/a desconocido/a", desc:"Descripción pendiente." },
       "virgen-romanica":     { title:"Virgen Románica", meta:"s. XII · Talla policromada", desc:"Descripción pendiente." },
-      "bargueno-relicario":  { title:"Bargueño Relicario", meta:"s. XVI · Mueble", desc:"Descripción pendiente." },
-      "san-bernardo-con-la-virgen": { title:"San Bernardo con la Virgen", meta:"s. XVIII", desc:"Descripción pendiente." },
-      "tapiz":               { title:"Tapiz", meta:"s. XVII", desc:"Descripción pendiente." },
-      "ecce-homo":           { title:"Ecce Homo", meta:"s. XVII", desc:"Descripción pendiente." },
-      "virgen-asuncion":     { title:"Virgen Asunción", meta:"s. XVIII", desc:"Descripción pendiente." },
-      "jesus-atado-a-la-columna": { title:"Jesús atado a la columna", meta:"s. XVII", desc:"Descripción pendiente." },
-      "san-jose-con-el-nino":{ title:"San José con el niño", meta:"s. XVIII", desc:"Descripción pendiente." },
-      "virgen-de-mena":      { title:"Virgen de Mena", meta:"s. XX", desc:"Descripción pendiente." },
-      "novisimos":           { title:"Novísimos", meta:"", desc:"Descripción pendiente." },
-      "casulla-santa-ana":   { title:"Casulla Santa Ana", meta:"Textil litúrgico", desc:"Descripción pendiente." },
-      "reliquia-dorada":     { title:"Reliquia Dorada", meta:"", desc:"Descripción pendiente." },
+      "san-jose-con-el-nino":{ title:"San José con el Niño", meta:"s. XVIII", desc:"Descripción pendiente." },
       "cristo-en-la-cruz":   { title:"Cristo en la Cruz", meta:"s. XVII", desc:"Descripción pendiente." }
     };
-
-            // Punto de mira (rostro) por figura
-            const cameraTargetBySlug = {
-            'cristo-yacente': '0m 0.3m 0m',
-            'virgen-romanica': '0m 0.3m 0m',
-            'san-jose-con-el-nino': '0m 0.6m 0m'
-          };
-
-                // === Configuración de cámara por figura ===
-          const cameraSettings = {
-            "cristo-yacente": {
-              orbit: "0deg 60deg 6m",     // posición de cámara (ángulo + distancia)
-              target: "0m 0.55m 0m",      // punto de mira (altura del rostro)
-              minRadius: "2.5m",          // zoom máximo (no acercar más)
-              maxRadius: "7m",            // zoom mínimo (no alejar más)
-              minFov: "22deg",            // límites de apertura de zoom
-              maxFov: "45deg"
-            },
-
-            "virgen-romanica": {
-              orbit: "0deg 55deg 2.5m",
-              target: "0m 0.35m 0m",
-              minRadius: "1.2m",
-              maxRadius: "5m",
-              minFov: "20deg",
-              maxFov: "45deg"
-            },
-
-            "san-jose-con-el-nino": {
-              orbit: "0deg 65deg 3m",
-              target: "0m 0.6m 0m",
-              minRadius: "1.5m",
-              maxRadius: "6m",
-              minFov: "22deg",
-              maxFov: "45deg"
-            },
-          };
-    
-      // Zoom/órbita por figura (ajusta a tu gusto)
-      const cameraConfig = {
-        // EJEMPLO: Cristo Yacente
-        "cristo-yacente": {
-          // posición inicial de cámara (theta, phi, radio)
-          orbit: "0deg 50deg 6m",
-
-          // límites de zoom por distancia (radio)
-          minRadius: "2.5m",   // qué tan cerca como máximo
-          maxRadius: "7m",     // qué tan lejos como máximo
-
-          // límites de zoom por apertura (opcional)
-          minFov: "22deg",     // no cerrar más de esto
-          maxFov: "45deg"      // no abrir más de esto
-        },
-
-        // añade más piezas si lo necesitas:
-        // "virgen-romanica": { orbit:"-30deg 65deg 1.8m", minRadius:"1.0m", maxRadius:"5.5m", minFov:"20deg", maxFov:"45deg" },
-      };
-
+  
+    // === Configuración de cámara por figura ===
+    const cameraSettings = {
+      "cristo-yacente": {
+        orbit: "0deg 70deg 6m",     // sube la cámara
+        target: "0m 1.55m 0m",      // sube el punto de mira
+        minRadius: "2.5m",
+        maxRadius: "7m",
+        minFov: "22deg",
+        maxFov: "45deg"
+      },
+      "virgen-romanica": {
+        orbit: "0deg 55deg 2.5m",
+        target: "0m 0.35m 0m",
+        minRadius: "1.2m",
+        maxRadius: "5m",
+        minFov: "20deg",
+        maxFov: "45deg"
+      },
+      "san-jose-con-el-nino": {
+        orbit: "0deg 65deg 3m",
+        target: "0m 0.6m 0m",
+        minRadius: "1.5m",
+        maxRadius: "6m",
+        minFov: "22deg",
+        maxFov: "45deg"
+      },
+    };
+  
     function buildMeta(d){
       if (!d) return '';
       if (d.author || d.year || d.material) {
@@ -354,7 +311,7 @@ field-of-view="30deg">
     }
   
     function renderInfo(s){
-      const d = (infoData && infoData[s]) || null;
+      const d = infoData[s] || null;
       const nice = (x) => (x||s||'').replace(/-/g,' ').trim();
       if (topBar && s){
         topBar.classList.remove('hidden');
@@ -365,7 +322,7 @@ field-of-view="30deg">
       infoDesc.textContent  = d?.desc || '';
     }
   
-    // ---------------- Listeners UI (cartela) ----------------
+    // ---------------- Cartela e interacción ----------------
     function openSheet(){ renderInfo(slug); sheet.classList.remove('hidden'); sheet.setAttribute('aria-hidden','false'); }
     function closeSheet(){ sheet.classList.add('hidden'); sheet.setAttribute('aria-hidden','true'); }
   
@@ -374,110 +331,43 @@ field-of-view="30deg">
     sheet.addEventListener('click', (e)=>{ if (e.target === sheet) closeSheet(); });
     window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeSheet(); });
   
-    if (arBtn){
-      const original = arBtn.onclick;
-      arBtn.onclick = (ev) => {
-        document.body.classList.add('in-ar');
-        closeSheet();
-        if (typeof original === 'function') original(ev);
-      };
-    }
-  
-    // ---------------- Carga JSON externo (con fallback) ----------------
-    (async function loadExternalInfoData(){
-      try {
-        const res = await fetch('/assets/info.json', { cache:'no-store' });
-        if (!res.ok) throw new Error('info.json not OK');
-        const external = await res.json();
-        if (external && typeof external === 'object' && Object.keys(external).length){
-          infoData = external;
-          console.debug('[infoData] usando /assets/info.json');
-          if (slug) renderInfo(slug);
-        }
-      } catch (err) {
-        console.warn('[infoData] usando inline fallback:', err?.message || err);
-      }
-    })();
-  
-    // ---------------- Montaje de la vista (GLB/SPLAT) ----------------
+    // ---------------- Inicialización ----------------
     (async function init(){
       try{
         if (type === 'glb' && model){
           document.body.classList.remove('mode-splat');
-          mv.src    = glbUrl(model);
-
-          // Espera a que <model-viewer> termine de encuadrar el modelo
-            
-// mv.addEventListener('load', () => {
-//   mv.cameraOrbit = 'auto auto 6m';
-//   const t = cameraTargetBySlug[model];
-//   if (t) mv.cameraTarget = t;
-// });
-
-// mv.addEventListener('load', () => {
-//   mv.cameraTarget = '0m 0.45m 0m';
-// });
-
-
-            // === Aplicar configuración de cámara por figura ===
-            const cam = cameraSettings[model];
-            if (cam) {
-              // Posición inicial de la cámara
-              if (cam.orbit) mv.cameraOrbit = cam.orbit;
-
-              // Punto de mira (altura del rostro)
-              if (cam.target) mv.cameraTarget = cam.target;
-
-              // Límites de zoom (radio)
-              if (cam.minRadius) mv.minCameraOrbit = `auto auto ${cam.minRadius}`;
-              if (cam.maxRadius) mv.maxCameraOrbit = `auto auto ${cam.maxRadius}`;
-
-              // Límites de apertura (zoom óptico)
-              if (cam.minFov) mv.minFieldOfView = cam.minFov;
-              if (cam.maxFov) mv.maxFieldOfView = cam.maxFov;
-            }
-
-
-
-            // Aplicar HDR suave al cargar modelos GLB
-            (async () => {
-              try {
-                // Precarga el HDR para evitar “flash” de luz
-                await fetch('/assets/hdr/museo-suave.hdr', { cache: 'force-cache' }).catch(()=>{});
-                // Asigna el HDR suave
-                mv.environmentImage = '/assets/hdr/museo-suave.hdr';
-                mv.exposure = '2';           // brillo suave general
-                mv.shadowIntensity = '0.7';     // sombras más naturales
-                mv.shadowSoftness = '1.0';      // bordes de sombra difusos
-                mv.environmentRotation = '10deg';  // prueba 30, 45, 90…
-
-                // Fondo borroso (skybox) para que no se vea negro ni se identifique el HDR
-                try {
-                  mv.skyboxImage = '/assets/hdr/museo-suave-blur.webp'; // o .jpg
-                  // color de respaldo por si falla la imagen:
-                  mv.backgroundColor = '#0f1115';
-                } catch(e) {
-                  console.warn('Skybox no aplicado, usando color de fondo', e);
-                }
-
-                
-                console.log('HDR suave aplicado');
-              } catch (e) {
-                console.warn('No se pudo aplicar el HDR, usando "neutral"', e);
-              }
-            })();
-
-             // Ajuste de cámara (sube el punto de mira)
-              mv.addEventListener('load', () => {
-                mv.cameraTarget = '0m 0.45m 0m'; // Sube 45 cm el punto que la cámara mira
-              });
- 
-
-
+          mv.src = glbUrl(model);
+  
+          // === Configuración de cámara por figura ===
+          const cam = cameraSettings[model];
+          if (cam) {
+            if (cam.orbit) mv.cameraOrbit = cam.orbit;
+            if (cam.target) mv.cameraTarget = cam.target;
+            if (cam.minRadius) mv.minCameraOrbit = `auto auto ${cam.minRadius}`;
+            if (cam.maxRadius) mv.maxCameraOrbit = `auto auto ${cam.maxRadius}`;
+            if (cam.minFov) mv.minFieldOfView = cam.minFov;
+            if (cam.maxFov) mv.maxFieldOfView = cam.maxFov;
+          }
+  
+          // === HDR suave ===
+          try {
+            await fetch('/assets/hdr/museo-suave.hdr', { cache: 'force-cache' }).catch(()=>{});
+            mv.environmentImage = '/assets/hdr/museo-suave.hdr';
+            mv.exposure = '2';
+            mv.shadowIntensity = '0.7';
+            mv.shadowSoftness = '1.0';
+            mv.environmentRotation = '10deg';
+            mv.skyboxImage = '/assets/hdr/museo-suave-blur.webp';
+            mv.backgroundColor = '#0f1115';
+            console.log('HDR suave aplicado');
+          } catch (e) {
+            console.warn('No se pudo aplicar el HDR, usando neutral', e);
+          }
+  
           mv.iosSrc = usdzUrl(model);
           mv.classList.remove('hidden');
   
-          // Oculta botón AR nativo de <model-viewer>
+          // Oculta botón AR nativo
           if (!mv.querySelector('[slot="ar-button"]')) {
             const blocker = document.createElement('button');
             blocker.setAttribute('slot','ar-button');
@@ -487,6 +377,7 @@ field-of-view="30deg">
             mv.appendChild(blocker);
           }
   
+          // Botón AR unificado
           arBtn.classList.remove('hidden');
           arBtn.onclick = () => {
             if (mv?.activateAR) mv.activateAR().catch(()=> openARFor(model));
@@ -515,6 +406,7 @@ field-of-view="30deg">
   
         // Sin parámetros válidos:
         showHelp();
+  
       } catch(err){
         console.error(err);
         msg.classList.remove('hidden');
@@ -522,12 +414,9 @@ field-of-view="30deg">
         skel.classList.add('hidden');
       }
     })();
-  
-  }); // DOMContentLoaded
+  });
   </script>
   
-
-
 
 </body>
 </html>
