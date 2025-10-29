@@ -182,6 +182,7 @@ field-of-view="30deg">
     const infoMeta   = document.getElementById('infoMeta');
     const infoDesc   = document.getElementById('infoDesc');
     const audioBtn   = document.getElementById('audioBtn');
+
   
     // ---------------- Rutas y plataforma ----------------
     const glbUrl   = (name) => `/models/${name}/${name}.glb`;
@@ -283,6 +284,14 @@ field-of-view="30deg">
       "cristo-en-la-cruz":   { title:"Cristo en la Cruz", meta:"s. XVII", desc:"Descripción pendiente." }
     };
 
+            // Punto de mira (rostro) por figura
+            const cameraTargetBySlug = {
+        'cristo-yacente': '0m 0.45m 0m',
+        'virgen-romanica': '0m 0.3m 0m',
+        'san-jose-con-el-nino': '0m 0.6m 0m'
+      };
+
+
       // Zoom/órbita por figura (ajusta a tu gusto)
       const cameraConfig = {
         // EJEMPLO: Cristo Yacente
@@ -372,6 +381,8 @@ field-of-view="30deg">
           mv.addEventListener('load', () => {
             // Solo distancia: más lejos sin tocar el ángulo
             mv.cameraOrbit = 'auto auto 6m'; // ← ajusta 2.6m a tu gusto
+            const t = cameraTargetBySlug[model];
+            if (t) mv.cameraTarget = t;
           });
 
 
@@ -418,6 +429,13 @@ field-of-view="30deg">
                 console.warn('No se pudo aplicar el HDR, usando "neutral"', e);
               }
             })();
+
+             // Ajuste de cámara (sube el punto de mira)
+              mv.addEventListener('load', () => {
+                mv.cameraTarget = '0m 0.45m 0m'; // Sube 45 cm el punto que la cámara mira
+              });
+ 
+
 
           mv.iosSrc = usdzUrl(model);
           mv.classList.remove('hidden');
