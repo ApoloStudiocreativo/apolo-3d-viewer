@@ -291,7 +291,36 @@ field-of-view="30deg">
             'san-jose-con-el-nino': '0m 0.6m 0m'
           };
 
+                // === Configuración de cámara por figura ===
+          const cameraSettings = {
+            "cristo-yacente": {
+              orbit: "0deg 60deg 6m",     // posición de cámara (ángulo + distancia)
+              target: "0m 0.55m 0m",      // punto de mira (altura del rostro)
+              minRadius: "2.5m",          // zoom máximo (no acercar más)
+              maxRadius: "7m",            // zoom mínimo (no alejar más)
+              minFov: "22deg",            // límites de apertura de zoom
+              maxFov: "45deg"
+            },
 
+            "virgen-romanica": {
+              orbit: "0deg 55deg 2.5m",
+              target: "0m 0.35m 0m",
+              minRadius: "1.2m",
+              maxRadius: "5m",
+              minFov: "20deg",
+              maxFov: "45deg"
+            },
+
+            "san-jose-con-el-nino": {
+              orbit: "0deg 65deg 3m",
+              target: "0m 0.6m 0m",
+              minRadius: "1.5m",
+              maxRadius: "6m",
+              minFov: "22deg",
+              maxFov: "45deg"
+            },
+          };
+    
       // Zoom/órbita por figura (ajusta a tu gusto)
       const cameraConfig = {
         // EJEMPLO: Cristo Yacente
@@ -385,21 +414,24 @@ field-of-view="30deg">
             if (t) mv.cameraTarget = t;
           });
 
+            // === Aplicar configuración de cámara por figura ===
+            const cam = cameraSettings[model];
+            if (cam) {
+              // Posición inicial de la cámara
+              if (cam.orbit) mv.cameraOrbit = cam.orbit;
 
-          // === Aplicar límites de zoom/órbita por figura ===
-        const cfg = cameraConfig[model];
-        if (cfg) {
-          // posición inicial
-          if (cfg.orbit) mv.cameraOrbit = cfg.orbit;
+              // Punto de mira (altura del rostro)
+              if (cam.target) mv.cameraTarget = cam.target;
 
-          // límites de distancia (radio) → tercer valor de min/max-camera-orbit
-          if (cfg.minRadius) mv.minCameraOrbit = `auto auto ${cfg.minRadius}`;
-          if (cfg.maxRadius) mv.maxCameraOrbit = `auto auto ${cfg.maxRadius}`;
+              // Límites de zoom (radio)
+              if (cam.minRadius) mv.minCameraOrbit = `auto auto ${cam.minRadius}`;
+              if (cam.maxRadius) mv.maxCameraOrbit = `auto auto ${cam.maxRadius}`;
 
-          // límites de apertura del zoom (opcional)
-          if (cfg.minFov) mv.minFieldOfView = cfg.minFov;
-          if (cfg.maxFov) mv.maxFieldOfView = cfg.maxFov;
-        }
+              // Límites de apertura (zoom óptico)
+              if (cam.minFov) mv.minFieldOfView = cam.minFov;
+              if (cam.maxFov) mv.maxFieldOfView = cam.maxFov;
+            }
+
 
 
             // Aplicar HDR suave al cargar modelos GLB
