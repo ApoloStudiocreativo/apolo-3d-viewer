@@ -166,6 +166,20 @@ field-of-view="30deg">
   let model  = (qs.get('model')||'').toLowerCase();  // slug glb
   let figure = (qs.get('figure')||'').toLowerCase(); // slug splat
 
+  // ---- Soporte de URLs limpias ----
+  // 2) URLs bonitas (pathname) si no hay query
+  if (!type && !model && !figure) {
+  const segs = location.pathname.replace(/\/+/g,'/').split('/').filter(Boolean);
+  if (segs.length) {
+    if (segs[0] === 'glb' && segs[1]) { type='glb';   model = segs[1].toLowerCase(); }
+    else if (segs[0] === 'splat' && segs[1]) { type='splat'; figure = segs[1].toLowerCase(); }
+    else { type='glb'; model = segs[0].toLowerCase(); } // /:slug → GLB por defecto
+    }
+      }
+
+    // 3) Slug unificado para la UI (topbar/cartela/audio)
+    const slug = model || figure || '';
+
   const mv    = document.getElementById('mv');
   const splat = document.getElementById('splat');
   const skel  = document.getElementById('skel');
@@ -175,30 +189,6 @@ field-of-view="30deg">
   const audioBtn = document.getElementById('audioBtn');
   let audio = null;
 
-  // ---- Soporte de URLs limpias ----
-// Acepta:
-//   /glb/:slug           → GLB
-//   /splat/:slug         → SPLAT
-//   /:slug               → GLB por defecto (auto)
-if (!type && !model && !figure) {
-  const segs = location.pathname.replace(/\/+/g, '/').split('/').filter(Boolean);
-  if (segs.length) {
-    if (segs[0] === 'glb' && segs[1]) {
-      type = 'glb';
-      model = segs[1].toLowerCase();
-    } else if (segs[0] === 'splat' && segs[1]) {
-      type = 'splat';
-      figure = segs[1].toLowerCase();
-    } else {
-      // /:slug → GLB por defecto
-      type = 'glb';
-      model = segs[0].toLowerCase();
-      // Nota: más adelante podemos leer info.json y si type==='splat' cambiar a SPLAT.
-    }
-  }
-}
-
-  
   function setupAudioFor(id){
     const url = `/assets/audio/${id}.mp3`;
   
@@ -412,14 +402,6 @@ function renderInfo(slug) {
   infoMeta.textContent  = buildMeta(d);
   infoDesc.textContent  = d?.desc || '';
 }
-
-  
-    // Helpers para obtener el slug actual
-    const qs = new URLSearchParams(location.search);
-    const type   = (qs.get('type')||'').toLowerCase();
-    const model  = (qs.get('model')||'').toLowerCase();
-    const figure = (qs.get('figure')||'').toLowerCase();
-    const slug = model || figure || '';
   
     // Elementos UI
     const topBar    = document.getElementById('topBar');
