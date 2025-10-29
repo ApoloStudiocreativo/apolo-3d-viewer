@@ -160,14 +160,6 @@ field-of-view="30deg">
   const type   = (qs.get('type')||'').toLowerCase();          // 'glb' | 'splat'
   const model  = (qs.get('model')||'').toLowerCase();         // para glb
   const figure = (qs.get('figure')||'').toLowerCase();        // para splat
-  
-
-
-  if (mv) {
-  mv.addEventListener('ar-status', (e) => {
-  console.log('[AR status]', e.detail?.status);
-  });
-  }
 
   const mv    = document.getElementById('mv');
   const splat = document.getElementById('splat');
