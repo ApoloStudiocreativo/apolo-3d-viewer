@@ -1,4 +1,9 @@
 {
+  "rewrites": [
+    { "source": "/glb/:slug",   "destination": "/?type=glb&model=:slug" },
+    { "source": "/splat/:slug", "destination": "/?type=splat&figure=:slug" },
+    { "source": "/:slug",       "destination": "/?type=glb&model=:slug" }
+  ],
   "headers": [
     {
       "source": "/models/(.*)\\.usdz",
