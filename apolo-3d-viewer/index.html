@@ -282,10 +282,13 @@ const slug = model || figure || '';
     function openARFor(name){
       const usdz = usdzUrl(name);
       const glb  = glbUrl(name);
+      const titleEl = document.getElementById('infoTitle');
+      const arTitle = encodeURIComponent((titleEl?.textContent || name).trim());
+
       if (isIOS) { window.location.href = usdz; return; }
       if (isAndroid){
         const file = new URL(glb, location.origin).toString();
-        const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(file)}&mode=ar_preferred#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(location.href)};end;`;
+        const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(file)}&mode=ar_preferred&title=${arTitle}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
         window.location.href = intent;
       }
     }
@@ -491,6 +494,25 @@ async function loadInfoDataOrFallback(current){
           document.body.classList.remove('mode-splat');
           mv.src = glbUrl(model);
   
+          // === Iluminación por pieza (opcional)
+          // Solo define las piezas que quieras ajustar; el resto heredan tus valores globales.
+          const lightSettings = {
+            // ejemplo:
+            "cristo-yacente": {
+              exposure: 1.6,
+              shadowIntensity: 0.9,
+              shadowSoftness: 0.9,
+              environmentRotation: "15deg"
+            },
+            "virgen-romanica": {
+              exposure: 1.3,
+              environmentRotation: "0deg"
+            }
+          };
+
+
+
+
           // === Configuración de cámara por figura ===
           const cam = cameraSettings[model];
           if (cam) {
@@ -517,6 +539,26 @@ async function loadInfoDataOrFallback(current){
             console.warn('No se pudo aplicar el HDR, usando neutral', e);
           }
   
+          // Overrides por pieza (si existen)
+          const L = lightSettings[model];
+          if (L){
+            if (L.exposure != null) mv.exposure = String(L.exposure);
+            if (L.shadowIntensity != null) mv.shadowIntensity = String(L.shadowIntensity);
+            if (L.shadowSoftness != null) mv.shadowSoftness = String(L.shadowSoftness);
+            if (L.environmentRotation) mv.environmentRotation = L.environmentRotation;
+          }
+
+          // Poster por pieza con fallback
+          const posterSrc = `/assets/posters/${model}.webp`;
+          try {
+            const r = await fetch(posterSrc, { method: 'HEAD', cache: 'force-cache' });
+            mv.poster = r.ok ? posterSrc : '/models/placeholder.webp';
+          } catch {
+            mv.poster = '/models/placeholder.webp';
+          }
+
+
+
           mv.iosSrc = usdzUrl(model);
           mv.classList.remove('hidden');
   

@@ -420,3 +420,14 @@ html, body{
 .audio-fab.is-playing{
   animation: pulse-glow 1.8s ease-in-out infinite;
 }
+
+:focus-visible {
+  outline: 2px solid #40cbcb;
+  outline-offset: 3px;
+}
+.info-sheet__close:focus-visible,
+.info-btn:focus-visible,
+.audio-fab:focus-visible,
+.ar-fab:focus-visible {
+  box-shadow: 0 0 0 3px rgba(64,203,203,.35);
+}
