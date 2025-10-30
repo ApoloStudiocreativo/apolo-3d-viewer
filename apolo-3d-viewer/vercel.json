@@ -1,36 +1,35 @@
 {
   "routes": [
+
     { "src": "^/splat/([a-z0-9-]+)/?$", "dest": "/?type=splat&figure=$1" },
     { "src": "^/glb/([a-z0-9-]+)/?$",   "dest": "/?type=glb&model=$1" },
+    {
+      "src": "^/models/(.*)\\.usdz$",
+      "headers": {
+        "Content-Type": "model/vnd.usdz+zip",
+        "X-Content-Type-Options": "nosniff",
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "^/models/(.*)\\.glb$",
+      "headers": {
+        "Content-Type": "model/gltf-binary",
+        "X-Content-Type-Options": "nosniff",
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "^/assets/hdr/(.*)\\.hdr$",
+      "headers": {
+        "Content-Type": "image/vnd.radiance",
+        "X-Content-Type-Options": "nosniff",
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
 
     { "handle": "filesystem" },
 
-    { "src": "^/([a-z0-9-]+)$",         "dest": "/?type=glb&model=$1" }
-  ],
-  "headers": [
-    {
-      "source": "/models/(.*)\\.usdz",
-      "headers": [
-        { "key": "Content-Type", "value": "model/vnd.usdz+zip" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/models/(.*)\\.glb",
-      "headers": [
-        { "key": "Content-Type", "value": "model/gltf-binary" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/assets/hdr/(.*)\\.hdr",
-      "headers": [
-        { "key": "Content-Type", "value": "image/vnd.radiance" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    }
+    { "src": "^/([a-z0-9-]+)/?$", "dest": "/?type=glb&model=$1" }
   ]
 }
