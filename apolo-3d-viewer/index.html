@@ -529,6 +529,120 @@ field-of-view="30deg">
       }
     })();
   });
+
+
+  
+  /* === PANEL VISUAL DE AJUSTE DE CÁMARA === */
+(function setupCameraDebugPanel() {
+  // Solo se muestra si hay ?debug=true en la URL
+  if (!location.search.includes('debug=true')) return;
+
+  const mv = document.getElementById('mv');
+  if (!mv) return;
+
+  // === Crea panel flotante ===
+  const panel = document.createElement('div');
+  panel.id = 'camDebug';
+  panel.style.cssText = `
+    position: fixed;
+    top: 10px; right: 10px;
+    width: 250px;
+    background: rgba(15,17,21,0.95);
+    color: #e9eef7;
+    font-family: system-ui, sans-serif;
+    font-size: 13px;
+    border-radius: 12px;
+    padding: 12px;
+    z-index: 9999;
+    box-shadow: 0 0 15px rgba(0,0,0,0.4);
+    backdrop-filter: blur(8px);
+  `;
+  panel.innerHTML = `
+    <b>🎥 Ajuste de Cámara</b><br><br>
+
+    <label>Altura (target Y): <span id="valY">0</span> m</label><br>
+    <input id="ctrlY" type="range" min="-1" max="3" step="0.05" value="1.8"><br><br>
+
+    <label>Distancia (radius): <span id="valR">0</span> m</label><br>
+    <input id="ctrlR" type="range" min="1" max="15" step="0.1" value="7.5"><br><br>
+
+    <label>Elevación (phi): <span id="valPhi">0</span>°</label><br>
+    <input id="ctrlPhi" type="range" min="10" max="90" step="1" value="78"><br><br>
+
+    <label>FOV (zoom óptico): <span id="valFov">0</span>°</label><br>
+    <input id="ctrlFov" type="range" min="15" max="60" step="1" value="30"><br><br>
+
+    <button id="copyCam" style="
+      width:100%; padding:6px; border:none;
+      background:#40cbcb; color:white; font-weight:bold;
+      border-radius:8px; cursor:pointer;">
+      📋 Copiar valores
+    </button>
+  `;
+
+  document.body.appendChild(panel);
+
+  // === Controladores ===
+  const yRange   = panel.querySelector('#ctrlY');
+  const rRange   = panel.querySelector('#ctrlR');
+  const phiRange = panel.querySelector('#ctrlPhi');
+  const fovRange = panel.querySelector('#ctrlFov');
+
+  const valY   = panel.querySelector('#valY');
+  const valR   = panel.querySelector('#valR');
+  const valPhi = panel.querySelector('#valPhi');
+  const valFov = panel.querySelector('#valFov');
+
+  const copyBtn = panel.querySelector('#copyCam');
+
+  function updateCamera() {
+    const y   = parseFloat(yRange.value);
+    const r   = parseFloat(rRange.value);
+    const phi = parseFloat(phiRange.value);
+    const fov = parseFloat(fovRange.value);
+
+    valY.textContent   = y.toFixed(2);
+    valR.textContent   = r.toFixed(1);
+    valPhi.textContent = phi.toFixed(0);
+    valFov.textContent = fov.toFixed(0);
+
+    // Actualiza cámara en tiempo real
+    mv.cameraTarget = `0m ${y}m 0m`;
+    mv.cameraOrbit  = `0deg ${phi}deg ${r}m`;
+    mv.fieldOfView  = `${fov}deg`;
+    mv.jumpCameraToGoal();
+  }
+
+  [yRange, rRange, phiRange, fovRange].forEach(i => {
+    i.addEventListener('input', updateCamera);
+  });
+
+  updateCamera(); // inicializa
+
+  // === Copiar a portapapeles ===
+  copyBtn.onclick = () => {
+    const text = `
+"cristo-yacente": {
+  orbit: "0deg ${phiRange.value}deg ${rRange.value}m",
+  target: "0m ${yRange.value}m 0m",
+  minRadius: "${Math.max(1, rRange.value * 0.4).toFixed(1)}m",
+  maxRadius: "${Math.max(1, rRange.value * 1.5).toFixed(1)}m",
+  minFov: "22deg",
+  maxFov: "${fovRange.value}deg"
+},
+    `.trim();
+    navigator.clipboard.writeText(text);
+    copyBtn.textContent = "✅ Copiado";
+    setTimeout(()=>copyBtn.textContent="📋 Copiar valores",1500);
+  };
+})();
+
+
+
+
+
+
+
   </script>
   
 
