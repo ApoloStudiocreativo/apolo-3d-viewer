@@ -227,7 +227,17 @@ const slug = model || figure || '';
     const glbUrl   = (name) => `/models/${name}/${name}.glb`;
     const usdzUrl  = (name) => `/models/${name}/${name}.usdz`;
     const splatUrl = (name) => `/splat/${name}/index.html`;
-  
+
+    // Comprueba si un recurso existe (HEAD)
+    async function exists(url){
+    try{
+      const r = await fetch(url, { method:'HEAD', cache:'force-cache' });
+      return r.ok;
+    }catch{
+      return false;
+      }
+    }
+
     const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     const isAndroid = /Android/.test(navigator.userAgent);
   
@@ -493,6 +503,23 @@ async function loadInfoDataOrFallback(current){
         if (type === 'glb' && model){
           document.body.classList.remove('mode-splat');
           mv.src = glbUrl(model);
+
+          // Poster por pieza con fallback al placeholder ya definido en el HTML
+          try {
+            const posterSrc = `/assets/posters/${model}.webp`;
+            if (await exists(posterSrc)) {
+              mv.poster = posterSrc;                 // propiedad
+              mv.setAttribute('poster', posterSrc);  // atributo (por compatibilidad)
+            } else {
+              mv.poster = '/models/placeholder.webp';
+              mv.setAttribute('poster','/models/placeholder.webp');
+            }
+          } catch {
+            // En caso de cualquier fallo de red, mantenemos el placeholder
+            mv.poster = '/models/placeholder.webp';
+            mv.setAttribute('poster','/models/placeholder.webp');
+          }
+
   
           // === Iluminación por pieza (opcional)
           // Solo define las piezas que quieras ajustar; el resto heredan tus valores globales.
