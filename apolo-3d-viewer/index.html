@@ -158,6 +158,24 @@ field-of-view="30deg">
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+
+      // --- 🔹 AQUÍ arriba defines la función applyCamera() ---
+  function applyCamera(model){
+    const cam = cameraSettings[model];
+    if (!cam) return;
+
+    // 1️⃣ límites primero
+    if (cam.minRadius) mv.minCameraOrbit = `auto auto ${cam.minRadius}`;
+    if (cam.maxRadius) mv.maxCameraOrbit = `auto auto ${cam.maxRadius}`;
+
+    // 2️⃣ posición y target después
+    if (cam.orbit)  mv.cameraOrbit  = cam.orbit;
+    if (cam.target) mv.cameraTarget = cam.target;
+
+    // 3️⃣ aplica inmediatamente
+    mv.jumpCameraToGoal();
+  }
+
     // ---------------- URL ----------------
     const qs     = new URLSearchParams(location.search);
     const type   = (qs.get('type')||'').toLowerCase();
