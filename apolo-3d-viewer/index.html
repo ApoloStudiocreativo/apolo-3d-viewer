@@ -122,6 +122,10 @@ field-of-view="30deg">
   allow="autoplay; fullscreen; xr-spatial-tracking; camera; microphone; gyroscope; accelerometer">
 </iframe>
 
+<!-- Poster temporal antes del SPLAT -->
+<div id="splatPoster" class="splat-poster hidden" aria-hidden="true"></div>
+
+
 
 <!-- BARRA DE FABs -->
 <div id="fabRow" class="fab-row">
@@ -632,6 +636,33 @@ async function loadInfoDataOrFallback(current){
           skel.classList.add('hidden');
           return;
         }
+
+        // --- Poster previo al SPLAT ---
+        const splatPoster = document.getElementById('splatPoster');
+        if (splatPoster) {
+          const posterUrl = `/assets/posters/${figure}.webp`;
+          try {
+            const r = await fetch(posterUrl, { method:'HEAD', cache:'force-cache' });
+            if (r.ok) {
+              splatPoster.style.backgroundImage = `url('${posterUrl}')`;
+            } else {
+              splatPoster.style.backgroundImage = `url('/models/placeholder.webp')`;
+            }
+          } catch {
+            splatPoster.style.backgroundImage = `url('/models/placeholder.webp')`;
+          }
+
+          // Aparece inmediatamente
+          splatPoster.classList.remove('hidden');
+          requestAnimationFrame(()=> splatPoster.classList.add('visible'));
+
+          // Se oculta cuando el SPLAT acaba de cargar
+          splat.addEventListener('load', ()=>{
+            splatPoster.classList.add('fade-out');
+            setTimeout(()=> splatPoster.classList.add('hidden'), 700);
+          }, { once:true });
+        }
+
   
         // Sin parámetros válidos:
         showHelp();

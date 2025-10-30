@@ -431,3 +431,26 @@ html, body{
 .ar-fab:focus-visible {
   box-shadow: 0 0 0 3px rgba(64,203,203,.35);
 }
+
+/* === Poster antes del SPLAT === */
+.splat-poster {
+  position: fixed;
+  inset: 0;
+  background: center center / cover no-repeat #0f1115;
+  z-index: 8;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .4s ease;
+}
+.splat-poster.visible {
+  opacity: 1;
+}
+.splat-poster.fade-out {
+  opacity: 0;
+  transition: opacity .6s ease-out, filter .6s ease-out;
+filter: blur(0);
+}
+.splat-poster.fade-out {
+  opacity: 0;
+  filter: blur(12px);
+}
