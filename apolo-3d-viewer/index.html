@@ -179,13 +179,32 @@ field-of-view="30deg">
     mv.jumpCameraToGoal();
   }
 
-    // ---------------- URL ----------------
-    const qs     = new URLSearchParams(location.search);
-    const type   = (qs.get('type')||'').toLowerCase();
-    const model  = (qs.get('model')||'').toLowerCase();
-    const figure = (qs.get('figure')||'').toLowerCase();
-    const slug   = model || figure || '';
-  
+    // ---------------- URL: soporta query *y* pathname limpias ----------------
+const qs = new URLSearchParams(location.search);
+
+// Prioridad: si hay query, se respeta; si no, usamos pathname
+let type   = (qs.get('type')   || '').toLowerCase();   // 'glb' | 'splat'
+let model  = (qs.get('model')  || '').toLowerCase();
+let figure = (qs.get('figure') || '').toLowerCase();
+
+if (!type) {
+  const parts = location.pathname.split('/').filter(Boolean); // ['splat','calvo-anillo'] o ['cristo-yacente']
+  if (parts[0] === 'splat' && parts[1]) {
+    type = 'splat';
+    figure = parts[1];
+  } else if (parts[0] === 'glb' && parts[1]) {
+    type = 'glb';
+    model = parts[1];
+  } else if (parts.length === 1) {
+    // /:slug → GLB por defecto
+    type = 'glb';
+    model = parts[0];
+  }
+}
+
+const slug = model || figure || '';
+
+
     // ---------------- Elementos del DOM ----------------
     const mv      = document.getElementById('mv');
     const splat   = document.getElementById('splat');
@@ -539,7 +558,15 @@ field-of-view="30deg">
   if (!location.search.includes('debug=true')) return;
 
   const qs = new URLSearchParams(location.search);
-  const model = (qs.get('model')||qs.get('figure')||'').toLowerCase();
+let dbgModel = (qs.get('model') || qs.get('figure') || '').toLowerCase();
+if (!dbgModel) {
+  const p = location.pathname.split('/').filter(Boolean);
+  if (p[0] === 'splat' && p[1]) dbgModel = p[1];
+  else if (p[0] === 'glb' && p[1]) dbgModel = p[1];
+  else if (p.length === 1) dbgModel = p[0];
+}
+const model = dbgModel; // el resto del panel usa 'model'
+
   const mv = document.getElementById('mv');
   if (!mv) return;
 
