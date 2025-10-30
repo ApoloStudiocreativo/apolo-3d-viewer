@@ -292,13 +292,14 @@ field-of-view="30deg">
 
         // 🕊️ Esculturas grandes o de cuerpo entero
         "cristo-yacente": {
-          orbit: "0deg 80deg 10m",     // mira al rostro
-          target: "0m 2.5m 0m",       // vista más elevadasa
+          orbit: "0deg 78deg 7.5m",     // mira al rostro
+          target: "0m 1.8m 0m",       // vista más elevadasa
           minRadius: "3m",
-          maxRadius: "13m",
-          minFov: "20deg",
+          maxRadius: "8m",
+          minFov: "22deg",
           maxFov: "45deg"
         },
+        
         "cristo-en-la-cruz": {
           orbit: "0deg 60deg 3.5m",
           target: "0m 1.8m 0m",
@@ -530,115 +531,148 @@ field-of-view="30deg">
     })();
   });
 
-
-  
-  /* === PANEL VISUAL DE AJUSTE DE CÁMARA VISOR === */
+  /* === PANEL VISUAL DE AJUSTE DE CÁMARA (con min/max zoom) === */
 (function setupCameraDebugPanel() {
-  // Solo se muestra si hay ?debug=true en la URL
   if (!location.search.includes('debug=true')) return;
 
+  const qs = new URLSearchParams(location.search);
+  const model = (qs.get('model')||qs.get('figure')||'').toLowerCase();
   const mv = document.getElementById('mv');
   if (!mv) return;
 
-  // === Crea panel flotante ===
+  // Utilidades
+  const num = (s, def=0) => {
+    if (s == null) return def;
+    const m = String(s).match(/-?\d+(\.\d+)?/);
+    return m ? parseFloat(m[0]) : def;
+  };
+
+  // Valores iniciales desde cameraSettings o estado actual
+  const cam = (window.cameraSettings && window.cameraSettings[model]) || {};
+  const initPhi = num((cam.orbit||'0deg 70deg 3m').split(' ')[1], 70);
+  const initR   = num((cam.orbit||'0deg 70deg 3m').split(' ')[2], 3);
+  const initY   = num((cam.target||'0m 0.5m 0m').split(' ')[1], 0.5);
+  const initMinR = num(cam.minRadius, Math.max(0.4, initR*0.4));
+  const initMaxR = num(cam.maxRadius, Math.max(initR*1.5, initMinR+0.5));
+  const initFov  = num(cam.fov || (mv.fieldOfView||'30deg'), 30);
+
+  // Panel UI
   const panel = document.createElement('div');
   panel.id = 'camDebug';
   panel.style.cssText = `
-    position: fixed;
-    top: 10px; right: 10px;
-    width: 250px;
-    background: rgba(15,17,21,0.95);
-    color: #e9eef7;
-    font-family: system-ui, sans-serif;
-    font-size: 13px;
-    border-radius: 12px;
-    padding: 12px;
-    z-index: 9999;
-    box-shadow: 0 0 15px rgba(0,0,0,0.4);
-    backdrop-filter: blur(8px);
+    position: fixed; top: 10px; right: 10px; width: 260px;
+    background: rgba(15,17,21,0.95); color: #e9eef7; font: 13px/1.2 system-ui,sans-serif;
+    border-radius: 12px; padding: 12px; z-index: 9999; box-shadow: 0 0 15px rgba(0,0,0,.4); backdrop-filter: blur(8px);
   `;
   panel.innerHTML = `
     <b>🎥 Ajuste de Cámara</b><br><br>
 
-    <label>Altura (target Y): <span id="valY">0</span> m</label><br>
-    <input id="ctrlY" type="range" min="-1" max="3" step="0.05" value="1.8"><br><br>
+    <label>Altura (target Y): <span id="valY">${initY.toFixed(2)}</span> m</label><br>
+    <input id="ctrlY" type="range" min="-1" max="3" step="0.05" value="${initY}"><br><br>
 
-    <label>Distancia (radius): <span id="valR">0</span> m</label><br>
-    <input id="ctrlR" type="range" min="1" max="15" step="0.1" value="7.5"><br><br>
+    <label>Distancia inicial (radius): <span id="valR">${initR.toFixed(1)}</span> m</label><br>
+    <input id="ctrlR" type="range" min="0.5" max="30" step="0.1" value="${initR}"><br><br>
 
-    <label>Elevación (phi): <span id="valPhi">0</span>°</label><br>
-    <input id="ctrlPhi" type="range" min="10" max="90" step="1" value="78"><br><br>
+    <label>Elevación (phi): <span id="valPhi">${initPhi.toFixed(0)}</span>°</label><br>
+    <input id="ctrlPhi" type="range" min="0" max="90" step="1" value="${initPhi}"><br><br>
 
-    <label>FOV (zoom óptico): <span id="valFov">0</span>°</label><br>
-    <input id="ctrlFov" type="range" min="15" max="60" step="1" value="30"><br><br>
+    <label>FOV (zoom óptico): <span id="valFov">${initFov.toFixed(0)}</span>°</label><br>
+    <input id="ctrlFov" type="range" min="15" max="75" step="1" value="${initFov}"><br><br>
 
-    <button id="copyCam" style="
-      width:100%; padding:6px; border:none;
-      background:#40cbcb; color:white; font-weight:bold;
-      border-radius:8px; cursor:pointer;">
+    <hr style="border-color:#2a2f38; opacity:.4; margin:8px 0">
+
+    <label>Zoom mínimo (minRadius): <span id="valMinR">${initMinR.toFixed(1)}</span> m</label><br>
+    <input id="ctrlMinR" type="range" min="0.4" max="60" step="0.1" value="${initMinR}"><br><br>
+
+    <label>Zoom máximo (maxRadius): <span id="valMaxR">${initMaxR.toFixed(1)}</span> m</label><br>
+    <input id="ctrlMaxR" type="range" min="0.5" max="80" step="0.1" value="${initMaxR}"><br><br>
+
+    <button id="copyCam" style="width:100%; padding:8px; border:none; background:#40cbcb; color:#fff; font-weight:700; border-radius:8px; cursor:pointer;">
       📋 Copiar valores
     </button>
   `;
-
   document.body.appendChild(panel);
 
-  // === Controladores ===
+  // Controles
   const yRange   = panel.querySelector('#ctrlY');
   const rRange   = panel.querySelector('#ctrlR');
   const phiRange = panel.querySelector('#ctrlPhi');
   const fovRange = panel.querySelector('#ctrlFov');
+  const minRRange= panel.querySelector('#ctrlMinR');
+  const maxRRange= panel.querySelector('#ctrlMaxR');
 
   const valY   = panel.querySelector('#valY');
   const valR   = panel.querySelector('#valR');
   const valPhi = panel.querySelector('#valPhi');
   const valFov = panel.querySelector('#valFov');
+  const valMinR= panel.querySelector('#valMinR');
+  const valMaxR= panel.querySelector('#valMaxR');
 
-  const copyBtn = panel.querySelector('#copyCam');
+  function clampLimits() {
+    // Evita inconsistencias: min <= radius <= max
+    let minR = parseFloat(minRRange.value);
+    let r    = parseFloat(rRange.value);
+    let maxR = parseFloat(maxRRange.value);
+
+    if (minR > maxR - 0.1) minR = maxR - 0.1;
+    if (r < minR) r = minR;
+    if (r > maxR) r = maxR;
+
+    minRRange.value = minR.toFixed(1);
+    rRange.value    = r.toFixed(1);
+    maxRRange.value = maxR.toFixed(1);
+
+    valMinR.textContent = minR.toFixed(1);
+    valR.textContent    = r.toFixed(1);
+    valMaxR.textContent = maxR.toFixed(1);
+    return { minR, r, maxR };
+  }
 
   function updateCamera() {
     const y   = parseFloat(yRange.value);
-    const r   = parseFloat(rRange.value);
     const phi = parseFloat(phiRange.value);
     const fov = parseFloat(fovRange.value);
+    const { minR, r, maxR } = clampLimits();
 
     valY.textContent   = y.toFixed(2);
-    valR.textContent   = r.toFixed(1);
     valPhi.textContent = phi.toFixed(0);
     valFov.textContent = fov.toFixed(0);
 
-    // Actualiza cámara en tiempo real
+    // Aplica límites primero
+    mv.minCameraOrbit = `auto auto ${minR}m`;
+    mv.maxCameraOrbit = `auto auto ${maxR}m`;
+
+    // Aplica posición inicial, target y FOV
     mv.cameraTarget = `0m ${y}m 0m`;
     mv.cameraOrbit  = `0deg ${phi}deg ${r}m`;
     mv.fieldOfView  = `${fov}deg`;
+
     mv.jumpCameraToGoal();
   }
 
-  [yRange, rRange, phiRange, fovRange].forEach(i => {
-    i.addEventListener('input', updateCamera);
-  });
+  [yRange, rRange, phiRange, fovRange, minRRange, maxRRange]
+    .forEach(i => i.addEventListener('input', updateCamera));
 
-  updateCamera(); // inicializa
+  updateCamera();
 
-  // === Copiar a portapapeles ===
-  copyBtn.onclick = () => {
+  // Copiar valores a portapapeles
+  panel.querySelector('#copyCam').onclick = () => {
     const text = `
-"cristo-yacente": {
+"${model || 'cristo-yacente'}": {
   orbit: "0deg ${phiRange.value}deg ${rRange.value}m",
   target: "0m ${yRange.value}m 0m",
-  minRadius: "${Math.max(1, rRange.value * 0.4).toFixed(1)}m",
-  maxRadius: "${Math.max(1, rRange.value * 1.5).toFixed(1)}m",
+  minRadius: "${minRRange.value}m",
+  maxRadius: "${maxRRange.value}m",
   minFov: "22deg",
   maxFov: "${fovRange.value}deg"
 },
     `.trim();
     navigator.clipboard.writeText(text);
-    copyBtn.textContent = "✅ Copiado";
-    setTimeout(()=>copyBtn.textContent="📋 Copiar valores",1500);
+    const btn = panel.querySelector('#copyCam');
+    btn.textContent = "✅ Copiado";
+    setTimeout(()=> btn.textContent = "📋 Copiar valores", 1200);
   };
 })();
-
-
-
 
 
 
