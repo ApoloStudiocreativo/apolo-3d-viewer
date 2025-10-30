@@ -12,6 +12,8 @@
 <link rel="stylesheet" href="/index.css">
 <link rel="preload" href="/assets/info.json" as="fetch" type="application/json" crossorigin="anonymous">
 
+<link rel="preload" as="image" href="/assets/hdr/museo-suave.hdr">
+<link rel="preload" as="image" href="/assets/hdr/museo-suave-blur.webp">
 
 <!-- model-viewer para el modo GLB -->
 <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
@@ -288,6 +290,20 @@ const slug = model || figure || '';
       }
     }
   
+
+    // === Carga info.json con fallback a infoData inline ===
+async function loadInfoDataOrFallback(current){
+  try{
+    const res = await fetch('/assets/info.json', { cache:'no-store' });
+    if (!res.ok) throw new Error('no info.json');
+    const json = await res.json();
+    // Si el JSON tiene estructura { es: {...}, en: {...} } ajusta aquí -> return json.es || json;
+    return json || current;
+  }catch{
+    return current;
+  }
+}
+
     // ---------------- Cartela ----------------
     function showHelp(){
       skel.classList.add('hidden');
@@ -521,7 +537,11 @@ const slug = model || figure || '';
             else openARFor(model);
           };
   
-          if (slug) renderInfo(slug);
+           if (slug) {
+          infoData = await loadInfoDataOrFallback(infoData);   // ⬅️ AÑADIR AQUÍ
+          renderInfo(slug);
+          }
+        
           setupAudioFor(model);
           skel.classList.add('hidden');
           return;
@@ -535,7 +555,10 @@ const slug = model || figure || '';
           arBtn.classList.remove('hidden');
           arBtn.onclick = () => openARFor(figure);
   
-          if (slug) renderInfo(slug);
+          if (slug) {
+          infoData = await loadInfoDataOrFallback(infoData);   // ⬅️ AÑADIR AQUÍ
+          renderInfo(slug);
+          }
           setupAudioFor(figure);
           skel.classList.add('hidden');
           return;
