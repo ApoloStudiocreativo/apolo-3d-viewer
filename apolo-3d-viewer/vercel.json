@@ -1,10 +1,4 @@
 {
-  "routes": [
-    { "src": "^/glb/([^/]+)$",   "dest": "/?type=glb&model=$1" },
-    { "src": "^/splat/([^/]+)$", "dest": "/?type=splat&figure=$1" },
-    { "src": "^/([^/]+)$",       "dest": "/?type=glb&model=$1" },
-    { "handle": "filesystem" }
-  ],
   "headers": [
     {
       "source": "/models/(.*)\\.usdz",
