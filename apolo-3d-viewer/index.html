@@ -182,20 +182,22 @@
 
   <!-- Overlay de carga AR -->
   <div id="arLoading" class="ar-loading hidden" aria-hidden="true">
-    <div class="spinner" aria-hidden="true"></div>
-    <span>Abriendo AR…</span>
-  </div>
-
-  <!-- Cartela -->
-  <div id="infoSheet" class="info-sheet hidden" aria-hidden="true">
-    <div class="info-sheet__drag"></div>
-    <button id="infoClose" class="info-sheet__close" aria-label="Cerrar">✕</button>
-    <div class="info-sheet__content">
-      <h2 id="infoTitle">Obra</h2>
-      <p class="info-meta" id="infoMeta"></p>
-      <p class="info-desc" id="infoDesc"></p>
+    <div class="ar-loading__card">
+      <!-- Logo inline (SVG ligero, cambia paths por tu marca si quieres) -->
+      <div class="ar-loading__logo" aria-hidden="true">
+        <svg viewBox="0 0 64 64" width="40" height="40" role="img" focusable="false">
+          <circle cx="32" cy="32" r="30" fill="none" stroke="currentColor" stroke-width="3" opacity=".25"/>
+          <path d="M18 34l6-10 5 7 6-9 11 16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+  
+      <div class="ar-loading__row">
+        <div class="spinner" aria-hidden="true"></div>
+        <span class="ar-loading__text">Abriendo AR…</span>
+      </div>
     </div>
   </div>
+  
 
   <!-- Link AR iOS oculto -->
   <a id="iosARLink" rel="ar" style="display:none" aria-hidden="true"></a>
