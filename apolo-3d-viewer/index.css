@@ -169,29 +169,43 @@ body.mode-splat{ --fab-bottom: calc(70px + env(safe-area-inset-bottom)); }
 /*********************************************
 * 6) Overlay "Abriendo AR…" (con tarjeta + logo)
 *********************************************/
-.ar-loading{
-  position: fixed; inset: 0; z-index: 60;
-  display: grid; place-items: center;
-  background: rgba(10,12,16,.62);
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  opacity: 0; pointer-events: none; transition: opacity .25s ease;
+/* ===== Overlay AR personalizado ===== */
+.ar-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: rgba(10, 12, 16, 0.6);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  padding: 20px; /* 👈 asegura 20px mínimo en todos los lados */
+  box-sizing: border-box;
 }
-.ar-loading.visible{ opacity:1; pointer-events:auto; }
-.ar-loading__card{
-  min-width: 220px; max-width: min(86vw, 360px);
-  padding: 16px 18px; border-radius: 16px;
-  background: rgba(18,20,26,.9);
-  box-shadow: 0 10px 30px rgba(0,0,0,.35);
-  border: 1px solid rgba(255,255,255,.07);
+
+.ar-loading.visible {
+  opacity: 1;
+  pointer-events: auto;
 }
-.ar-loading__logo{ display:grid; place-items:center; color: var(--brand); margin-bottom:10px; }
-.ar-loading__row{ display:inline-flex; align-items:center; gap:10px; }
-.ar-loading .spinner{ width:22px; height:22px; margin:0; border-width:3px; }
-.ar-loading__text{ color: var(--text); font: 600 14px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; letter-spacing:.2px; opacity:.95; }
-@media (prefers-reduced-motion: reduce){
-  .ar-loading, .ar-loading *{ animation:none !important; transition:none !important; }
-  .ar-loading{ backdrop-filter:none; -webkit-backdrop-filter:none; }
+
+.ar-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 380px;
+  padding: 16px 18px;
+  background: #15161B;
+  border: 3px solid #308687;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  box-sizing: border-box;
 }
+
 
 /*********************************************
 * 7) Safe areas globales
