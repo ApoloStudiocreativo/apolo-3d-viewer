@@ -197,7 +197,19 @@
       </div>
     </div>
   </div>
-  
+
+    <!-- Panel/cartela de información del museo -->
+  <div id="infoSheet" class="info-sheet hidden" aria-hidden="true">
+    <div class="info-sheet__drag"></div>
+    <button id="infoClose" class="info-sheet__close" aria-label="Cerrar">✕</button>
+
+    <div class="info-sheet__content">
+      <h2 id="infoTitle">Obra</h2>
+      <p class="info-meta" id="infoMeta"></p>
+      <p class="info-desc" id="infoDesc"></p>
+    </div>
+  </div>
+
 
   <!-- Link AR iOS oculto -->
   <a id="iosARLink" rel="ar" style="display:none" aria-hidden="true"></a>
@@ -509,10 +521,10 @@
 
         if (topBar && s){
           topBar.classList.remove('hidden');
-          pieceTitle.textContent = d.title || nice(s);
+          if (pieceTitle) pieceTitle.textContent = d.title || nice(s);
         }
-        infoTitle.textContent = d.title || nice(s);
-        infoMeta.textContent  = buildMeta(d);
+        if (infoTitle) infoTitle.textContent = d.title || nice(s);
+        if (infoMeta)  infoMeta.textContent  = buildMeta(d);
 
         const desc = d.desc || '';
         const extras = [];
@@ -524,17 +536,19 @@
         if (d.author)     extras.push(`<div><strong>Autor:</strong> ${d.author}</div>`);
 
         const extrasHtml = extras.length ? `<div class="info-extra">${extras.join('')}</div>` : '';
-        infoDesc.innerHTML = [desc, extrasHtml].filter(Boolean).join('');
+        if (infoDesc) infoDesc.innerHTML = [desc, extrasHtml].filter(Boolean).join('');
+
       }
 
       // Panel/cartela UI
       function openSheet(){ renderInfo(slug); sheet.classList.remove('hidden'); sheet.setAttribute('aria-hidden','false'); }
       function closeSheet(){ sheet.classList.add('hidden'); sheet.setAttribute('aria-hidden','true'); }
 
-      if (infoBtn) infoBtn.addEventListener('click', openSheet);
-      sheetClose.addEventListener('click', closeSheet);
-      sheet.addEventListener('click', (e)=>{ if (e.target === sheet) closeSheet(); });
-      window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeSheet(); });
+      if (infoBtn && sheet) infoBtn.addEventListener('click', openSheet);
+      if (sheetClose) sheetClose.addEventListener('click', closeSheet);
+      if (sheet) sheet.addEventListener('click', (e)=>{ if (e.target === sheet) closeSheet(); });
+      window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && sheet) closeSheet(); });
+
 
       // ---------------- Inicialización ----------------
       (async function init(){
