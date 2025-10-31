@@ -191,7 +191,7 @@
   <!-- Tu script principal (sin cambios funcionales) -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // ---- Leer ruta / query ----
+      // ---------- URL parsing (query y pathname limpias) ----------
       const qs = new URLSearchParams(location.search);
       let type   = (qs.get('type')   || '').toLowerCase();
       let model  = (qs.get('model')  || '').toLowerCase();
@@ -205,17 +205,24 @@
       }
       const slug = model || figure || '';
     
-      // ---- DOM ----
+      // ---------- DOM ----------
       const mv          = document.getElementById('mv');
       const splat       = document.getElementById('splat');
       const skel        = document.getElementById('skel');
       const msg         = document.getElementById('msg');
       const topBar      = document.getElementById('topBar');
       const pieceTitle  = document.getElementById('pieceTitle');
-      const splatPoster = document.getElementById('splatPoster');
+      const infoBtn     = document.getElementById('infoBtn');
+      const sheet       = document.getElementById('infoSheet');
+      const sheetClose  = document.getElementById('infoClose');
+      const infoTitle   = document.getElementById('infoTitle');
+      const infoMeta    = document.getElementById('infoMeta');
+      const infoDesc    = document.getElementById('infoDesc');
+      const audioBtn    = document.getElementById('audioBtn');
       const arBtn       = document.getElementById('arBtn');
+      const splatPoster = document.getElementById('splatPoster');
     
-      // ---- Helpers ----
+      // ---------- Helpers ----------
       const glbUrl   = (name) => `/models/${name}/${name}.glb`;
       const usdzUrl  = (name) => `/models/${name}/${name}.usdz`;
       const splatUrl = (name) => `/splat/${name}/index.html`;
@@ -225,63 +232,244 @@
         catch{ return false; }
       }
     
-      function showHelp() {
-        skel.classList.add('hidden');
-        msg.classList.remove('hidden');
-        msg.innerHTML = `
-          <div>
-            <b>Falta parámetro en la URL.</b><br/><br/>
-            Usa ejemplos:<br/>
-            <code>?type=glb&model=cristo-yacente</code><br/>
-            <code>?type=splat&figure=calvo-anillo</code>
-          </div>`;
+      const isIOS     = /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
+                        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isAndroid = /Android/.test(navigator.userAgent);
+    
+      function buildMeta(d){
+        if (!d) return '';
+        if (d.author || d.year || d.material) {
+          const parts = [];
+          if (d.year) parts.push(d.year);
+          if (d.author) parts.push(d.author);
+          if (d.material) parts.push(d.material);
+          return parts.filter(Boolean).join(' · ');
+        }
+        return d.meta || '';
+      }
+    
+      // Info por defecto (se sobreescribe si existe info.json)
+      let infoData = {
+        "cristo-yacente":      { title:"Cristo Yacente", meta:"s. XVII · Autor/a desconocido/a", desc:"Descripción pendiente." },
+        "virgen-romanica":     { title:"Virgen Románica", meta:"s. XII · Talla policromada", desc:"Descripción pendiente." },
+        "san-jose-con-el-nino":{ title:"San José con el Niño", meta:"s. XVIII", desc:"Descripción pendiente." },
+        "cristo-en-la-cruz":   { title:"Cristo en la Cruz", meta:"s. XVII", desc:"Descripción pendiente." }
+      };
+    
+      async function loadInfoDataOrFallback(current){
+        try{
+          const res = await fetch('/assets/info.json', { cache:'no-store' });
+          if (!res.ok) throw new Error('no info.json');
+          const json = await res.json();
+          return json || current;
+        }catch{ return current; }
+      }
+    
+      function renderInfo(s){
+        const d = infoData[s] || {};
+        const nice = (x) => (x||s||'').replace(/-/g,' ').trim();
+    
+        if (topBar){
+          topBar.classList.remove('hidden');
+          if (pieceTitle) pieceTitle.textContent = d.title || nice(s);
+        }
+        if (infoTitle) infoTitle.textContent = d.title || nice(s);
+        if (infoMeta)  infoMeta.textContent  = buildMeta(d);
+    
+        const desc = d.desc || '';
+        const extras = [];
+        if (d.typology)   extras.push(`<div><strong>Tipología:</strong> ${d.typology}</div>`);
+        if (d.material)   extras.push(`<div><strong>Material:</strong> ${d.material}</div>`);
+        if (d.technique)  extras.push(`<div><strong>Técnica:</strong> ${d.technique}</div>`);
+        if (d.dimensions) extras.push(`<div><strong>Dimensiones:</strong> ${d.dimensions}</div>`);
+        if (d.year)       extras.push(`<div><strong>Fecha:</strong> ${d.year}</div>`);
+        if (d.author)     extras.push(`<div><strong>Autor:</strong> ${d.author}</div>`);
+        const extrasHtml = extras.length ? `<div class="info-extra">${extras.join('')}</div>` : '';
+        if (infoDesc) infoDesc.innerHTML = [desc, extrasHtml].filter(Boolean).join('');
+      }
+    
+      // ----- Cartela: asegura que haya 1 solo set de listeners -----
+      if (infoBtn && sheet && !sheet.dataset.bound){
+        infoBtn.addEventListener('click', ()=>{ renderInfo(slug); sheet.classList.remove('hidden'); sheet.setAttribute('aria-hidden','false'); });
+        sheetClose?.addEventListener('click', ()=>{ sheet.classList.add('hidden'); sheet.setAttribute('aria-hidden','true'); });
+        sheet.addEventListener('click', (e)=>{ if (e.target === sheet) { sheet.classList.add('hidden'); sheet.setAttribute('aria-hidden','true'); }});
+        window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') { sheet.classList.add('hidden'); sheet.setAttribute('aria-hidden','true'); }});
+        sheet.dataset.bound = '1';
+      }
+    
+      // ----- Audio por figura -----
+      let audio = null;
+      function setupAudioFor(id){
+        const url = `/assets/audio/${id}.mp3`;
+        if (audio) { try { audio.pause(); } catch{} audio = null; }
+    
+        audio = new Audio(url);
+        audio.loop = true;
+        audio.preload = 'none';
+    
+        audioBtn?.classList.remove('hidden');
+        audioBtn?.classList.remove('is-playing');
+        audioBtn?.setAttribute('aria-pressed','false');
+        audioBtn?.setAttribute('aria-label','Reproducir audio');
+    
+        audioBtn.onclick = async () => {
+          if (!audio) return;
+          if (audio.paused) {
+            try {
+              await audio.play();
+              audioBtn.classList.add('is-playing');
+              audioBtn.setAttribute('aria-pressed','true');
+              audioBtn.setAttribute('aria-label','Pausar audio');
+              if (navigator.vibrate) navigator.vibrate(10);
+            } catch(e){ console.log('Bloqueo autoplay:', e); }
+          } else {
+            audio.pause();
+            audioBtn.classList.remove('is-playing');
+            audioBtn.setAttribute('aria-pressed','false');
+            audioBtn.setAttribute('aria-label','Reproducir audio');
+          }
+        };
+    
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden && audio && !audio.paused) {
+            audio.pause();
+            audioBtn.classList.remove('is-playing');
+            audioBtn.setAttribute('aria-pressed','false');
+            audioBtn.setAttribute('aria-label','Reproducir audio');
+          }
+        }, { once:true });
+    
+        audio.addEventListener('error', () => {
+          console.warn('Audio no encontrado:', url);
+        });
+      }
+    
+      // ----- AR helpers (usa showARLoading/hideARLoading ya definidos arriba) -----
+      function openARFor(name){
+        const usdz = usdzUrl(name);
+        const glb  = glbUrl(name);
+        const arTitle = encodeURIComponent((infoTitle?.textContent || name).trim());
+    
+        if (isIOS) { window.location.href = usdz; return; }
+        if (isAndroid){
+          const file = new URL(glb, location.origin).toString();
+          const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(file)}&mode=ar_preferred&title=${arTitle}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+          window.location.href = intent;
+        }
+      }
+      function openQuickLookSync(slug) {
+        try {
+          const link = document.getElementById('iosARLink');
+          if (!link) return false;
+          link.setAttribute('href', `/models/${slug}/${slug}.usdz#${Date.now()}`);
+          link.click();
+          return true;
+        } catch { return false; }
       }
     
       // ---------- INIT ----------
       (async function init(){
         try{
-          // SPLAT
+          // Cargar info.json si existe
+          if (slug) infoData = await loadInfoDataOrFallback(infoData);
+    
+          // ----- SPLAT -----
           if (type === 'splat' && figure){
             document.body.classList.add('mode-splat');
     
-            // Póster previo
+            // Poster previo (fallback inmediato + intento específico)
             if (splatPoster){
               splatPoster.style.backgroundImage = `url('/models/placeholder.webp')`;
               splatPoster.classList.remove('hidden');
               requestAnimationFrame(()=> splatPoster.classList.add('visible'));
               (async ()=>{
-                const p = `/assets/posters/${figure}.webp`;
-                if (await exists(p)) splatPoster.style.backgroundImage = `url('${p}')`;
+                const posterUrl = `/assets/posters/${figure}.webp`;
+                if (await exists(posterUrl)) splatPoster.style.backgroundImage = `url('${posterUrl}')`;
               })();
               splat.addEventListener('load', ()=>{
                 splatPoster.classList.add('fade-out');
-                setTimeout(()=> splatPoster.classList.add('hidden'), 600);
+                setTimeout(()=> splatPoster.classList.add('hidden'), 700);
               }, { once:true });
             }
     
-            // Cargar iframe
+            // Cargar iframe SPLAT
             splat.src = splatUrl(figure);
             splat.classList.remove('hidden');
     
-            // UI básica
-            if (topBar) {
-              topBar.classList.remove('hidden');
-              if (pieceTitle) pieceTitle.textContent = (figure || '').replace(/-/g,' ');
-            }
+            // Título / cartela
+            renderInfo(figure);
     
-            // Botón AR → muestra overlay y llama visor nativo
+            // Audio
+            setupAudioFor(figure);
+    
+            // Botón AR unificado con overlay
             arBtn.classList.remove('hidden');
             arBtn.onclick = () => {
               showARLoading();
-              const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
-                            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
               if (isIOS) {
-                const link = document.getElementById('iosARLink');
-                if (link){ link.href = usdzUrl(figure) + '#' + Date.now(); link.click(); }
+                const ok = openQuickLookSync(figure);
+                if (!ok) window.location.href = usdzUrl(figure);
+                return;
+              }
+              openARFor(figure);
+            };
+    
+            skel.classList.add('hidden');
+            return;
+          }
+    
+          // ----- GLB -----
+          if (type === 'glb' && model){
+            document.body.classList.remove('mode-splat');
+    
+            // Fuente GLB
+            mv.src = glbUrl(model);
+    
+            // Poster por pieza con fallback
+            try {
+              const posterSrc = `/assets/posters/${model}.webp`;
+              if (await exists(posterSrc)) {
+                mv.poster = posterSrc; mv.setAttribute('poster', posterSrc);
               } else {
-                const file = new URL(glbUrl(figure), location.origin).toString();
-                const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(file)}&mode=ar_preferred#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
-                location.href = intent;
+                mv.poster = '/models/placeholder.webp'; mv.setAttribute('poster','/models/placeholder.webp');
+              }
+            } catch {
+              mv.poster = '/models/placeholder.webp'; mv.setAttribute('poster','/models/placeholder.webp');
+            }
+    
+            // iOS Quick Look
+            mv.iosSrc = usdzUrl(model);
+            mv.classList.remove('hidden');
+    
+            // Oculta botón AR nativo
+            if (!mv.querySelector('[slot="ar-button"]')) {
+              const blocker = document.createElement('button');
+              blocker.setAttribute('slot','ar-button');
+              blocker.setAttribute('aria-hidden','true');
+              blocker.style.display = 'none';
+              blocker.tabIndex = -1;
+              mv.appendChild(blocker);
+            }
+    
+            // Título / cartela
+            renderInfo(model);
+    
+            // Audio
+            setupAudioFor(model);
+    
+            // Botón AR unificado
+            arBtn.classList.remove('hidden');
+            arBtn.onclick = () => {
+              showARLoading();
+              if (isIOS) {
+                const ok = openQuickLookSync(model);
+                if (!ok) window.location.href = usdzUrl(model);
+                return;
+              }
+              if (mv?.activateAR) {
+                mv.activateAR().catch(()=> openARFor(model));
+              } else {
+                openARFor(model);
               }
             };
     
@@ -289,34 +477,16 @@
             return;
           }
     
-          // GLB (mínimo para no romper)
-          if (type === 'glb' && model){
-            mv.src = glbUrl(model);
-            mv.iosSrc = usdzUrl(model);
-            mv.classList.remove('hidden');
-    
-            if (topBar){ topBar.classList.remove('hidden'); pieceTitle.textContent = (model || '').replace(/-/g,' '); }
-    
-            // Oculta el botón nativo AR de model-viewer (por si acaso)
-            if (!mv.querySelector('[slot="ar-button"]')) {
-              const blocker = document.createElement('button');
-              blocker.setAttribute('slot','ar-button'); blocker.style.display='none'; blocker.tabIndex=-1;
-              mv.appendChild(blocker);
-            }
-    
-            // FAB AR
-            arBtn.classList.remove('hidden');
-            arBtn.onclick = () => {
-              showARLoading();
-              if (mv.activateAR) mv.activateAR().catch(()=>{}); // fallback ya se maneja con intent en SPLAT
-            };
-    
-            skel.classList.add('hidden');
-            return;
-          }
-    
-          // Sin parámetros válidos
-          showHelp();
+          // ----- Sin parámetros válidos -----
+          skel.classList.add('hidden');
+          msg.classList.remove('hidden');
+          msg.innerHTML = `
+            <div>
+              <b>Falta parámetro en la URL.</b><br/><br/>
+              Usa ejemplos:<br/>
+              <code>?type=glb&model=cristo-yacente</code><br/>
+              <code>?type=splat&figure=calvo-anillo</code>
+            </div>`;
         }catch(err){
           console.error(err);
           msg.classList.remove('hidden');
@@ -327,6 +497,5 @@
     });
     </script>
     
-  </script>
 </body>
 </html>
