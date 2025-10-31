@@ -111,6 +111,69 @@
       letter-spacing: .2px;
     }
     .ar-loading .spinner + span { display:inline-block; vertical-align: middle; }
+
+    /* Card mejorada + tip */
+.ar-loading__card{
+  position: relative;
+  min-width: 220px;
+  max-width: min(86vw, 360px);
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: rgba(18,20,26,.90);
+  border: 1px solid rgba(64,203,203,.15);
+  box-shadow:
+    0 10px 30px rgba(0,0,0,.35),
+    inset 0 0 0 1px rgba(255,255,255,.04);
+}
+.ar-loading__logo{ display:grid; place-items:center; color:var(--brand); margin-bottom:10px; }
+.ar-loading__row{ display:inline-flex; align-items:center; gap:10px; }
+.ar-loading__tip{
+  margin-top: 8px;
+  font: 500 12px/1.25 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  color: rgba(233,238,247,.80);
+  opacity: .9;
+}
+
+/* PRESET A: anillo animado alrededor del logo */
+.ar-style-ring .ar-loading__logo{ position: relative; }
+.ar-style-ring .ar-loading__logo::before{
+  content:"";
+  position:absolute; inset:-6px;
+  border-radius:16px;
+  background: conic-gradient(from 0deg, var(--brand), transparent 60%, transparent 100%);
+  animation: ar-spin 1.6s linear infinite;
+  /* “punchar” el centro para que solo se vea el aro */
+  -webkit-mask: radial-gradient(circle 22px at center, transparent 35px, #000 36px);
+          mask: radial-gradient(circle 22px at center, transparent 35px, #000 36px);
+}
+@keyframes ar-spin{ to{ transform: rotate(360deg) } }
+
+/* PRESET B: vignette más cinematográfico */
+.ar-style-vignette{
+  background:
+    radial-gradient(120% 120% at 50% 10%, rgba(64,203,203,.10), rgba(10,12,16,.70) 55%, rgba(10,12,16,.85) 100%),
+    rgba(10,12,16,.62);
+}
+.ar-style-vignette .ar-loading__card{
+  box-shadow:
+    0 20px 60px rgba(0,0,0,.55),
+    0 0 0 1px rgba(64,203,203,.12) inset;
+}
+
+/* PRESET C: minimal (sin spinner ni logo) */
+.ar-style-min .ar-loading__logo{ display:none; }
+.ar-style-min .spinner{ display:none !important; }
+.ar-style-min .ar-loading__row{ justify-content:center; }
+.ar-style-min .ar-loading__text{ font-weight:700; letter-spacing:.3px; opacity:.95; }
+
+/* Respeta reduce-motion */
+@media (prefers-reduced-motion: reduce){
+  .ar-loading, .ar-loading *{ animation: none !important; transition: none !important; }
+  .ar-style-ring .ar-loading__logo::before{ display:none; }
+}
+
+
+
   </style>
 </head>
 
@@ -180,23 +243,27 @@
     </button>
   </div>
 
-  <!-- Overlay de carga AR -->
-  <div id="arLoading" class="ar-loading hidden" aria-hidden="true">
-    <div class="ar-loading__card">
-      <!-- Logo inline (SVG ligero, cambia paths por tu marca si quieres) -->
-      <div class="ar-loading__logo" aria-hidden="true">
-        <svg viewBox="0 0 64 64" width="40" height="40" role="img" focusable="false">
-          <circle cx="32" cy="32" r="30" fill="none" stroke="currentColor" stroke-width="3" opacity=".25"/>
-          <path d="M18 34l6-10 5 7 6-9 11 16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
-  
-      <div class="ar-loading__row">
-        <div class="spinner" aria-hidden="true"></div>
-        <span class="ar-loading__text">Abriendo AR…</span>
+
+    <!-- Overlay de carga AR -->
+    <div id="arLoading" class="ar-loading ar-style-ring hidden" aria-hidden="true">
+      <div class="ar-loading__card">
+        <div class="ar-loading__logo" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="40" height="40" role="img" focusable="false">
+            <circle cx="32" cy="32" r="30" fill="none" stroke="currentColor" stroke-width="3" opacity=".25"/>
+            <path d="M18 34l6-10 5 7 6-9 11 16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <div class="ar-loading__row">
+          <div class="spinner" aria-hidden="true"></div>
+          <span class="ar-loading__text">Abriendo AR…</span>
+        </div>
+
+        <!-- nuevo: tip pequeño -->
+        <div class="ar-loading__tip" aria-hidden="true"></div>
       </div>
     </div>
-  </div>
+
 
     <!-- Panel/cartela de información del museo -->
   <div id="infoSheet" class="info-sheet hidden" aria-hidden="true">
@@ -339,12 +406,27 @@
       }
 
       // Overlay “Abriendo AR…”
-      function showARLoading(){
-        const el = document.getElementById('arLoading');
-        if (!el) return;
-        el.classList.remove('hidden');
-        requestAnimationFrame(()=> el.classList.add('visible'));
-      }
+        function showARLoading(){
+          const el = document.getElementById('arLoading');
+          if (!el) return;
+
+          // Elige estilo aquí si quieres cambiarlo dinámicamente:
+          // el.classList.remove('ar-style-min','ar-style-ring','ar-style-vignette');
+          // el.classList.add('ar-style-ring'); // 'ar-style-vignette' o 'ar-style-min'
+
+          // Mensaje/tip por plataforma
+          const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+          const textEl = el.querySelector('.ar-loading__text');
+          const tipEl  = el.querySelector('.ar-loading__tip');
+          if (textEl) textEl.textContent = isIOS ? 'Abriendo Quick Look…' : 'Abriendo AR…';
+          if (tipEl)  tipEl.textContent  = isIOS
+            ? 'Si no se abre, toca de nuevo.'
+            : 'Puede pedir permiso de cámara.';
+
+          el.classList.remove('hidden');
+          requestAnimationFrame(()=> el.classList.add('visible'));
+        }
+
       function hideARLoading(){
         const el = document.getElementById('arLoading');
         if (!el) return;
