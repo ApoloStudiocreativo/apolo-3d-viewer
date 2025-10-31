@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -5,10 +6,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover" />
   <title>Museo Virtual San Joaquín y Santa Ana</title>
 
-  <!-- Tipografías -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Tipografía para títulos -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet">
 
   <!-- CSS principal -->
   <link rel="stylesheet" href="/index.css">
@@ -22,6 +21,98 @@
 
   <!-- model-viewer (GLB) -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#0f1115;
+      --text:#e9eef7;
+      --muted:#9aa4b2;
+      --brand:#40cbcb;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --fab-bottom: max(18px, env(safe-area-inset-bottom));
+    }
+    html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden}
+    .full{position:fixed;inset:0}
+    .hidden{display:none!important}
+
+    /* Contenedores de vista */
+    model-viewer, iframe#splat {
+      width:100vw; height:100dvh; display:block; background:var(--bg);
+    }
+    iframe#splat{border:0}
+
+    /* Mensaje de error/ayuda */
+    #msg{
+      position:fixed; inset:0;
+      display:flex; align-items:center; justify-content:center;
+      font:500 16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      text-align:center; color:var(--muted);
+      padding:24px;
+    }
+    #msg b{color:#ff6464}
+
+    /* Botón AR: visible solo en móvil/tablet */
+    .ar-fab{
+      position:fixed; left:50%; bottom: var(--fab-bottom); transform:translateX(-50%);
+      display:none; /* por defecto oculto, se activa con media query */
+      gap:10px; align-items:center; justify-content:center;
+      height:56px; padding:0 18px; min-width:180px;
+      border:none; border-radius:16px; cursor:pointer;
+      background:var(--brand); color:white; font-weight:700; font-size:16px; letter-spacing:.2px;
+      box-shadow:var(--shadow);
+      z-index:20;
+    }
+    .ar-fab:active{transform:translateX(-50%) scale(.98)}
+    .ar-fab svg{width:22px;height:22px}
+
+    /* Solo móvil/tablet */
+    @media (max-width:1024px){
+      .ar-fab{display:flex}
+    }
+
+    /* Esqueleto simple mientras carga */
+    .skeleton{
+      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+      background:linear-gradient(160deg,#101319 0%,#0b0e13 100%);
+      color:#7b8696; font:500 14px system-ui,-apple-system,Segoe UI,Roboto,Arial;
+      z-index:50;
+    }
+    .spinner{width:28px;height:28px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:#fff;animation:rot .9s linear infinite;margin-right:10px}
+    @keyframes rot{to{transform:rotate(360deg)}}
+
+    /* Poster previo al SPLAT */
+    .splat-poster {
+      position: fixed; inset: 0;
+      background: center center / cover no-repeat #0f1115;
+      z-index: 30;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s ease;
+    }
+    .splat-poster.visible { opacity: 1; }
+    .splat-poster.fade-out {
+      opacity: 0;
+      transition: opacity .45s ease-out;
+    }
+
+    /* Overlay "Abriendo AR…" */
+    .ar-loading{
+      position: fixed; inset: 0; z-index: 60;
+      display: grid; place-items: center;
+      background: rgba(10,12,16,.65);
+      backdrop-filter: blur(6px);
+      opacity: 0; pointer-events: none;
+      transition: opacity .25s ease;
+    }
+    .ar-loading.visible{ opacity: 1; pointer-events: auto; }
+    .ar-loading .spinner{ margin-right: 10px; }
+    .ar-loading span{
+      color: var(--text);
+      font: 600 14px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      letter-spacing: .2px;
+    }
+    .ar-loading .spinner + span { display:inline-block; vertical-align: middle; }
+  </style>
 </head>
 
 <body>
@@ -34,7 +125,7 @@
   <!-- Mensaje si faltan parámetros -->
   <div id="msg" class="hidden"></div>
 
-  <!-- Overlay skeleton inicial -->
+  <!-- Overlay skeleton -->
   <div id="skel" class="skeleton"><div class="spinner"></div>Cargando…</div>
 
   <!-- Vista GLB -->
@@ -92,25 +183,11 @@
 
   <!-- Overlay de carga AR -->
   <div id="arLoading" class="ar-loading hidden" aria-hidden="true">
-    <div class="ar-card" role="status" aria-live="polite">
-      <!-- Progreso circular -->
-      <div class="ar-ring">
-        <svg class="ar-ring__svg" viewBox="0 0 48 48" aria-hidden="true">
-          <circle class="ar-ring__track" cx="24" cy="24" r="20"/>
-          <circle class="ar-ring__arc"   cx="24" cy="24" r="20"/>
-        </svg>
-        <div class="ar-ring__pct" id="arPct">0%</div>
-      </div>
-
-      <!-- Textos -->
-      <div class="ar-copy">
-        <div class="ar-title">Cargando experiencia…</div>
-        <div class="ar-sub">Puede tardar unos segundos según tu conexión.</div>
-      </div>
-    </div>
+    <div class="spinner" aria-hidden="true"></div>
+    <span>Abriendo AR…</span>
   </div>
 
-  <!-- Cartela de información -->
+  <!-- Cartela -->
   <div id="infoSheet" class="info-sheet hidden" aria-hidden="true">
     <div class="info-sheet__drag"></div>
     <button id="infoClose" class="info-sheet__close" aria-label="Cerrar">✕</button>
@@ -124,194 +201,70 @@
   <!-- Link AR iOS oculto -->
   <a id="iosARLink" rel="ar" style="display:none" aria-hidden="true"></a>
 
-  <!-- JS (tu lógica intacta) -->
-  <script>
-    /* ====== Variables y helpers para AR Loading con porcentaje ====== */
-    const arLoadingEl = document.getElementById('arLoading');
-    const arPctEl     = document.getElementById('arPct');
-    let arAnimating = false, arDone = false, rafId = 0, circLen = 0, currentPct = 0;
-
-    (function initARRing(){
-      const arc = document.querySelector('.ar-ring__arc');
-      if (!arc) return;
-      const r = parseFloat(arc.getAttribute('r')) || 20;
-      circLen = 2 * Math.PI * r;
-      arc.style.strokeDasharray  = String(circLen);
-      arc.style.strokeDashoffset = String(circLen);
-    })();
-
-    function setARProgress(p){
-      currentPct = Math.max(0, Math.min(100, p|0));
-      if (arPctEl) arPctEl.textContent = currentPct + '%';
-      const arc = document.querySelector('.ar-ring__arc');
-      if (arc && circLen){
-        arc.style.strokeDashoffset = String(circLen * (1 - currentPct/100));
-      }
-    }
-    function startFakeProgress(){
-      cancelAnimationFrame(rafId);
-      arAnimating = true; arDone = false; setARProgress(0);
-      const t0 = performance.now(), maxWhileWaiting = 87;
-      const tick = (t)=>{
-        if (!arAnimating) return;
-        const dt = (t - t0) / 1000;
-        const target = Math.min(maxWhileWaiting, Math.round(100 * (1 - Math.exp(-1.6 * dt))));
-        if (target > currentPct) setARProgress(target);
-        rafId = requestAnimationFrame(tick);
-      };
-      rafId = requestAnimationFrame(tick);
-    }
-    function finishAndHide(){
-      arAnimating = false; cancelAnimationFrame(rafId);
-      const start = currentPct, dur = 220, t0 = performance.now();
-      const step = (t)=>{
-        const k = Math.min(1, (t - t0)/dur);
-        setARProgress(Math.round(start + (100 - start)*k));
-        if (k < 1) requestAnimationFrame(step);
-        else {
-          arLoadingEl.classList.remove('visible');
-          setTimeout(()=> arLoadingEl.classList.add('hidden'), 200);
-        }
-      };
-      requestAnimationFrame(step);
-    }
-    function showARLoading(){
-      if (!arLoadingEl) return;
-      arLoadingEl.classList.remove('hidden');
-      requestAnimationFrame(()=> arLoadingEl.classList.add('visible'));
-      startFakeProgress();
-    }
-    function hideARLoading(){
-      if (!arLoadingEl || arDone) return;
-      arDone = true; finishAndHide();
-    }
-    document.addEventListener('visibilitychange', ()=>{ if (!document.hidden) hideARLoading(); });
-  </script>
-
-  <!-- Tu script principal (sin cambios funcionales) -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // ---------- URL parsing (query y pathname limpias) ----------
+      // ---------------- URL: soporta query *y* pathname limpias ----------------
       const qs = new URLSearchParams(location.search);
-      let type   = (qs.get('type')   || '').toLowerCase();
+      let type   = (qs.get('type')   || '').toLowerCase();   // 'glb' | 'splat'
       let model  = (qs.get('model')  || '').toLowerCase();
       let figure = (qs.get('figure') || '').toLowerCase();
-    
+
       if (!type) {
         const parts = location.pathname.split('/').filter(Boolean);
-        if (parts[0] === 'splat' && parts[1]) { type = 'splat'; figure = parts[1]; }
-        else if (parts[0] === 'glb' && parts[1]) { type = 'glb'; model = parts[1]; }
-        else if (parts.length === 1) { type = 'glb'; model = parts[0]; }
+        if (parts[0] === 'splat' && parts[1]) {
+          type = 'splat'; figure = parts[1];
+        } else if (parts[0] === 'glb' && parts[1]) {
+          type = 'glb'; model = parts[1];
+        } else if (parts.length === 1) {
+          type = 'glb'; model = parts[0]; // /:slug → GLB por defecto
+        }
       }
       const slug = model || figure || '';
-    
-      // ---------- DOM ----------
-      const mv          = document.getElementById('mv');
-      const splat       = document.getElementById('splat');
-      const skel        = document.getElementById('skel');
-      const msg         = document.getElementById('msg');
-      const topBar      = document.getElementById('topBar');
-      const pieceTitle  = document.getElementById('pieceTitle');
-      const infoBtn     = document.getElementById('infoBtn');
-      const sheet       = document.getElementById('infoSheet');
-      const sheetClose  = document.getElementById('infoClose');
-      const infoTitle   = document.getElementById('infoTitle');
-      const infoMeta    = document.getElementById('infoMeta');
-      const infoDesc    = document.getElementById('infoDesc');
-      const audioBtn    = document.getElementById('audioBtn');
-      const arBtn       = document.getElementById('arBtn');
-      const splatPoster = document.getElementById('splatPoster');
-    
-      // ---------- Helpers ----------
+
+      // ---------------- Elementos del DOM ----------------
+      const mv      = document.getElementById('mv');
+      const splat   = document.getElementById('splat');
+      const skel    = document.getElementById('skel');
+      const msg     = document.getElementById('msg');
+      const arBtn   = document.getElementById('arBtn');
+      const topBar  = document.getElementById('topBar');
+      const pieceTitle = document.getElementById('pieceTitle');
+      const infoBtn = document.getElementById('infoBtn');
+      const sheet   = document.getElementById('infoSheet');
+      const sheetClose = document.getElementById('infoClose');
+      const infoTitle  = document.getElementById('infoTitle');
+      const infoMeta   = document.getElementById('infoMeta');
+      const infoDesc   = document.getElementById('infoDesc');
+      const audioBtn   = document.getElementById('audioBtn');
+
+      // ---------------- Rutas y helpers ----------------
       const glbUrl   = (name) => `/models/${name}/${name}.glb`;
       const usdzUrl  = (name) => `/models/${name}/${name}.usdz`;
       const splatUrl = (name) => `/splat/${name}/index.html`;
-    
+
       async function exists(url){
         try{ const r = await fetch(url, { method:'HEAD', cache:'force-cache' }); return r.ok; }
         catch{ return false; }
       }
-    
-      const isIOS     = /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
-                        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+      const isIOS     = /iPad|iPhone|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       const isAndroid = /Android/.test(navigator.userAgent);
-    
-      function buildMeta(d){
-        if (!d) return '';
-        if (d.author || d.year || d.material) {
-          const parts = [];
-          if (d.year) parts.push(d.year);
-          if (d.author) parts.push(d.author);
-          if (d.material) parts.push(d.material);
-          return parts.filter(Boolean).join(' · ');
-        }
-        return d.meta || '';
-      }
-    
-      // Info por defecto (se sobreescribe si existe info.json)
-      let infoData = {
-        "cristo-yacente":      { title:"Cristo Yacente", meta:"s. XVII · Autor/a desconocido/a", desc:"Descripción pendiente." },
-        "virgen-romanica":     { title:"Virgen Románica", meta:"s. XII · Talla policromada", desc:"Descripción pendiente." },
-        "san-jose-con-el-nino":{ title:"San José con el Niño", meta:"s. XVIII", desc:"Descripción pendiente." },
-        "cristo-en-la-cruz":   { title:"Cristo en la Cruz", meta:"s. XVII", desc:"Descripción pendiente." }
-      };
-    
-      async function loadInfoDataOrFallback(current){
-        try{
-          const res = await fetch('/assets/info.json', { cache:'no-store' });
-          if (!res.ok) throw new Error('no info.json');
-          const json = await res.json();
-          return json || current;
-        }catch{ return current; }
-      }
-    
-      function renderInfo(s){
-        const d = infoData[s] || {};
-        const nice = (x) => (x||s||'').replace(/-/g,' ').trim();
-    
-        if (topBar){
-          topBar.classList.remove('hidden');
-          if (pieceTitle) pieceTitle.textContent = d.title || nice(s);
-        }
-        if (infoTitle) infoTitle.textContent = d.title || nice(s);
-        if (infoMeta)  infoMeta.textContent  = buildMeta(d);
-    
-        const desc = d.desc || '';
-        const extras = [];
-        if (d.typology)   extras.push(`<div><strong>Tipología:</strong> ${d.typology}</div>`);
-        if (d.material)   extras.push(`<div><strong>Material:</strong> ${d.material}</div>`);
-        if (d.technique)  extras.push(`<div><strong>Técnica:</strong> ${d.technique}</div>`);
-        if (d.dimensions) extras.push(`<div><strong>Dimensiones:</strong> ${d.dimensions}</div>`);
-        if (d.year)       extras.push(`<div><strong>Fecha:</strong> ${d.year}</div>`);
-        if (d.author)     extras.push(`<div><strong>Autor:</strong> ${d.author}</div>`);
-        const extrasHtml = extras.length ? `<div class="info-extra">${extras.join('')}</div>` : '';
-        if (infoDesc) infoDesc.innerHTML = [desc, extrasHtml].filter(Boolean).join('');
-      }
-    
-      // ----- Cartela: asegura que haya 1 solo set de listeners -----
-      if (infoBtn && sheet && !sheet.dataset.bound){
-        infoBtn.addEventListener('click', ()=>{ renderInfo(slug); sheet.classList.remove('hidden'); sheet.setAttribute('aria-hidden','false'); });
-        sheetClose?.addEventListener('click', ()=>{ sheet.classList.add('hidden'); sheet.setAttribute('aria-hidden','true'); });
-        sheet.addEventListener('click', (e)=>{ if (e.target === sheet) { sheet.classList.add('hidden'); sheet.setAttribute('aria-hidden','true'); }});
-        window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') { sheet.classList.add('hidden'); sheet.setAttribute('aria-hidden','true'); }});
-        sheet.dataset.bound = '1';
-      }
-    
-      // ----- Audio por figura -----
+
+      // ---------------- Audio por figura ----------------
       let audio = null;
       function setupAudioFor(id){
         const url = `/assets/audio/${id}.mp3`;
         if (audio) { try { audio.pause(); } catch{} audio = null; }
-    
+
         audio = new Audio(url);
         audio.loop = true;
         audio.preload = 'none';
-    
-        audioBtn?.classList.remove('hidden');
-        audioBtn?.classList.remove('is-playing');
-        audioBtn?.setAttribute('aria-pressed','false');
-        audioBtn?.setAttribute('aria-label','Reproducir audio');
-    
+
+        audioBtn.classList.remove('hidden');
+        audioBtn.classList.remove('is-playing');
+        audioBtn.setAttribute('aria-pressed','false');
+        audioBtn.setAttribute('aria-label','Reproducir audio');
+
         audioBtn.onclick = async () => {
           if (!audio) return;
           if (audio.paused) {
@@ -329,7 +282,7 @@
             audioBtn.setAttribute('aria-label','Reproducir audio');
           }
         };
-    
+
         document.addEventListener('visibilitychange', () => {
           if (document.hidden && audio && !audio.paused) {
             audio.pause();
@@ -337,19 +290,20 @@
             audioBtn.setAttribute('aria-pressed','false');
             audioBtn.setAttribute('aria-label','Reproducir audio');
           }
-        }, { once:true });
-    
+        });
+
         audio.addEventListener('error', () => {
           console.warn('Audio no encontrado:', url);
         });
       }
-    
-      // ----- AR helpers (usa showARLoading/hideARLoading ya definidos arriba) -----
+
+      // ---------------- AR helpers ----------------
       function openARFor(name){
         const usdz = usdzUrl(name);
         const glb  = glbUrl(name);
-        const arTitle = encodeURIComponent((infoTitle?.textContent || name).trim());
-    
+        const titleEl = document.getElementById('infoTitle');
+        const arTitle = encodeURIComponent((titleEl?.textContent || name).trim());
+
         if (isIOS) { window.location.href = usdz; return; }
         if (isAndroid){
           const file = new URL(glb, location.origin).toString();
@@ -357,90 +311,296 @@
           window.location.href = intent;
         }
       }
+
       function openQuickLookSync(slug) {
         try {
           const link = document.getElementById('iosARLink');
           if (!link) return false;
-          link.setAttribute('href', `/models/${slug}/${slug}.usdz#${Date.now()}`);
-          link.click();
+          const ts = Date.now(); // cache-buster (cada click es "nuevo")
+          link.setAttribute('href', `/models/${slug}/${slug}.usdz#${ts}`);
+          link.click(); // síncrono, en la misma pila del gesto
           return true;
-        } catch { return false; }
+        } catch {
+          return false;
+        }
       }
-    
-      // ---------- INIT ----------
+
+      // Overlay “Abriendo AR…”
+      function showARLoading(){
+        const el = document.getElementById('arLoading');
+        if (!el) return;
+        el.classList.remove('hidden');
+        requestAnimationFrame(()=> el.classList.add('visible'));
+      }
+      function hideARLoading(){
+        const el = document.getElementById('arLoading');
+        if (!el) return;
+        el.classList.remove('visible');
+        setTimeout(()=> el.classList.add('hidden'), 250);
+      }
+      document.addEventListener('visibilitychange', ()=>{
+        if (!document.hidden) hideARLoading();
+      });
+
+      // ---------------- Info JSON ----------------
+      async function loadInfoDataOrFallback(current){
+        try{
+          const res = await fetch('/assets/info.json', { cache:'no-store' });
+          if (!res.ok) throw new Error('no info.json');
+          const json = await res.json();
+          return json || current;
+        }catch{
+          return current;
+        }
+      }
+
+      // ---------------- Cartela ----------------
+      function showHelp(){
+        skel.classList.add('hidden');
+        msg.classList.remove('hidden');
+        msg.innerHTML = `
+          <div>
+            <b>Falta parámetro en la URL.</b><br/><br/>
+            Usa ejemplos:<br/>
+            <code>?type=glb&model=cristo-yacente</code><br/>
+            <code>?type=splat&figure=calvo-anillo</code>
+          </div>`;
+      }
+
+      let infoData = {
+        "cristo-yacente":      { title:"Cristo Yacente", meta:"s. XVII · Autor/a desconocido/a", desc:"Descripción pendiente." },
+        "virgen-romanica":     { title:"Virgen Románica", meta:"s. XII · Talla policromada", desc:"Descripción pendiente." },
+        "san-jose-con-el-nino":{ title:"San José con el Niño", meta:"s. XVIII", desc:"Descripción pendiente." },
+        "cristo-en-la-cruz":   { title:"Cristo en la Cruz", meta:"s. XVII", desc:"Descripción pendiente." }
+      };
+
+      // Cámara por figura
+      const cameraSettings = {
+        "cristo-yacente": {
+          orbit: "0deg 74deg 10.6m",
+          target: "0m 2m 0m",
+          minRadius: "2.5m",
+          maxRadius: "13.1m",
+          minFov: "22deg",
+          maxFov: "30deg"
+        },
+        "cristo-en-la-cruz": {
+          orbit: "0deg 60deg 3.5m",
+          target: "0m 1.8m 0m",
+          minRadius: "2m",
+          maxRadius: "5m",
+          minFov: "22deg",
+          maxFov: "45deg"
+        },
+        "san-jose-con-el-nino": {
+          orbit: "0deg 65deg 3m",
+          target: "0m 0.8m 0m",
+          minRadius: "1.5m",
+          maxRadius: "6m",
+          minFov: "22deg",
+          maxFov: "45deg"
+        },
+        "san-bernardo-con-la-virgen": {
+          orbit: "0deg 65deg 3m",
+          target: "0m 0.8m 0m",
+          minRadius: "1.5m",
+          maxRadius: "5m",
+          minFov: "22deg",
+          maxFov: "45deg"
+        },
+        "virgen-asuncion": {
+          orbit: "0deg 60deg 2.8m",
+          target: "0m 0.75m 0m",
+          minRadius: "1.5m",
+          maxRadius: "5m",
+          minFov: "20deg",
+          maxFov: "45deg"
+        },
+        "virgen-de-mena": {
+          orbit: "0deg 60deg 3m",
+          target: "0m 0.8m 0m",
+          minRadius: "1.5m",
+          maxRadius: "6m",
+          minFov: "22deg",
+          maxFov: "45deg"
+        },
+        "virgen-romanica": {
+          orbit: "0deg 55deg 2.5m",
+          target: "0m 0.35m 0m",
+          minRadius: "1.2m",
+          maxRadius: "5m",
+          minFov: "20deg",
+          maxFov: "45deg"
+        },
+        "ecce-homo": {
+          orbit: "0deg 60deg 2.2m",
+          target: "0m 0.4m 0m",
+          minRadius: "1.0m",
+          maxRadius: "4m",
+          minFov: "20deg",
+          maxFov: "45deg"
+        },
+        "reliquia-dorada": {
+          orbit: "0deg 60deg 1.8m",
+          target: "0m 0.25m 0m",
+          minRadius: "0.8m",
+          maxRadius: "3m",
+          minFov: "20deg",
+          maxFov: "45deg"
+        },
+        "bargueno-relicario": {
+          orbit: "0deg 55deg 2.8m",
+          target: "0m 0.4m 0m",
+          minRadius: "1.2m",
+          maxRadius: "5m",
+          minFov: "20deg",
+          maxFov: "45deg"
+        },
+        "tapiz": {
+          orbit: "0deg 90deg 3m",
+          target: "0m 1.2m 0m",
+          minRadius: "2m",
+          maxRadius: "6m",
+          minFov: "25deg",
+          maxFov: "45deg"
+        },
+        "casulla-santa-ana": {
+          orbit: "0deg 85deg 2.5m",
+          target: "0m 1.0m 0m",
+          minRadius: "1.5m",
+          maxRadius: "5m",
+          minFov: "25deg",
+          maxFov: "45deg"
+        },
+        "novisimos": {
+          orbit: "0deg 60deg 2.8m",
+          target: "0m 0.6m 0m",
+          minRadius: "1.2m",
+          maxRadius: "5m",
+          minFov: "22deg",
+          maxFov: "45deg"
+        },
+        "jesus-atado-a-la-columna": {
+          orbit: "0deg 65deg 2.8m",
+          target: "0m 0.8m 0m",
+          minRadius: "1.2m",
+          maxRadius: "5m",
+          minFov: "22deg",
+          maxFov: "45deg"
+        }
+      };
+
+      function buildMeta(d){
+        if (!d) return '';
+        if (d.author || d.year || d.material) {
+          const parts = [];
+          if (d.year) parts.push(d.year);
+          if (d.author) parts.push(d.author);
+          if (d.material) parts.push(d.material);
+          return parts.filter(Boolean).join(' · ');
+        }
+        return d.meta || '';
+      }
+
+      function renderInfo(s){
+        const d = infoData[s] || {};
+        const nice = (x) => (x||s||'').replace(/-/g,' ').trim();
+
+        if (topBar && s){
+          topBar.classList.remove('hidden');
+          pieceTitle.textContent = d.title || nice(s);
+        }
+        infoTitle.textContent = d.title || nice(s);
+        infoMeta.textContent  = buildMeta(d);
+
+        const desc = d.desc || '';
+        const extras = [];
+        if (d.typology)   extras.push(`<div><strong>Tipología:</strong> ${d.typology}</div>`);
+        if (d.material)   extras.push(`<div><strong>Material:</strong> ${d.material}</div>`);
+        if (d.technique)  extras.push(`<div><strong>Técnica:</strong> ${d.technique}</div>`);
+        if (d.dimensions) extras.push(`<div><strong>Dimensiones:</strong> ${d.dimensions}</div>`);
+        if (d.year)       extras.push(`<div><strong>Fecha:</strong> ${d.year}</div>`);
+        if (d.author)     extras.push(`<div><strong>Autor:</strong> ${d.author}</div>`);
+
+        const extrasHtml = extras.length ? `<div class="info-extra">${extras.join('')}</div>` : '';
+        infoDesc.innerHTML = [desc, extrasHtml].filter(Boolean).join('');
+      }
+
+      // Panel/cartela UI
+      function openSheet(){ renderInfo(slug); sheet.classList.remove('hidden'); sheet.setAttribute('aria-hidden','false'); }
+      function closeSheet(){ sheet.classList.add('hidden'); sheet.setAttribute('aria-hidden','true'); }
+
+      if (infoBtn) infoBtn.addEventListener('click', openSheet);
+      sheetClose.addEventListener('click', closeSheet);
+      sheet.addEventListener('click', (e)=>{ if (e.target === sheet) closeSheet(); });
+      window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeSheet(); });
+
+      // ---------------- Inicialización ----------------
       (async function init(){
         try{
-          // Cargar info.json si existe
-          if (slug) infoData = await loadInfoDataOrFallback(infoData);
-    
-          // ----- SPLAT -----
-          if (type === 'splat' && figure){
-            document.body.classList.add('mode-splat');
-    
-            // Poster previo (fallback inmediato + intento específico)
-            if (splatPoster){
-              splatPoster.style.backgroundImage = `url('/models/placeholder.webp')`;
-              splatPoster.classList.remove('hidden');
-              requestAnimationFrame(()=> splatPoster.classList.add('visible'));
-              (async ()=>{
-                const posterUrl = `/assets/posters/${figure}.webp`;
-                if (await exists(posterUrl)) splatPoster.style.backgroundImage = `url('${posterUrl}')`;
-              })();
-              splat.addEventListener('load', ()=>{
-                splatPoster.classList.add('fade-out');
-                setTimeout(()=> splatPoster.classList.add('hidden'), 700);
-              }, { once:true });
-            }
-    
-            // Cargar iframe SPLAT
-            splat.src = splatUrl(figure);
-            splat.classList.remove('hidden');
-    
-            // Título / cartela
-            renderInfo(figure);
-    
-            // Audio
-            setupAudioFor(figure);
-    
-            // Botón AR unificado con overlay
-            arBtn.classList.remove('hidden');
-            arBtn.onclick = () => {
-              showARLoading();
-              if (isIOS) {
-                const ok = openQuickLookSync(figure);
-                if (!ok) window.location.href = usdzUrl(figure);
-                return;
-              }
-              openARFor(figure);
-            };
-    
-            skel.classList.add('hidden');
-            return;
-          }
-    
-          // ----- GLB -----
           if (type === 'glb' && model){
             document.body.classList.remove('mode-splat');
-    
+
             // Fuente GLB
             mv.src = glbUrl(model);
-    
+
             // Poster por pieza con fallback
             try {
               const posterSrc = `/assets/posters/${model}.webp`;
               if (await exists(posterSrc)) {
-                mv.poster = posterSrc; mv.setAttribute('poster', posterSrc);
+                mv.poster = posterSrc;
+                mv.setAttribute('poster', posterSrc);
               } else {
-                mv.poster = '/models/placeholder.webp'; mv.setAttribute('poster','/models/placeholder.webp');
+                mv.poster = '/models/placeholder.webp';
+                mv.setAttribute('poster','/models/placeholder.webp');
               }
             } catch {
-              mv.poster = '/models/placeholder.webp'; mv.setAttribute('poster','/models/placeholder.webp');
+              mv.poster = '/models/placeholder.webp';
+              mv.setAttribute('poster','/models/placeholder.webp');
             }
-    
+
+            // Config cámara
+            const cam = cameraSettings[model];
+            if (cam) {
+              if (cam.orbit) mv.cameraOrbit = cam.orbit;
+              if (cam.target) mv.cameraTarget = cam.target;
+              if (cam.minRadius) mv.minCameraOrbit = `auto auto ${cam.minRadius}`;
+              if (cam.maxRadius) mv.maxCameraOrbit = `auto auto ${cam.maxRadius}`;
+              if (cam.minFov) mv.minFieldOfView = cam.minFov;
+              if (cam.maxFov) mv.maxFieldOfView = cam.maxFov;
+            }
+
+            // HDR suave
+            try {
+              await fetch('/assets/hdr/museo-suave.hdr', { cache: 'force-cache' }).catch(()=>{});
+              mv.environmentImage = '/assets/hdr/museo-suave.hdr';
+              mv.exposure = '2';
+              mv.shadowIntensity = '0.7';
+              mv.shadowSoftness = '1.0';
+              mv.environmentRotation = '10deg';
+              mv.skyboxImage = '/assets/hdr/museo-suave-blur.webp';
+              mv.backgroundColor = '#0f1115';
+            } catch (e) {
+              console.warn('No se pudo aplicar el HDR, usando neutral', e);
+            }
+
+            // Iluminación por pieza (opcional)
+            const lightSettings = {
+              "cristo-yacente": { exposure: 1.6, shadowIntensity: 0.9, shadowSoftness: 0.9, environmentRotation: "15deg" },
+              "virgen-romanica": { exposure: 1.3, environmentRotation: "0deg" }
+            };
+            const L = lightSettings[model];
+            if (L){
+              if (L.exposure != null) mv.exposure = String(L.exposure);
+              if (L.shadowIntensity != null) mv.shadowIntensity = String(L.shadowIntensity);
+              if (L.shadowSoftness != null) mv.shadowSoftness = String(L.shadowSoftness);
+              if (L.environmentRotation) mv.environmentRotation = L.environmentRotation;
+            }
+
             // iOS Quick Look
             mv.iosSrc = usdzUrl(model);
             mv.classList.remove('hidden');
-    
+
             // Oculta botón AR nativo
             if (!mv.querySelector('[slot="ar-button"]')) {
               const blocker = document.createElement('button');
@@ -450,20 +610,14 @@
               blocker.tabIndex = -1;
               mv.appendChild(blocker);
             }
-    
-            // Título / cartela
-            renderInfo(model);
-    
-            // Audio
-            setupAudioFor(model);
-    
-            // Botón AR unificado
+
+            // Botón AR unificado (iOS síncrono + overlay)
             arBtn.classList.remove('hidden');
             arBtn.onclick = () => {
               showARLoading();
               if (isIOS) {
                 const ok = openQuickLookSync(model);
-                if (!ok) window.location.href = usdzUrl(model);
+                if (!ok) window.location.href = usdzUrl(model); // fallback duro
                 return;
               }
               if (mv?.activateAR) {
@@ -472,22 +626,74 @@
                 openARFor(model);
               }
             };
-    
+
+            if (slug) {
+              infoData = await loadInfoDataOrFallback(infoData);
+              renderInfo(slug);
+            }
+
+            setupAudioFor(model);
             skel.classList.add('hidden');
             return;
           }
-    
-          // ----- Sin parámetros válidos -----
-          skel.classList.add('hidden');
-          msg.classList.remove('hidden');
-          msg.innerHTML = `
-            <div>
-              <b>Falta parámetro en la URL.</b><br/><br/>
-              Usa ejemplos:<br/>
-              <code>?type=glb&model=cristo-yacente</code><br/>
-              <code>?type=splat&figure=calvo-anillo</code>
-            </div>`;
-        }catch(err){
+
+          if (type === 'splat' && figure){
+            document.body.classList.add('mode-splat');
+
+            // --- Poster previo al SPLAT (aparece ya, antes del src) ---
+            const splatPoster = document.getElementById('splatPoster');
+            if (splatPoster) {
+              // Fallback inmediato
+              splatPoster.style.backgroundImage = `url('/models/placeholder.webp')`;
+              splatPoster.classList.remove('hidden');
+              requestAnimationFrame(()=> splatPoster.classList.add('visible'));
+
+              // Intentar poster específico en paralelo
+              (async ()=>{
+                try{
+                  const posterUrl = `/assets/posters/${figure}.webp`;
+                  const r = await fetch(posterUrl, { method:'HEAD', cache:'force-cache' });
+                  if (r.ok) splatPoster.style.backgroundImage = `url('${posterUrl}')`;
+                }catch{}
+              })();
+
+              // Ocultar cuando el SPLAT carga
+              splat.addEventListener('load', ()=>{
+                splatPoster.classList.add('fade-out');
+                setTimeout(()=> splatPoster.classList.add('hidden'), 700);
+              }, { once:true });
+            }
+
+            // Cargar SPLAT
+            splat.src = splatUrl(figure);
+            splat.classList.remove('hidden');
+
+            // FAB AR
+            arBtn.classList.remove('hidden');
+            arBtn.onclick = () => {
+              showARLoading();
+              if (isIOS) {
+                const ok = openQuickLookSync(figure);
+                if (!ok) window.location.href = usdzUrl(figure); // fallback duro
+                return;
+              }
+              openARFor(figure);
+            };
+
+            if (slug) {
+              infoData = await loadInfoDataOrFallback(infoData);
+              renderInfo(slug);
+            }
+
+            setupAudioFor(figure);
+            skel.classList.add('hidden');
+            return;
+          }
+
+          // Sin parámetros válidos:
+          showHelp();
+
+        } catch(err){
           console.error(err);
           msg.classList.remove('hidden');
           msg.innerHTML = `<b>Error:</b> ${String(err).replace(/</g,'&lt;')}`;
@@ -495,7 +701,146 @@
         }
       })();
     });
-    </script>
-    
+
+    /* === PANEL VISUAL DE AJUSTE DE CÁMARA (con min/max zoom) === */
+    (function setupCameraDebugPanel() {
+      if (!location.search.includes('debug=true')) return;
+
+      const qs = new URLSearchParams(location.search);
+      let dbgModel = (qs.get('model') || qs.get('figure') || '').toLowerCase();
+      if (!dbgModel) {
+        const p = location.pathname.split('/').filter(Boolean);
+        if (p[0] === 'splat' && p[1]) dbgModel = p[1];
+        else if (p[0] === 'glb' && p[1]) dbgModel = p[1];
+        else if (p.length === 1) dbgModel = p[0];
+      }
+      const model = dbgModel;
+
+      const mv = document.getElementById('mv');
+      if (!mv) return;
+
+      const num = (s, def=0) => {
+        if (s == null) return def;
+        const m = String(s).match(/-?\d+(\.\d+)?/);
+        return m ? parseFloat(m[0]) : def;
+      };
+
+      const cam = (window.cameraSettings && window.cameraSettings[model]) || {};
+      const initPhi = num((cam.orbit||'0deg 70deg 3m').split(' ')[1], 70);
+      const initR   = num((cam.orbit||'0deg 70deg 3m').split(' ')[2], 3);
+      const initY   = num((cam.target||'0m 0.5m 0m').split(' ')[1], 0.5);
+      const initMinR = num(cam.minRadius, Math.max(0.4, initR*0.4));
+      const initMaxR = num(cam.maxRadius, Math.max(initR*1.5, initMinR+0.5));
+      const initFov  = num(cam.fov || (mv.fieldOfView||'30deg'), 30);
+
+      const panel = document.createElement('div');
+      panel.id = 'camDebug';
+      panel.style.cssText = `
+        position: fixed; top: 10px; right: 10px; width: 260px;
+        background: rgba(15,17,21,0.95); color: #e9eef7; font: 13px/1.2 system-ui,sans-serif;
+        border-radius: 12px; padding: 12px; z-index: 9999; box-shadow: 0 0 15px rgba(0,0,0,.4); backdrop-filter: blur(8px);
+      `;
+      panel.innerHTML = `
+        <b>🎥 Ajuste de Cámara</b><br><br>
+
+        <label>Altura (target Y): <span id="valY">${initY.toFixed(2)}</span> m</label><br>
+        <input id="ctrlY" type="range" min="-1" max="3" step="0.05" value="${initY}"><br><br>
+
+        <label>Distancia inicial (radius): <span id="valR">${initR.toFixed(1)}</span> m</label><br>
+        <input id="ctrlR" type="range" min="0.5" max="30" step="0.1" value="${initR}"><br><br>
+
+        <label>Elevación (phi): <span id="valPhi">${initPhi.toFixed(0)}</span>°</label><br>
+        <input id="ctrlPhi" type="range" min="0" max="90" step="1" value="${initPhi}"><br><br>
+
+        <label>FOV (zoom óptico): <span id="valFov">${initFov.toFixed(0)}</span>°</label><br>
+        <input id="ctrlFov" type="range" min="15" max="75" step="1" value="${initFov}"><br><br>
+
+        <hr style="border-color:#2a2f38; opacity:.4; margin:8px 0">
+
+        <label>Zoom mínimo (minRadius): <span id="valMinR">${initMinR.toFixed(1)}</span> m</label><br>
+        <input id="ctrlMinR" type="range" min="0.4" max="60" step="0.1" value="${initMinR}"><br><br>
+
+        <label>Zoom máximo (maxRadius): <span id="valMaxR">${initMaxR.toFixed(1)}</span> m</label><br>
+        <input id="ctrlMaxR" type="range" min="0.5" max="80" step="0.1" value="${initMaxR}"><br><br>
+
+        <button id="copyCam" style="width:100%; padding:8px; border:none; background:#40cbcb; color:#fff; font-weight:700; border-radius:8px; cursor:pointer;">
+          📋 Copiar valores
+        </button>
+      `;
+      document.body.appendChild(panel);
+
+      const yRange   = panel.querySelector('#ctrlY');
+      const rRange   = panel.querySelector('#ctrlR');
+      const phiRange = panel.querySelector('#ctrlPhi');
+      const fovRange = panel.querySelector('#ctrlFov');
+      const minRRange= panel.querySelector('#ctrlMinR');
+      const maxRRange= panel.querySelector('#ctrlMaxR');
+
+      const valY   = panel.querySelector('#valY');
+      const valR   = panel.querySelector('#valR');
+      const valPhi = panel.querySelector('#valPhi');
+      const valFov = panel.querySelector('#valFov');
+      const valMinR= panel.querySelector('#valMinR');
+      const valMaxR= panel.querySelector('#valMaxR');
+
+      function clampLimits() {
+        let minR = parseFloat(minRRange.value);
+        let r    = parseFloat(rRange.value);
+        let maxR = parseFloat(maxRRange.value);
+
+        if (minR > maxR - 0.1) minR = maxR - 0.1;
+        if (r < minR) r = minR;
+        if (r > maxR) r = maxR;
+
+        minRRange.value = minR.toFixed(1);
+        rRange.value    = r.toFixed(1);
+        maxRRange.value = maxR.toFixed(1);
+
+        valMinR.textContent = minR.toFixed(1);
+        valR.textContent    = r.toFixed(1);
+        valMaxR.textContent = maxR.toFixed(1);
+        return { minR, r, maxR };
+      }
+
+      function updateCamera() {
+        const y   = parseFloat(yRange.value);
+        const phi = parseFloat(phiRange.value);
+        const fov = parseFloat(fovRange.value);
+        const { minR, r, maxR } = clampLimits();
+
+        valY.textContent   = y.toFixed(2);
+        valPhi.textContent = phi.toFixed(0);
+        valFov.textContent = fov.toFixed(0);
+
+        mv.minCameraOrbit = `auto auto ${minR}m`;
+        mv.maxCameraOrbit = `auto auto ${maxR}m`;
+        mv.cameraTarget = `0m ${y}m 0m`;
+        mv.cameraOrbit  = `0deg ${phi}deg ${r}m`;
+        mv.fieldOfView  = `${fov}deg`;
+        mv.jumpCameraToGoal();
+      }
+
+      [yRange, rRange, phiRange, fovRange, minRRange, maxRRange]
+        .forEach(i => i.addEventListener('input', updateCamera));
+
+      updateCamera();
+
+      panel.querySelector('#copyCam').onclick = () => {
+        const text = `
+"${model || 'cristo-yacente'}": {
+  orbit: "0deg ${phiRange.value}deg ${rRange.value}m",
+  target: "0m ${yRange.value}m 0m",
+  minRadius: "${minRRange.value}m",
+  maxRadius: "${maxRRange.value}m",
+  minFov: "22deg",
+  maxFov: "${fovRange.value}deg"
+},`.trim();
+        navigator.clipboard.writeText(text);
+        const btn = panel.querySelector('#copyCam');
+        btn.textContent = "✅ Copiado";
+        setTimeout(()=> btn.textContent = "📋 Copiar valores", 1200);
+      };
+    })();
+  </script>
 </body>
 </html>
