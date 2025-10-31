@@ -191,10 +191,142 @@
   <!-- Tu script principal (sin cambios funcionales) -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      /* … Todo tu JS de inicialización tal y como lo tenías … */
-      /* (he conservado íntegramente tu lógica aquí)
-         ——— OMITIDO EN ESTA VISTA POR BREVEDAD ——— */
+      // ---- Leer ruta / query ----
+      const qs = new URLSearchParams(location.search);
+      let type   = (qs.get('type')   || '').toLowerCase();
+      let model  = (qs.get('model')  || '').toLowerCase();
+      let figure = (qs.get('figure') || '').toLowerCase();
+    
+      if (!type) {
+        const parts = location.pathname.split('/').filter(Boolean);
+        if (parts[0] === 'splat' && parts[1]) { type = 'splat'; figure = parts[1]; }
+        else if (parts[0] === 'glb' && parts[1]) { type = 'glb'; model = parts[1]; }
+        else if (parts.length === 1) { type = 'glb'; model = parts[0]; }
+      }
+      const slug = model || figure || '';
+    
+      // ---- DOM ----
+      const mv          = document.getElementById('mv');
+      const splat       = document.getElementById('splat');
+      const skel        = document.getElementById('skel');
+      const msg         = document.getElementById('msg');
+      const topBar      = document.getElementById('topBar');
+      const pieceTitle  = document.getElementById('pieceTitle');
+      const splatPoster = document.getElementById('splatPoster');
+      const arBtn       = document.getElementById('arBtn');
+    
+      // ---- Helpers ----
+      const glbUrl   = (name) => `/models/${name}/${name}.glb`;
+      const usdzUrl  = (name) => `/models/${name}/${name}.usdz`;
+      const splatUrl = (name) => `/splat/${name}/index.html`;
+    
+      async function exists(url){
+        try{ const r = await fetch(url, { method:'HEAD', cache:'force-cache' }); return r.ok; }
+        catch{ return false; }
+      }
+    
+      function showHelp() {
+        skel.classList.add('hidden');
+        msg.classList.remove('hidden');
+        msg.innerHTML = `
+          <div>
+            <b>Falta parámetro en la URL.</b><br/><br/>
+            Usa ejemplos:<br/>
+            <code>?type=glb&model=cristo-yacente</code><br/>
+            <code>?type=splat&figure=calvo-anillo</code>
+          </div>`;
+      }
+    
+      // ---------- INIT ----------
+      (async function init(){
+        try{
+          // SPLAT
+          if (type === 'splat' && figure){
+            document.body.classList.add('mode-splat');
+    
+            // Póster previo
+            if (splatPoster){
+              splatPoster.style.backgroundImage = `url('/models/placeholder.webp')`;
+              splatPoster.classList.remove('hidden');
+              requestAnimationFrame(()=> splatPoster.classList.add('visible'));
+              (async ()=>{
+                const p = `/assets/posters/${figure}.webp`;
+                if (await exists(p)) splatPoster.style.backgroundImage = `url('${p}')`;
+              })();
+              splat.addEventListener('load', ()=>{
+                splatPoster.classList.add('fade-out');
+                setTimeout(()=> splatPoster.classList.add('hidden'), 600);
+              }, { once:true });
+            }
+    
+            // Cargar iframe
+            splat.src = splatUrl(figure);
+            splat.classList.remove('hidden');
+    
+            // UI básica
+            if (topBar) {
+              topBar.classList.remove('hidden');
+              if (pieceTitle) pieceTitle.textContent = (figure || '').replace(/-/g,' ');
+            }
+    
+            // Botón AR → muestra overlay y llama visor nativo
+            arBtn.classList.remove('hidden');
+            arBtn.onclick = () => {
+              showARLoading();
+              const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
+                            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+              if (isIOS) {
+                const link = document.getElementById('iosARLink');
+                if (link){ link.href = usdzUrl(figure) + '#' + Date.now(); link.click(); }
+              } else {
+                const file = new URL(glbUrl(figure), location.origin).toString();
+                const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(file)}&mode=ar_preferred#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+                location.href = intent;
+              }
+            };
+    
+            skel.classList.add('hidden');
+            return;
+          }
+    
+          // GLB (mínimo para no romper)
+          if (type === 'glb' && model){
+            mv.src = glbUrl(model);
+            mv.iosSrc = usdzUrl(model);
+            mv.classList.remove('hidden');
+    
+            if (topBar){ topBar.classList.remove('hidden'); pieceTitle.textContent = (model || '').replace(/-/g,' '); }
+    
+            // Oculta el botón nativo AR de model-viewer (por si acaso)
+            if (!mv.querySelector('[slot="ar-button"]')) {
+              const blocker = document.createElement('button');
+              blocker.setAttribute('slot','ar-button'); blocker.style.display='none'; blocker.tabIndex=-1;
+              mv.appendChild(blocker);
+            }
+    
+            // FAB AR
+            arBtn.classList.remove('hidden');
+            arBtn.onclick = () => {
+              showARLoading();
+              if (mv.activateAR) mv.activateAR().catch(()=>{}); // fallback ya se maneja con intent en SPLAT
+            };
+    
+            skel.classList.add('hidden');
+            return;
+          }
+    
+          // Sin parámetros válidos
+          showHelp();
+        }catch(err){
+          console.error(err);
+          msg.classList.remove('hidden');
+          msg.innerHTML = `<b>Error:</b> ${String(err).replace(/</g,'&lt;')}`;
+          skel.classList.add('hidden');
+        }
+      })();
     });
+    </script>
+    
   </script>
 </body>
 </html>
