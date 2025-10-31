@@ -112,6 +112,8 @@
     }
     .ar-loading .spinner + span { display:inline-block; vertical-align: middle; }
 
+
+
     /* Card mejorada + tip */
 .ar-loading__card{
   position: relative;
@@ -172,8 +174,66 @@
   .ar-style-ring .ar-loading__logo::before{ display:none; }
 }
 
+/* ===== Overlay AR personalizado ===== */
+.ar-loading{
+  position: fixed; inset: 0; z-index: 60;
+  display: grid; place-items: center;
+  background: rgba(10,12,16,.60);
+  backdrop-filter: blur(6px);
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s ease;
+}
+.ar-loading.visible{ opacity:1; pointer-events:auto; }
+.ar-card{
+  display:flex; align-items:center; gap:16px;
+  min-width: 280px; max-width: min(92vw, 380px);
+  padding:16px 18px;
+  background:#15161B;
+  border:3px solid #308687;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  color:#fff;
+  font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
 
+/* Anillo de progreso */
+.ar-ring{ position:relative; width:64px; height:64px; flex:0 0 64px; }
+.ar-ring__svg{ width:64px; height:64px; display:block; }
+.ar-ring__track{
+  fill:none;
+  stroke: rgba(255,255,255,.15);
+  stroke-width: 6;
+}
+.ar-ring__arc{
+  fill:none;
+  stroke: #308687;                  /* azulito del borde */
+  stroke-width: 6;
+  stroke-linecap: round;
+  transform-origin: 50% 50%;
+  animation: ar-spin 1.2s linear infinite; /* giro continuo */
+}
+@keyframes ar-spin { to { transform: rotate(360deg); } }
 
+.ar-ring__pct{
+  position:absolute; inset:0;
+  display:grid; place-items:center;
+  font-weight: 700;                 /* Poppins Bold */
+  font-size: 14px;
+}
+
+/* Textos */
+.ar-copy{ display:flex; flex-direction:column; gap:4px; }
+.ar-title{
+  font-weight: 600;                 /* Poppins Semibold */
+  font-size: 18px;
+  letter-spacing:.2px;
+}
+.ar-sub{
+  font-weight: 400;                 /* Poppins Regular */
+  font-size: 13px;
+  color: #FFFFFF;
+  opacity: .9;
+}
   </style>
 </head>
 
@@ -245,24 +305,27 @@
 
 
     <!-- Overlay de carga AR -->
-    <div id="arLoading" class="ar-loading ar-style-ring hidden" aria-hidden="true">
-      <div class="ar-loading__card">
-        <div class="ar-loading__logo" aria-hidden="true">
-          <svg viewBox="0 0 64 64" width="40" height="40" role="img" focusable="false">
-            <circle cx="32" cy="32" r="30" fill="none" stroke="currentColor" stroke-width="3" opacity=".25"/>
-            <path d="M18 34l6-10 5 7 6-9 11 16" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <div id="arLoading" class="ar-loading hidden" aria-hidden="true">
+      <div class="ar-card" role="status" aria-live="polite">
+        <!-- Progreso circular -->
+        <div class="ar-ring">
+          <svg class="ar-ring__svg" viewBox="0 0 48 48" aria-hidden="true">
+            <!-- pista -->
+            <circle class="ar-ring__track" cx="24" cy="24" r="20"/>
+            <!-- arco activo (gira) -->
+            <circle class="ar-ring__arc"   cx="24" cy="24" r="20"/>
           </svg>
+          <div class="ar-ring__pct" id="arPct">0%</div>
         </div>
 
-        <div class="ar-loading__row">
-          <div class="spinner" aria-hidden="true"></div>
-          <span class="ar-loading__text">Abriendo AR…</span>
+        <!-- Textos -->
+        <div class="ar-copy">
+          <div class="ar-title">Cargando experiencia…</div>
+          <div class="ar-sub">Puede tardar unos segundos según tu conexión.</div>
         </div>
-
-        <!-- nuevo: tip pequeño -->
-        <div class="ar-loading__tip" aria-hidden="true"></div>
       </div>
     </div>
+
 
 
     <!-- Panel/cartela de información del museo -->
@@ -406,36 +469,94 @@
       }
 
       // Overlay “Abriendo AR…”
-        function showARLoading(){
-          const el = document.getElementById('arLoading');
-          if (!el) return;
+        // ===== Overlay “Abriendo AR…” con porcentaje =====
+const arLoadingEl = document.getElementById('arLoading');
+const arPctEl     = document.getElementById('arPct');
 
-          // Elige estilo aquí si quieres cambiarlo dinámicamente:
-          // el.classList.remove('ar-style-min','ar-style-ring','ar-style-vignette');
-          // el.classList.add('ar-style-ring'); // 'ar-style-vignette' o 'ar-style-min'
+let arAnimating = false;
+let arDone      = false;
+let rafId       = 0;
+let circLen     = 0;   // perímetro del círculo SVG
+let currentPct  = 0;
 
-          // Mensaje/tip por plataforma
-          const isIOS = /iPad|iPhone|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-          const textEl = el.querySelector('.ar-loading__text');
-          const tipEl  = el.querySelector('.ar-loading__tip');
-          if (textEl) textEl.textContent = isIOS ? 'Abriendo Quick Look…' : 'Abriendo AR…';
-          if (tipEl)  tipEl.textContent  = isIOS
-            ? 'Si no se abre, toca de nuevo.'
-            : 'Puede pedir permiso de cámara.';
+// Prepara el trazo del SVG para poder “recortar” por porcentaje
+(function initARRing(){
+  const arc = document.querySelector('.ar-ring__arc');
+  if (!arc) return;
+  const r = parseFloat(arc.getAttribute('r')) || 20;
+  circLen = 2 * Math.PI * r;
+  arc.style.strokeDasharray  = String(circLen);
+  arc.style.strokeDashoffset = String(circLen);
+})();
 
-          el.classList.remove('hidden');
-          requestAnimationFrame(()=> el.classList.add('visible'));
-        }
+function setARProgress(p){
+  currentPct = Math.max(0, Math.min(100, p|0));
+  if (arPctEl) arPctEl.textContent = currentPct + '%';
+  const arc = document.querySelector('.ar-ring__arc');
+  if (arc && circLen){
+    const off = circLen * (1 - currentPct/100);
+    arc.style.strokeDashoffset = String(off);
+  }
+}
 
-      function hideARLoading(){
-        const el = document.getElementById('arLoading');
-        if (!el) return;
-        el.classList.remove('visible');
-        setTimeout(()=> el.classList.add('hidden'), 250);
-      }
-      document.addEventListener('visibilitychange', ()=>{
-        if (!document.hidden) hideARLoading();
-      });
+function startFakeProgress(){
+  cancelAnimationFrame(rafId);
+  arAnimating = true;
+  arDone = false;
+  setARProgress(0);
+
+  const t0 = performance.now();
+  const maxWhileWaiting = 87; // no “clavamos” el 100% hasta cerrar el visor
+
+  const tick = (t)=>{
+    if (!arAnimating) return;
+    const dt = (t - t0) / 1000; // seg
+    // Curva suavizada: rápido al principio, lento al final
+    const target = Math.min(maxWhileWaiting, Math.round(100 * (1 - Math.exp(-1.6 * dt))));
+    if (target > currentPct) setARProgress(target);
+    rafId = requestAnimationFrame(tick);
+  };
+  rafId = requestAnimationFrame(tick);
+}
+
+function finishAndHide(){
+  // Sube a 100% rápido y oculta
+  arAnimating = false;
+  cancelAnimationFrame(rafId);
+  const start = currentPct;
+  const dur = 220; // ms
+  const t0 = performance.now();
+
+  const step = (t)=>{
+    const k = Math.min(1, (t - t0)/dur);
+    const p = Math.round(start + (100 - start)*k);
+    setARProgress(p);
+    if (k < 1) requestAnimationFrame(step);
+    else {
+      arLoadingEl.classList.remove('visible');
+      setTimeout(()=> arLoadingEl.classList.add('hidden'), 200);
+    }
+  };
+  requestAnimationFrame(step);
+}
+
+function showARLoading(){
+  if (!arLoadingEl) return;
+  arLoadingEl.classList.remove('hidden');
+  requestAnimationFrame(()=> arLoadingEl.classList.add('visible'));
+  startFakeProgress();
+}
+function hideARLoading(){
+  if (!arLoadingEl) return;
+  if (arDone) return;
+  arDone = true;
+  finishAndHide();
+}
+// Al volver del visor (Quick Look / Scene Viewer)
+document.addEventListener('visibilitychange', ()=>{
+  if (!document.hidden) hideARLoading();
+});
+
 
       // ---------------- Info JSON ----------------
       async function loadInfoDataOrFallback(current){
