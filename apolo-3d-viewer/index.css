@@ -1,81 +1,115 @@
 /*********************************************
-* 1) Ocultar botones nativos de <model-viewer>
-*********************************************/
-model-viewer::part(ar-button),
-model-viewer::part(ar-prompt),
-model-viewer::part(ar-status),
-model-viewer button[slot="ar-button"] { /* fallback de slot */
-  display: none !important;
-}
-
-/*********************************************
-* 2) Posicionamiento de FABs con safe-area
+* Variables y resets base
 *********************************************/
 :root{
-  /* margen inferior base con clamp + notch */
+  --bg:#0f1115;
+  --text:#e9eef7;
+  --muted:#9aa4b2;
+  --brand:#40cbcb;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
   --fab-bottom: calc(clamp(16px, 5vh, 90px) + env(safe-area-inset-bottom));
 }
 
-/* La fila de FABs gobierna la posición final */
+html, body{
+  margin:0;
+  height:100%;
+  min-height:100%;
+  background:var(--bg);
+  color:var(--text);
+  overflow:hidden;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.hidden{ display:none !important; }
+
+/* Contenedores de vista */
+model-viewer,
+iframe#splat{
+  width:100vw;
+  height:100dvh;
+  display:block;
+  background:var(--bg);
+}
+iframe#splat{ border:0; }
+
+/*********************************************
+* Skeleton de carga inicial
+*********************************************/
+.skeleton{
+  position:fixed;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(160deg,#101319 0%,#0b0e13 100%);
+  color:#7b8696;
+  font:500 14px system-ui,-apple-system,Segoe UI,Roboto,Arial;
+  z-index:50;
+}
+.spinner{
+  width:28px; height:28px; border-radius:50%;
+  border:3px solid rgba(255,255,255,.15); border-top-color:#fff;
+  animation:rot .9s linear infinite; margin-right:10px;
+}
+@keyframes rot{ to{ transform:rotate(360deg) } }
+
+/*********************************************
+* Mensaje de error/ayuda
+*********************************************/
+#msg{
+  position:fixed; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font:500 16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  text-align:center; color:var(--muted);
+  padding:24px;
+}
+#msg b{ color:#ff6464; }
+
+/*********************************************
+* FABs (posición con safe-area)
+*********************************************/
 .fab-row{
   position: fixed;
   left: 0; right: 0;
   bottom: var(--fab-bottom);
-  display: none;                 /* solo móvil/tablet */
+  display: none; /* móvil/tablet */
   align-items: center;
-  justify-content: space-between;/* audio izq, AR dcha */
+  justify-content: space-between; /* audio izq, AR dcha */
   padding: 0 18px;
   z-index: 20;
-  pointer-events: none;          /* la fila no intercepta */
+  pointer-events: none;
 }
 .fab-row .ar-fab,
 .fab-row .audio-fab{
   position: relative;
   left: auto; right: auto; bottom: auto; transform: none;
-  pointer-events: auto;          /* los botones sí */
+  pointer-events: auto;
 }
-
-/* Mostrar en móvil/tablet */
-@media (max-width:1024px){
-  .fab-row{ display: flex; }
-}
+@media (max-width:1024px){ .fab-row{ display:flex; } }
 
 /* En SPLAT, subimos un poco */
 body.mode-splat{ --fab-bottom: calc(70px + env(safe-area-inset-bottom)); }
-@media (max-width: 420px){
-  body.mode-splat{ --fab-bottom: calc(70px + env(safe-area-inset-bottom)); }
-}
-@media (max-height: 480px){
-  body.mode-splat{ --fab-bottom: calc(100px + env(safe-area-inset-bottom)); }
-}
+@media (max-width:420px){ body.mode-splat{ --fab-bottom: calc(70px + env(safe-area-inset-bottom)); } }
+@media (max-height:480px){ body.mode-splat{ --fab-bottom: calc(100px + env(safe-area-inset-bottom)); } }
 
-/* === Botón AR (derecha) === */
+/* Botón AR */
 .ar-fab{
-  height: 56px;
-  min-width: 180px;
-  border: none;
-  border-radius: 16px;
-  background: var(--brand);
-  color: #fff;
-  font-weight: 700;
-  padding: 0 18px;
-  box-shadow: var(--shadow);
+  height:56px; min-width:180px; padding:0 18px;
+  border:none; border-radius:16px; background:var(--brand); color:#fff;
+  font-weight:700; box-shadow:var(--shadow);
+  display:flex; align-items:center; justify-content:center;
 }
 .ar-fab svg{ width:22px; height:22px; }
 
-/* === Botón Audio (izquierda) – cristal rojo === */
+/* Botón Audio – cristal rojo */
 .audio-fab{
-  height: 56px;
-  width: 120px;
-  border-radius: 18px;
+  height:56px; width:120px; border-radius:18px; color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  backdrop-filter: blur(14px) saturate(200%); -webkit-backdrop-filter: blur(14px) saturate(200%);
   background:
     radial-gradient(circle at 30% 30%, rgba(255,80,80,.55), rgba(150,0,0,.45)),
     linear-gradient(135deg, rgba(255,0,0,.55), rgba(90,0,0,.42));
-  border: 1px solid rgba(255,0,0,.7);
-  color: #fff;
-  display: flex; align-items: center; justify-content: center;
-  backdrop-filter: blur(14px) saturate(200%);
-  -webkit-backdrop-filter: blur(14px) saturate(200%);
+  border:1px solid rgba(255,0,0,.7);
   box-shadow:
     0 0 12px rgba(255,0,0,.45),
     0 6px 22px rgba(255,0,0,.30),
@@ -83,11 +117,10 @@ body.mode-splat{ --fab-bottom: calc(70px + env(safe-area-inset-bottom)); }
   transition: transform .12s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease;
 }
 .audio-fab:active{ transform: scale(.97); }
-.audio-fab .icon-pause{ display: none; width: 24px; height: 24px; }
-.audio-fab .icon-play{  display: block; width: 24px; height: 24px; }
-.audio-fab.is-playing .icon-play{  display: none; }
-.audio-fab.is-playing .icon-pause{ display: block; }
-/* Estado reproduciendo */
+.audio-fab .icon-pause{ display:none; width:24px; height:24px; }
+.audio-fab .icon-play{  display:block; width:24px; height:24px; }
+.audio-fab.is-playing .icon-play{  display:none; }
+.audio-fab.is-playing .icon-pause{ display:block; }
 @keyframes pulse-glow { 0%,100%{ box-shadow:0 0 14px rgba(255,30,30,.45) } 50%{ box-shadow:0 0 22px rgba(255,50,50,.75) } }
 .audio-fab.is-playing{
   background:
@@ -97,16 +130,13 @@ body.mode-splat{ --fab-bottom: calc(70px + env(safe-area-inset-bottom)); }
   animation: pulse-glow 1.8s ease-in-out infinite;
 }
 
-/* Mostrar FABs solo en móvil/tablet */
-@media (max-width:1024px){
-  .ar-fab, .audio-fab{ display:flex; }
-}
-
 /*********************************************
-* 3) Topbar + botones
+* Topbar + botón info
 *********************************************/
 #topBar{
-  position: fixed; top: env(safe-area-inset-top, 0px); left: 0; right: 0;
+  position: fixed;
+  top: env(safe-area-inset-top, 0px);
+  left: 0; right: 0;
   z-index: 1000;
   display: flex; align-items: center; justify-content: space-between;
   height: 56px; padding: 0 16px;
@@ -114,8 +144,12 @@ body.mode-splat{ --fab-bottom: calc(70px + env(safe-area-inset-bottom)); }
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
 }
 #pieceTitle{
-  margin:0; font-family:'Poppins', serif; font-weight:600;
-  font-size: clamp(18px,4vw,26px); color: var(--text); text-shadow:0 2px 6px rgba(0,0,0,.4);
+  margin:0;
+  font-family:'Poppins', sans-serif;
+  font-weight:600;
+  font-size: clamp(18px,4vw,26px);
+  color: var(--text);
+  text-shadow:0 2px 6px rgba(0,0,0,.4);
 }
 .info-btn{
   background: transparent; border: 2px solid var(--brand); color: var(--brand);
@@ -124,10 +158,10 @@ body.mode-splat{ --fab-bottom: calc(70px + env(safe-area-inset-bottom)); }
 }
 .info-btn:hover{ background: var(--brand); color:#fff; }
 .info-btn:focus-visible{ outline: none; box-shadow: 0 0 0 3px rgba(64,203,203,.35); }
-@media (max-width: 600px){ .info-btn{ font-size:14px; padding:5px 12px; min-width:108px; height:34px; }}
+@media (max-width:600px){ .info-btn{ font-size:14px; padding:5px 12px; min-width:108px; height:34px; }}
 
 /*********************************************
-* 4) Cartela inferior
+* Cartela inferior (info-sheet)
 *********************************************/
 .info-sheet{
   position: fixed; left:0; right:0; bottom:0;
@@ -147,14 +181,13 @@ body.mode-splat{ --fab-bottom: calc(70px + env(safe-area-inset-bottom)); }
 .info-desc{ margin:0 0 10px 0; line-height:1.5; font-size: clamp(14px, 3.8vw, 16px); }
 .info-extra { margin-top:12px; color: var(--muted); font-size:13px; line-height:1.4; }
 .info-extra strong { color: var(--text); font-weight:600; }
-/* Texto más grande en la cartela */
 #infoSheet .info-sheet__content,
 #infoSheet .info-desc,
 #infoSheet .info-meta,
 #infoSheet .info-extra { font-size:16px !important; line-height:1.55 !important; }
 
 /*********************************************
-* 5) Poster previo al SPLAT
+* Poster previo al SPLAT
 *********************************************/
 .splat-poster{
   position: fixed; inset: 0;
@@ -164,66 +197,79 @@ body.mode-splat{ --fab-bottom: calc(70px + env(safe-area-inset-bottom)); }
   transition: opacity .25s ease;
 }
 .splat-poster.visible{ opacity: 1; }
-.splat-poster.fade-out{ opacity: 0; filter: blur(12px); transition: opacity .45s ease-out, filter .45s ease-out; }
+.splat-poster.fade-out{
+  opacity: 0; filter: blur(12px);
+  transition: opacity .45s ease-out, filter .45s ease-out;
+}
 
 /*********************************************
-* 6) Overlay "Abriendo AR…" (con tarjeta + logo)
+* Overlay "Abriendo AR…" (tarjeta con anillo)
 *********************************************/
-/* ===== Overlay AR personalizado ===== */
-.ar-loading {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  display: grid;
-  place-items: center;
-  background: rgba(10, 12, 16, 0.6);
+.ar-loading{
+  position: fixed; inset: 0; z-index: 60;
+  display: grid; place-items: center;
+  background: rgba(10,12,16,.60);
   backdrop-filter: blur(6px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.25s ease;
-  padding: 20px; /* 👈 asegura 20px mínimo en todos los lados */
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s ease;
+  padding: 20px;             /* margen mínimo a los bordes */
+  box-sizing: border-box;
+}
+.ar-loading.visible{ opacity:1; pointer-events:auto; }
+
+.ar-card{
+  display:flex; align-items:center; gap:16px;
+  width:100%; max-width:380px; padding:16px 18px;
+  background:#15161B; border:3px solid #308687; border-radius:16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  color:#fff; font-family:'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   box-sizing: border-box;
 }
 
-.ar-loading.visible {
-  opacity: 1;
-  pointer-events: auto;
+/* Anillo de progreso */
+.ar-ring{ position:relative; width:64px; height:64px; flex:0 0 64px; }
+.ar-ring__svg{ width:64px; height:64px; display:block; }
+.ar-ring__track{ fill:none; stroke: rgba(255,255,255,.15); stroke-width: 6; }
+.ar-ring__arc{
+  fill:none; stroke:#308687; stroke-width:6; stroke-linecap:round;
+  transform-origin:50% 50%;
+  animation: ar-spin 1.2s linear infinite; /* giro continuo */
+}
+@keyframes ar-spin{ to{ transform: rotate(360deg); } }
+.ar-ring__pct{
+  position:absolute; inset:0; display:grid; place-items:center;
+  font-weight:700; font-size:14px; /* Poppins Bold */
 }
 
-.ar-card {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  width: 100%;
-  max-width: 380px;
-  padding: 16px 18px;
-  background: #15161B;
-  border: 3px solid #308687;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-  color: #fff;
-  font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  box-sizing: border-box;
-}
-
+/* Textos del overlay */
+.ar-copy{ display:flex; flex-direction:column; gap:4px; }
+.ar-title{ font-weight:600; font-size:18px; letter-spacing:.2px; } /* Semibold */
+.ar-sub{ font-weight:400; font-size:13px; color:#fff; opacity:.9; }
 
 /*********************************************
-* 7) Safe areas globales
+* AR: ocultar UI si se desea durante el visor
 *********************************************/
-html, body{
-  height: 100%; min-height: 100%;
-  padding-bottom: env(safe-area-inset-bottom);
-}
-/* Ocultar UI al entrar en AR si hiciera falta */
 body.in-ar #topBar,
 body.in-ar .fab-row,
 body.in-ar .ar-fab,
 body.in-ar .audio-fab,
 body.in-ar .info-sheet{ display:none !important; }
 
-/* Accesibilidad foco base */
+/*********************************************
+* Accesibilidad: foco
+*********************************************/
 :focus-visible { outline: 2px solid #40cbcb; outline-offset: 3px; }
 .info-sheet__close:focus-visible,
 .info-btn:focus-visible,
 .audio-fab:focus-visible,
 .ar-fab:focus-visible { box-shadow: 0 0 0 3px rgba(64,203,203,.35); }
+
+/*********************************************
+* <model-viewer>: ocultar botones nativos
+*********************************************/
+model-viewer::part(ar-button),
+model-viewer::part(ar-prompt),
+model-viewer::part(ar-status),
+model-viewer button[slot="ar-button"]{
+  display:none !important;
+}
