@@ -465,3 +465,12 @@ filter: blur(0);
   color: var(--text);
   font-weight: 600;
 }
+
+.info-sheet__content {
+  font-size: 16px;      /* antes era ~13px */
+  line-height: 1.55;    /* mejora lectura */
+}
+
+@media (max-width: 768px) {
+  .info-sheet__content { font-size: 17px; }
+}
