@@ -474,3 +474,21 @@ filter: blur(0);
   font-size: 16px !important;
   line-height: 1.55 !important;
 }
+
+/* === Overlay "Abriendo AR…" === */
+.ar-loading{
+  position: fixed; inset: 0; z-index: 60;
+  display: grid; place-items: center;
+  background: rgba(10,12,16,.65);
+  backdrop-filter: blur(6px);
+  opacity: 0; pointer-events: none;
+  transition: opacity .25s ease;
+}
+.ar-loading.visible{ opacity: 1; pointer-events: auto; }
+.ar-loading .spinner{ margin-right: 10px; }
+.ar-loading span{
+  color: var(--text);
+  font: 600 14px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  letter-spacing: .2px;
+}
+.ar-loading .spinner + span { display:inline-block; vertical-align: middle; }

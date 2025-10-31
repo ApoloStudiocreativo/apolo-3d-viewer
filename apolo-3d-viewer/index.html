@@ -153,6 +153,13 @@ field-of-view="30deg">
   </button>
 </div>
 
+<!-- Overlay de carga AR -->
+<div id="arLoading" class="ar-loading hidden" aria-hidden="true">
+  <div class="spinner" aria-hidden="true"></div>
+  <span>Abriendo AR…</span>
+</div>
+
+
 <!-- Panel/cartela de información del museo -->
 <div id="infoSheet" class="info-sheet hidden" aria-hidden="true">
   <div class="info-sheet__drag"></div>
@@ -318,21 +325,15 @@ const slug = model || figure || '';
   try {
     const link = document.getElementById('iosARLink');
     if (!link) return false;
-    link.setAttribute('href', `/models/${slug}/${slug}.usdz`);
-    // Opcional: poster para Quick Look
-    // link.setAttribute('data-quick-look-poster', `/assets/posters/${slug}.webp`);
-    // ⚠️ Importante: el click debe ocurrir en la MISMA pila de llamada del gesto
-    link.click();
+    const ts = Date.now(); // cache-buster para que cada click sea "nuevo"
+    link.setAttribute('href', `/models/${slug}/${slug}.usdz#${ts}`);
+    // link.setAttribute('data-quick-look-poster', `/assets/posters/${slug}.webp`); // opcional
+    link.click(); // síncrono, en la misma pila del gesto
     return true;
   } catch {
     return false;
   }
 }
-
-
-
-
-
 
 
     // === Carga info.json con fallback a infoData inline ===
@@ -542,6 +543,30 @@ async function loadInfoDataOrFallback(current){
     sheet.addEventListener('click', (e)=>{ if (e.target === sheet) closeSheet(); });
     window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeSheet(); });
   
+
+
+    function showARLoading(){
+  const el = document.getElementById('arLoading');
+  if (!el) return;
+  el.classList.remove('hidden');
+  requestAnimationFrame(()=> el.classList.add('visible'));
+}
+function hideARLoading(){
+  const el = document.getElementById('arLoading');
+  if (!el) return;
+  el.classList.remove('visible');
+  setTimeout(()=> el.classList.add('hidden'), 250);
+}
+// Al volver de AR (Quick Look/Scene Viewer), se dispara visibilitychange
+document.addEventListener('visibilitychange', ()=>{
+  if (!document.hidden) hideARLoading();
+});
+
+
+
+
+
+
     // ---------------- Inicialización ----------------
     (async function init(){
       try{
@@ -676,6 +701,8 @@ async function loadInfoDataOrFallback(current){
   
           arBtn.classList.remove('hidden');
           arBtn.onclick = () => {
+            showARLoading();
+
             if (isIOS) {
               const ok = openQuickLookSync(figure);
               if (!ok) window.location.href = usdzUrl(figure); // fallback duro
