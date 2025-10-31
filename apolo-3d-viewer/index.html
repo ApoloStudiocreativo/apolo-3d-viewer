@@ -481,16 +481,30 @@ async function loadInfoDataOrFallback(current){
     }
   
     function renderInfo(s){
-      const d = infoData[s] || null;
-      const nice = (x) => (x||s||'').replace(/-/g,' ').trim();
-      if (topBar && s){
-        topBar.classList.remove('hidden');
-        pieceTitle.textContent = d?.title || nice(s);
-      }
-      infoTitle.textContent = d?.title || nice(s);
-      infoMeta.textContent  = buildMeta(d);
-      infoDesc.textContent  = d?.desc || '';
-    }
+  const d = infoData[s] || {};
+  const nice = (x) => (x||s||'').replace(/-/g,' ').trim();
+
+  if (topBar && s){
+    topBar.classList.remove('hidden');
+    pieceTitle.textContent = d.title || nice(s);
+  }
+  infoTitle.textContent = d.title || nice(s);
+  infoMeta.textContent  = buildMeta(d);
+
+  const desc = d.desc || '';
+
+  const extras = [];
+  if (d.typology)   extras.push(`<div><strong>Tipología:</strong> ${d.typology}</div>`);
+  if (d.material)   extras.push(`<div><strong>Material:</strong> ${d.material}</div>`);
+  if (d.technique)  extras.push(`<div><strong>Técnica:</strong> ${d.technique}</div>`);
+  if (d.dimensions) extras.push(`<div><strong>Dimensiones:</strong> ${d.dimensions}</div>`);
+  if (d.year)       extras.push(`<div><strong>Fecha:</strong> ${d.year}</div>`);
+  if (d.author)     extras.push(`<div><strong>Autor:</strong> ${d.author}</div>`);
+
+  const extrasHtml = extras.length ? `<div class="info-extra">${extras.join('')}</div>` : '';
+  infoDesc.innerHTML = [desc, extrasHtml].filter(Boolean).join('');
+}
+
   
     // ---------------- Cartela e interacción ----------------
     function openSheet(){ renderInfo(slug); sheet.classList.remove('hidden'); sheet.setAttribute('aria-hidden','false'); }

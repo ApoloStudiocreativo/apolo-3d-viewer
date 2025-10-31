@@ -454,3 +454,14 @@ filter: blur(0);
   opacity: 0;
   filter: blur(12px);
 }
+
+.info-extra {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.info-extra strong {
+  color: var(--text);
+  font-weight: 600;
+}

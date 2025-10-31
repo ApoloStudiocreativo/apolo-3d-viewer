@@ -4,6 +4,9 @@
     "desc": "",
     "material": "",
     "title": "",
+    "typology": "",
+    "dimensions": "",
+    "technique": "",
     "type": "auto",
     "year": ""
   },
@@ -12,6 +15,9 @@
     "desc": "",
     "material": "",
     "title": "",
+    "typology": "",
+    "dimensions": "",
+    "technique": "",
     "type": "splat",
     "year": ""
   },
@@ -20,6 +26,9 @@
     "desc": "",
     "material": "",
     "title": "",
+    "typology": "",
+    "dimensions": "",
+    "technique": "",
     "type": "auto",
     "year": ""
   },
@@ -28,14 +37,20 @@
     "desc": "",
     "material": "",
     "title": "",
+    "typology": "",
+    "dimensions": "",
+    "technique": "",
     "type": "auto",
     "year": ""
   },
   "cristo-yacente": {
-    "author": "Gregorio Fernandez",
+    "author": "Gregorio Fernández",
     "desc": "Figura yacente de Cristo de escuela barroca; destaca la policromía y el tratamiento anatómico.",
     "material": "Madera policromada",
     "title": "Cristo Yacente",
+    "typology": "Escultura religiosa",
+    "dimensions": "162 × 45 × 38 cm",
+    "technique": "Tallado y policromado",
     "type": "auto",
     "year": "Siglo XVII"
   },
@@ -44,6 +59,9 @@
     "desc": "",
     "material": "",
     "title": "",
+    "typology": "",
+    "dimensions": "",
+    "technique": "",
     "type": "auto",
     "year": ""
   },
@@ -52,6 +70,9 @@
     "desc": "",
     "material": "",
     "title": "",
+    "typology": "",
+    "dimensions": "",
+    "technique": "",
     "type": "auto",
     "year": ""
   },
@@ -60,6 +81,9 @@
     "desc": "",
     "material": "",
     "title": "",
+    "typology": "",
+    "dimensions": "",
+    "technique": "",
     "type": "auto",
     "year": ""
   },
@@ -68,6 +92,9 @@
     "desc": "",
     "material": "",
     "title": "",
+    "typology": "",
+    "dimensions": "",
+    "technique": "",
     "type": "auto",
     "year": ""
   },
@@ -76,6 +103,9 @@
     "desc": "",
     "material": "",
     "title": "",
+    "typology": "",
+    "dimensions": "",
+    "technique": "",
     "type": "auto",
     "year": ""
   },
@@ -84,6 +114,9 @@
     "desc": "",
     "material": "",
     "title": "",
+    "typology": "",
+    "dimensions": "",
+    "technique": "",
     "type": "auto",
     "year": ""
   },
@@ -92,6 +125,9 @@
     "desc": "",
     "material": "",
     "title": "",
+    "typology": "",
+    "dimensions": "",
+    "technique": "",
     "type": "auto",
     "year": ""
   },
@@ -100,6 +136,9 @@
     "desc": "",
     "material": "",
     "title": "",
+    "typology": "",
+    "dimensions": "",
+    "technique": "",
     "type": "auto",
     "year": ""
   },
@@ -108,6 +147,9 @@
     "desc": "",
     "material": "",
     "title": "",
+    "typology": "",
+    "dimensions": "",
+    "technique": "",
     "type": "auto",
     "year": ""
   },
@@ -116,6 +158,9 @@
     "desc": "",
     "material": "",
     "title": "",
+    "typology": "",
+    "dimensions": "",
+    "technique": "",
     "type": "auto",
     "year": ""
   }
