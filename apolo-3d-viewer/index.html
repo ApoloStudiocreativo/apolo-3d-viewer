@@ -840,6 +840,59 @@
         setTimeout(()=> btn.textContent = "📋 Copiar valores", 1200);
       };
     })();
+
+    /* === Interacción táctil para arrastrar la cartela (UX mejorado) === */
+(function enableInfoSheetDrag() {
+  const sheet = document.getElementById('infoSheet');
+  if (!sheet) return;
+
+  let startY = 0;
+  let currentY = 0;
+  let isDragging = false;
+  const threshold = 90; // píxeles de arrastre necesarios para cerrar
+
+  const onStart = (e) => {
+    if (e.touches?.length !== 1) return;
+    startY = e.touches[0].clientY;
+    isDragging = true;
+    sheet.style.transition = 'none';
+  };
+
+  const onMove = (e) => {
+    if (!isDragging || e.touches?.length !== 1) return;
+    currentY = e.touches[0].clientY - startY;
+    if (currentY > 0) {
+      sheet.style.transform = `translateY(${currentY}px)`;
+      sheet.style.opacity = `${1 - Math.min(currentY / 250, 0.4)}`;
+    }
+  };
+
+  const onEnd = () => {
+    if (!isDragging) return;
+    sheet.style.transition = 'transform .28s ease, opacity .28s ease';
+    if (currentY > threshold) {
+      sheet.classList.add('hidden');
+      sheet.setAttribute('aria-hidden','true');
+      sheet.style.transform = 'translateY(100%)';
+      sheet.style.opacity = '0';
+    } else {
+      sheet.style.transform = 'translateY(0)';
+      sheet.style.opacity = '1';
+    }
+    isDragging = false;
+    startY = 0;
+    currentY = 0;
+  };
+
+  sheet.addEventListener('touchstart', onStart, { passive: true });
+  sheet.addEventListener('touchmove', onMove, { passive: true });
+  sheet.addEventListener('touchend', onEnd);
+})();
+
+
+
+
+
   </script>
 </body>
 </html>

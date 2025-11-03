@@ -184,16 +184,19 @@ body.mode-splat{
   left: 0; right: 0;
   bottom: 0;
   transform: translateY(100%);
-  background: rgba(14,16,20,0.96);
+  background: rgba(14,16,20,0.75);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
   color: var(--text);
   border-top-left-radius: 18px;
   border-top-right-radius: 18px;
-  box-shadow: 0 -10px 30px rgba(0,0,0,.35);
-  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  box-shadow: 0 -10px 30px rgba(0,0,0,.45);
+  padding-bottom: calc(18px + env(safe-area-inset-bottom));
   z-index: 40;
   transition: transform .28s ease, opacity .28s ease;
   opacity: 0;
 }
+
 .info-sheet:not(.hidden){
   transform: translateY(0%);
   opacity: 1;
