@@ -125,7 +125,15 @@
   <div id="msg" class="hidden"></div>
 
   <!-- Overlay skeleton -->
-  <div id="skel" class="skeleton"><div class="spinner"></div>Cargando…</div>
+  <div id="skel" class="skeleton">
+    <div class="loader-container">
+      <div class="loader-circle">
+        <div class="loader-progress" id="loaderProgress">0%</div>
+      </div>
+      <p class="loader-text">Cargando experiencia,<br>puede tardar un poco según tu conexión</p>
+    </div>
+  </div>
+  
 
   <!-- Vista GLB -->
   <model-viewer id="mv" class="hidden"
@@ -542,6 +550,24 @@
 
             // Fuente GLB
             mv.src = glbUrl(model);
+
+                        // === Indicador de progreso del modelo ===
+            const progressEl = document.getElementById('loaderProgress');
+            if (mv) {
+              mv.addEventListener('progress', (e) => {
+                const ratio = Math.round(e.detail.totalProgress * 100);
+                if (progressEl) progressEl.textContent = `${ratio}%`;
+              });
+              mv.addEventListener('load', () => {
+                // desvanecer la pantalla de carga suavemente
+                const skel = document.getElementById('skel');
+                if (skel) {
+                  skel.style.opacity = '0';
+                  setTimeout(() => skel.classList.add('hidden'), 600);
+                }
+              });
+            }
+
 
             // Poster por pieza con fallback
             try {
