@@ -621,3 +621,50 @@ filter: blur(0);
   font-weight: 400;
   max-width: 80%;
 }
+
+/* === AR FAB — Glass Blue LOOK (override seguro, no rompe nada) === */
+.ar-fab {
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(48,134,135,0.55), rgba(10,40,40,0.45)),
+    linear-gradient(135deg, rgba(48,134,135,0.55), rgba(8,30,30,0.42));
+  border: 1px solid rgba(48,134,135,0.7);
+  color: #fff;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  padding: 0 18px;
+  backdrop-filter: blur(14px) saturate(200%);
+  -webkit-backdrop-filter: blur(14px) saturate(200%);
+  box-shadow:
+    0 0 12px rgba(48,134,135,0.45),
+    0 6px 22px rgba(48,134,135,0.30),
+    inset 0 2px 6px rgba(255,255,255,0.18);
+  transition:
+    background .25s ease,
+    box-shadow .25s ease,
+    transform .12s ease;
+}
+
+.ar-fab:active {
+  transform: scale(0.97);
+}
+
+/* ✨ Estado con “glow” */
+.ar-fab.is-active {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(48,134,135,0.66), rgba(20,60,60,0.48)),
+    linear-gradient(135deg, rgba(48,134,135,0.70), rgba(10,50,50,0.50));
+  border-color: rgba(48,134,135,0.9);
+  animation: pulse-glow-ar 1.8s ease-in-out infinite;
+  box-shadow:
+    0 0 18px rgba(48,134,135,0.65),
+    0 12px 28px rgba(48,134,135,0.40),
+    inset 0 2px 8px rgba(255,255,255,0.22);
+}
+
+@keyframes pulse-glow-ar {
+  0%, 100% { box-shadow: 0 0 14px rgba(48,134,135,0.45); }
+  50%      { box-shadow: 0 0 22px rgba(48,134,135,0.75); }
+}
