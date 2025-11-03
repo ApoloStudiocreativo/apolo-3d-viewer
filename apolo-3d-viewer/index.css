@@ -747,7 +747,7 @@ filter: blur(0);
   background:
     radial-gradient(circle at 30% 30%, rgba(13, 217, 253, 0.88), rgba(2, 199, 199, 0.62)),
     linear-gradient(135deg, rgba(13,110,253,0.88), rgba(0,42,120,0.62));
-  border-color: rgba(13,110,253,0.98);
+  border-color: rgba(101, 255, 247, 0.98);
   box-shadow:
     0 0 12px rgba(13,110,253,0.55),
     0 8px 24px rgba(13,110,253,0.40),
