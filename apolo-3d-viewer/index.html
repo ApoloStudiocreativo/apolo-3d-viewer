@@ -613,45 +613,58 @@
             // ✅ Botón AR unificado (optimizado para carga instantánea)
             arBtn.classList.remove('hidden');
 
-            // Precarga silenciosa de recursos AR (GLB + USDZ)
+            // ✅ Precarga silenciosa de recursos AR (GLB + USDZ)
             (async () => {
               try {
                 const preloadUrls = [ glbUrl(model), usdzUrl(model) ];
                 preloadUrls.forEach(u => {
-                  fetch(url, { method:'HEAD', cache:'force-cache', priority:'low', keepalive:true }).catch(()=>{});
+                  fetch(u, { method:'HEAD', cache:'force-cache', priority:'low', keepalive:true }).catch(()=>{});
                 });
-              } catch {}
+              } catch (err) {
+                console.warn('Precarga AR fallida:', err);
+              }
             })();
 
+
             arBtn.onclick = async () => {
+              if (arBtn.classList.contains('is-busy')) return;
+              arBtn.classList.add('is-busy');
               showARLoading();
 
-              // iOS → QuickLook inmediato (sincrónico)
-              if (isIOS) {
-                const ok = openQuickLookSync(model);
-                if (!ok) window.location.href = usdzUrl(model);
-                return;
-              }
+              const release = () => {
+                hideARLoading();
+                setTimeout(()=> arBtn.classList.remove('is-busy'), 500);
+              };
 
-              // Android → Scene Viewer precalentado
-              if (isAndroid) {
-                // Precalienta el intent con delay controlado
-                const intent = () => openARFor(model);
-                requestAnimationFrame(() => setTimeout(intent, 60));
-                return;
-              }
-
-              // WebXR o fallback → model-viewer
               try {
-                if (mv?.activateAR) {
-                  await mv.activateAR();
-                } else {
-                  openARFor(model);
+                if (isIOS) {
+                  const ok = openQuickLookSync(model);
+                  if (!ok) window.location.href = usdzUrl(model);
+                  release();
+                  return;
                 }
-              } catch {
+
+                if (isAndroid) {
+                  // usa anchor temporal para garantizar gesture event
+                  const a = document.createElement('a');
+                  a.href = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(glbUrl(model))}&mode=ar_preferred&title=${encodeURIComponent(model)}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+                  a.style.display = 'none';
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  release();
+                  return;
+                }
+
+                if (mv?.activateAR) await mv.activateAR(); else openARFor(model);
+              } catch (err) {
+                console.error('AR error:', err);
                 openARFor(model);
+              } finally {
+                release();
               }
             };
+
 
 
             if (slug) {
