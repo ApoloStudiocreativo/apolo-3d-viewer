@@ -347,6 +347,21 @@
         });
       }
 
+      /* === Fix: garantizar que se muestran aunque el evento load ya haya pasado === */
+      window.addEventListener('load', () => {
+        if (mv && mv.src && !mv.classList.contains('is-visible')) {
+          mv.classList.add('is-visible');
+          skel?.classList.add('is-fading');
+          setTimeout(()=> skel?.classList.add('hidden'), 350);
+        }
+        if (splat && splat.src && !splat.classList.contains('is-visible')) {
+          splat.classList.add('is-visible');
+          skel?.classList.add('is-fading');
+          setTimeout(()=> skel?.classList.add('hidden'), 350);
+        }
+      });
+
+
       // ---------------- AR helpers ----------------
       function openARFor(name){
         const usdz = usdzUrl(name);
