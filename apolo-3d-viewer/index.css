@@ -148,7 +148,6 @@ body.mode-splat{
   .fab-row{ display: flex; }
 }
 
-/* Botón AR ya no necesita 'right' ni 'transform' porque lo empuja el flex */
 /* 📱 AR FAB — estilo cristalino azul */
 .ar-fab {
   height: 56px;
@@ -203,6 +202,7 @@ body.mode-splat{
     box-shadow: 0 0 22px rgba(48,134,135,0.75);
   }
 }
+
 
 
 /* Botón Audio ancho configurable */
