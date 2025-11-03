@@ -841,10 +841,11 @@
       };
     })();
 
-    /* === Interacción táctil para arrastrar la cartela (UX mejorado) === */
+/* === Interacción táctil para arrastrar la cartela (UX mejorado + fix reopen) === */
 (function enableInfoSheetDrag() {
   const sheet = document.getElementById('infoSheet');
-  if (!sheet) return;
+  const infoBtn = document.getElementById('infoBtn');
+  if (!sheet || !infoBtn) return;
 
   let startY = 0;
   let currentY = 0;
@@ -867,14 +868,24 @@
     }
   };
 
+  const closeSheetSmooth = () => {
+    sheet.style.transition = 'transform .28s ease, opacity .28s ease';
+    sheet.style.transform = 'translateY(100%)';
+    sheet.style.opacity = '0';
+    // pequeño retraso para permitir la animación antes del hidden
+    setTimeout(() => {
+      sheet.classList.add('hidden');
+      sheet.setAttribute('aria-hidden','true');
+      sheet.style.transform = '';
+      sheet.style.opacity = '';
+    }, 280);
+  };
+
   const onEnd = () => {
     if (!isDragging) return;
     sheet.style.transition = 'transform .28s ease, opacity .28s ease';
     if (currentY > threshold) {
-      sheet.classList.add('hidden');
-      sheet.setAttribute('aria-hidden','true');
-      sheet.style.transform = 'translateY(100%)';
-      sheet.style.opacity = '0';
+      closeSheetSmooth();
     } else {
       sheet.style.transform = 'translateY(0)';
       sheet.style.opacity = '1';
@@ -884,14 +895,19 @@
     currentY = 0;
   };
 
+  // Escuchar gestos táctiles
   sheet.addEventListener('touchstart', onStart, { passive: true });
   sheet.addEventListener('touchmove', onMove, { passive: true });
   sheet.addEventListener('touchend', onEnd);
+
+  // Reapertura desde el botón de info
+  infoBtn.addEventListener('click', () => {
+    sheet.classList.remove('hidden');
+    sheet.setAttribute('aria-hidden','false');
+    sheet.style.transform = 'translateY(0)';
+    sheet.style.opacity = '1';
+  });
 })();
-
-
-
-
 
   </script>
 </body>
