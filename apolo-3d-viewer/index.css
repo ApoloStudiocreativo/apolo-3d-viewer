@@ -148,15 +148,15 @@ body.mode-splat{
   .fab-row{ display: flex; }
 }
 
-/* === AR FAB — Estilo cristal azul (mismo efecto que el botón de audio) === */
+/* 📱 AR FAB — estilo cristalino azul */
 .ar-fab {
   height: 56px;
   min-width: 180px;
   border-radius: 18px;
   background:
-    radial-gradient(circle at 30% 30%, rgba(255, 97, 97, 0.7), rgba(255, 97, 97, 0.7)),
-    linear-gradient(135deg, rgba(255, 97, 97, 0.7), rgba(255, 97, 97, 0.7));
-  border: 1px solid rgba(133, 5, 5, 0.7);
+    radial-gradient(circle at 30% 30%, rgba(48,134,135,0.55), rgba(10,40,40,0.45)),
+    linear-gradient(135deg, rgba(48,134,135,0.55), rgba(8,30,30,0.42));
+  border: 1px solid rgba(48,134,135,0.7);
   color: #fff;
   display: flex;
   align-items: center;
@@ -170,47 +170,38 @@ body.mode-splat{
   backdrop-filter: blur(14px) saturate(200%);
   -webkit-backdrop-filter: blur(14px) saturate(200%);
   box-shadow:
-    0 0 12px rgba(94, 255, 0, 0.45),
-    0 6px 22px rgba(0, 255, 13, 0.3),
-    inset 0 2px 6px rgba(30, 255, 0, 0.18);
-  transition:
-    transform .12s ease,
-    box-shadow .25s ease,
-    background .25s ease,
-    border-color .25s ease;
+    0 0 12px rgba(48,134,135,0.45),
+    0 6px 22px rgba(48,134,135,0.30),
+    inset 0 2px 6px rgba(255,255,255,0.18);
+  transition: all 0.25s ease;
   z-index: 20;
-  transform-origin: center;
-  will-change: transform, box-shadow, background;
 }
 
-/* 💡 Mismo “tap” que el botón de audio */
 .ar-fab:active {
   transform: scale(0.97);
-  background:
-    radial-gradient(circle at 30% 30%, rgba(0, 255, 221, 0.66), rgba(20,60,60,.48)),
-    linear-gradient(135deg, rgba(94, 255, 0, 0.7), rrgba(123, 255, 0, 0.5);
-  border-color: rgba(48,134,135,.9);
-  box-shadow:
-    0 0 18px rgba(145, 255, 0, 0.65),
-    0 12px 28px rgba(59, 236, 4, 0.4),
-    inset 0 2px 8px rgba(255,255,255,.22);
 }
 
-/* ✨ Estado “activo” con animación suave */
+/* ✨ Estado activo / glow pulsante */
 .ar-fab.is-active {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(48,134,135,0.66), rgba(20,60,60,0.48)),
+    linear-gradient(135deg, rgba(48,134,135,0.70), rgba(10,50,50,0.50));
+  border-color: rgba(48,134,135,0.9);
   animation: pulse-glow-ar 1.8s ease-in-out infinite;
+  box-shadow:
+    0 0 18px rgba(48,134,135,0.65),
+    0 12px 28px rgba(48,134,135,0.40),
+    inset 0 2px 8px rgba(255,255,255,0.22);
 }
 
 @keyframes pulse-glow-ar {
-  0%, 100% { box-shadow: 0 0 14px rgba(94, 255, 0, 0.45); }
-  50%      { box-shadow: 0 0 22px rgba(94, 255, 0, 0.75); }
+  0%,100% {
+    box-shadow: 0 0 14px rgba(48,134,135,0.45);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(48,134,135,0.75);
+  }
 }
-
-/* 🧩 FIX: evitar desplazamientos en hover */
-.ar-fab:hover {
-  transform: none;
-}
-
 
 
 
