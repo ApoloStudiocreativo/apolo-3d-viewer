@@ -396,3 +396,45 @@ body.in-ar .audio-fab,
 body.in-ar .info-sheet {
   display: none !important;
 }
+
+/* ===== Botón AR – pulidos ligeros ===== */
+
+/* Estado ocupado/disabled: evita dobles toques mientras abre AR */
+.ar-fab.is-busy,
+.ar-fab[disabled]{
+  opacity: .65;
+  cursor: wait;
+  filter: saturate(.8);
+  pointer-events: none;
+}
+
+/* Hover y focus más claros (sin cambiar tu estilo cristal) */
+@media (hover:hover){
+  .ar-fab:not(.is-busy):hover{
+    box-shadow:
+      0 0 16px rgba(48,134,135,.55),
+      0 10px 26px rgba(48,134,135,.35),
+      inset 0 3px 8px rgba(255,255,255,.22);
+    transform: translateY(-1px);
+  }
+}
+.ar-fab:focus-visible{
+  outline: none;
+  box-shadow:
+    0 0 0 3px rgba(64,203,203,.35),
+    0 0 16px rgba(48,134,135,.55);
+}
+
+/* Reduce-motion: quita animaciones/pulsos si el usuario lo prefiere */
+@media (prefers-reduced-motion: reduce){
+  .ar-fab,
+  .ar-fab.is-active{
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Micro feedback al “click” sin marear */
+.ar-fab:active:not(.is-busy){
+  transform: scale(.985);
+}

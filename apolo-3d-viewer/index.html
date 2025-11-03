@@ -686,6 +686,41 @@
               openARFor(figure);
             };
 
+            // --- Pulido botón AR: evita dobles clics y mejora accesibilidad ---
+function setArBusy(state){
+  if (!arBtn) return;
+  arBtn.classList.toggle('is-busy', state);
+  arBtn.toggleAttribute('disabled', state);
+  arBtn.setAttribute('aria-busy', state ? 'true' : 'false');
+}
+
+const _originalArOnClick = arBtn.onclick; // preserva tu handler actual
+arBtn.onclick = (ev) => {
+  if (arBtn.classList.contains('is-busy')) return; // ya en progreso
+  setArBusy(true);
+
+  // haptics suave si está disponible
+  try { navigator.vibrate && navigator.vibrate(8); } catch {}
+
+  // llama a tu lógica original
+  _originalArOnClick && _originalArOnClick.call(arBtn, ev);
+
+  // safety timeout por si no vuelve el visibilitychange
+  // (p.ej. usuario cancela visor AR)
+  clearTimeout(arBtn._busyTimer);
+  arBtn._busyTimer = setTimeout(() => setArBusy(false), 8000);
+};
+
+// al volver del visor (ya tienes visibilitychange para el overlay),
+// aquí liberamos el botón también:
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    clearTimeout(arBtn._busyTimer);
+    setArBusy(false);
+  }
+});
+
+
             if (slug) {
               infoData = await loadInfoDataOrFallback(infoData);
               renderInfo(slug);
