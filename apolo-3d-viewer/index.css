@@ -712,3 +712,30 @@ filter: blur(0);
   0%, 100% { box-shadow: 0 0 14px rgba(48,134,135,0.45); }
   50%      { box-shadow: 0 0 22px rgba(48,134,135,0.75); }
 }
+
+/* === Fix movimiento raro del botón AR en hover/active === */
+
+/* 1) No queremos que HOVER cambie la posición ni aplique transform extra */
+@media (hover:hover) {
+  .ar-fab:hover {
+    /* Si no usas translateX(-50%), esto será un no-op */
+    transform: none;
+  }
+  /* Si el botón está centrado con translateX(-50%) desde el <style> inline,
+     al hacer hover mantenemos ese translateX para que no “salte” */
+  .ar-fab[style*="translateX(-50%)"]:hover {
+    transform: translateX(-50%);
+  }
+}
+
+/* 2) En :active, conserva el centrado si estás usando translateX(-50%) */
+.ar-fab:active {
+  /* En layout “a la derecha” (sin translateX) esto sólo hará el pequeño scale */
+  transform: scale(0.97);
+}
+
+/* Si el inline del <head> centra el botón con translateX(-50%),
+   aquí evitamos que :active lo reemplace y cause el salto */
+.ar-fab[style*="translateX(-50%)"]:active {
+  transform: translateX(-50%) scale(0.97);
+}
