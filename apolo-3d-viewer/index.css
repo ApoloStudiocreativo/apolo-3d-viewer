@@ -495,3 +495,21 @@ filter: blur(0);
   letter-spacing: .2px;
 }
 .ar-loading .spinner + span { display:inline-block; vertical-align: middle; }
+
+/* 🔒 Evitar zoom del navegador en la UI (no toca <model-viewer>) */
+#topBar,
+#infoSheet,
+.fab-row,
+.info-btn,
+.audio-fab,
+.ar-fab {
+  touch-action: manipulation;              /* evita doble-tap zoom */
+  -ms-touch-action: manipulation;          /* IE/Edge legacy */
+}
+
+/* En iOS ayuda a que no “salte” el zoom por gesto en la UI */
+#topBar *,
+#infoSheet *,
+.fab-row * {
+  touch-action: manipulation;
+}

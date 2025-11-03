@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <title>Museo Virtual San Joaquín y Santa Ana</title>
 
   <!-- Tipografía para títulos -->
@@ -932,6 +932,53 @@ if (arBtn) {
     sheet.style.transform = 'translateY(0)';
     sheet.style.opacity = '1';
   });
+})();
+
+/* 🔒 Bloquear page-zoom del navegador solo cuando el gesto ocurre sobre la UI */
+(function preventPageZoomOnUI(){
+  const uiRoots = ['#topBar', '#infoSheet', '#fabRow'];
+
+  const isInUI = (target) => {
+    if (!target || !target.closest) return false;
+    return uiRoots.some(sel => target.closest(sel));
+  };
+
+  /* iOS: gesturestart/gesturechange → pinch page-zoom */
+  const onGesture = (e) => {
+    if (isInUI(e.target)) {
+      e.preventDefault();  // requiere passive:false
+    }
+  };
+  document.addEventListener('gesturestart', onGesture, { passive:false, capture:true });
+  document.addEventListener('gesturechange', onGesture, { passive:false, capture:true });
+
+  /* Trackpad pinch (Ctrl+wheel) en Desktop → evita zoom si es sobre UI */
+  window.addEventListener('wheel', (e) => {
+    if (e.ctrlKey && isInUI(e.target)) {
+      e.preventDefault();
+    }
+  }, { passive:false, capture:true });
+
+  /* Evitar double-tap zoom en iOS SOLO en UI */
+  let lastTouchEnd = 0;
+  const onTouchEnd = (e) => {
+    if (!isInUI(e.target)) return;
+    const now = Date.now();
+    if (now - lastTouchEnd < 350) {
+      e.preventDefault(); // suprime double-tap zoom
+    }
+    lastTouchEnd = now;
+  };
+  document.addEventListener('touchend', onTouchEnd, { passive:false, capture:true });
+
+  /* Extra: evita scroll-bounce que a veces dispara zoom accidental en UI */
+  const onTouchMove = (e) => {
+    if (isInUI(e.target)) {
+      // permitimos desplazamiento en la cartela, pero no “pinch zoom” de página
+      if (e.scale && e.scale !== 1) e.preventDefault();
+    }
+  };
+  document.addEventListener('touchmove', onTouchMove, { passive:false, capture:true });
 })();
 
   </script>
