@@ -15,7 +15,7 @@
   <link rel="preload" href="/index.css" as="style" fetchpriority="high">
   <link rel="stylesheet" href="/index.css">
 
-  <!-- Model Viewer -->
+  <!-- model-viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js" defer></script>
 </head>
 
@@ -26,13 +26,13 @@
     <button id="infoBtn" class="info-btn" type="button" aria-label="Mostrar información">Información</button>
   </header>
 
-  <!-- Mensaje si faltan parámetros -->
+  <!-- Mensaje / errores -->
   <div id="msg" class="hidden"></div>
 
   <!-- Skeleton -->
   <div id="skel" class="skeleton"><div class="spinner"></div>Cargando…</div>
 
-  <!-- Vista GLB -->
+  <!-- Visor GLB -->
   <model-viewer id="mv" class="hidden"
     poster="/assets/posters/placeholder.webp"
     alt="Modelo 3D"
@@ -44,60 +44,67 @@
     ar-placement="floor"
     environment-image="neutral"
     shadow-intensity="1"
-    shadow-softness="0.9"
     exposure="1.2">
   </model-viewer>
 
-  <!-- Vista SPLAT -->
+  <!-- SPLAT -->
   <iframe id="splat" class="hidden" loading="lazy"
     allow="autoplay; fullscreen; xr-spatial-tracking; camera; microphone; gyroscope; accelerometer"></iframe>
 
   <!-- Poster SPLAT -->
   <div id="splatPoster" class="splat-poster hidden" aria-hidden="true"></div>
 
-  <!-- Botones flotantes -->
+  <!-- FABs (se quedan, aunque no los usemos aún) -->
   <div id="fabRow" class="fab-row">
-    <button id="audioBtn" class="audio-fab hidden" type="button" aria-label="Reproducir audio">
-      <svg class="icon-play" viewBox="0 0 24 24" fill="none">
+    <button id="audioBtn" class="audio-fab hidden" type="button" aria-pressed="false" aria-label="Reproducir audio">
+      <svg class="icon-play" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M4 9v6h3l5 4V5L7 9H4z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
         <path d="M15 10.5a3.5 3.5 0 010 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
         <path d="M17.5 8a6 6 0 010 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
       </svg>
-      <svg class="icon-pause" viewBox="0 0 24 24" fill="none">
+      <svg class="icon-pause" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <rect x="6" y="5" width="4" height="14" rx="1.2" stroke="currentColor" stroke-width="1.8"/>
         <rect x="14" y="5" width="4" height="14" rx="1.2" stroke="currentColor" stroke-width="1.8"/>
       </svg>
     </button>
 
     <button id="arBtn" class="ar-fab hidden" type="button" aria-label="Ver en AR">
-      <svg viewBox="0 0 24 24" fill="none">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path d="M12 3l8.66 5v8L12 21l-8.66-5V8L12 3zM12 3v18M3.34 8L12 13l8.66-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       Ver en AR
     </button>
   </div>
 
-  <!-- Overlay carga AR -->
-  <div id="arLoading" class="ar-loading hidden" aria-hidden="true">
-    <div class="spinner"></div><span>Abriendo AR…</span>
-  </div>
-
   <!-- Cartela -->
-  <div id="infoSheet" class="info-sheet hidden">
+  <div id="infoSheet" class="info-sheet hidden" aria-hidden="true">
     <div class="info-sheet__drag"></div>
-    <button id="infoClose" class="info-sheet__close" aria-label="Cerrar información">✕</button>
+    <button id="infoClose" class="info-sheet__close" aria-label="Cerrar">✕</button>
     <div class="info-sheet__content">
       <h2 id="infoTitle">Obra</h2>
-      <p id="infoMeta" class="info-meta"></p>
-      <p id="infoDesc" class="info-desc"></p>
+      <p class="info-meta" id="infoMeta"></p>
+      <p class="info-desc" id="infoDesc"></p>
     </div>
   </div>
 
-  <!-- Script -->
   <script>
   document.addEventListener('DOMContentLoaded', () => {
+    // ---------- Utilidades ----------
+    const $ = id => document.getElementById(id);
+    const mv = $('mv'), splat = $('splat'), skel = $('skel'), msg = $('msg');
+    const topBar = $('topBar'), pieceTitle = $('pieceTitle'), infoBtn = $('infoBtn');
+    const infoSheet = $('infoSheet'), infoClose = $('infoClose');
+    const infoTitle = $('infoTitle'), infoMeta = $('infoMeta'), infoDesc = $('infoDesc');
+    const splatPoster = $('splatPoster');
 
-    // --- Config inicial ---
+    function show(el){ el && el.classList.remove('hidden'); }
+    function hide(el){ el && el.classList.add('hidden'); }
+    function setError(text){
+      msg.innerHTML = text;
+      show(msg); hide(skel); hide(mv); hide(splat);
+    }
+
+    // ---------- Detección de ruta ----------
     const qs = new URLSearchParams(location.search);
     let type = (qs.get('type') || '').toLowerCase();
     let model = (qs.get('model') || '').toLowerCase();
@@ -105,89 +112,89 @@
 
     if (!type) {
       const parts = location.pathname.split('/').filter(Boolean);
-      if (parts[0] === 'splat' && parts[1]) type = 'splat', figure = parts[1];
-      else if (parts.length === 1) type = 'glb', model = parts[0];
+      if (parts[0] === 'splat' && parts[1]) { type = 'splat'; figure = parts[1]; }
+      else if (parts.length === 1) { type = 'glb'; model = parts[0]; }
     }
     const slug = model || figure || '';
 
-    const mv = document.getElementById('mv');
-    const splat = document.getElementById('splat');
-    const skel = document.getElementById('skel');
-    const topBar = document.getElementById('topBar');
-    const infoBtn = document.getElementById('infoBtn');
-    const infoSheet = document.getElementById('infoSheet');
-    const infoClose = document.getElementById('infoClose');
-    const infoTitle = document.getElementById('infoTitle');
-    const infoMeta = document.getElementById('infoMeta');
-    const infoDesc = document.getElementById('infoDesc');
-
-    const glbUrl = n => `/models/${n}/${n}.glb`;
-    const usdzUrl = n => `/models/${n}/${n}.usdz`;
-    const splatUrl = n => `/splat/${n}/index.html`;
-
-    async function exists(url){ try{const r=await fetch(url,{method:'HEAD'});return r.ok}catch{return false}}
-
-    const infoData = {
-      "cristo-yacente": { title: "Cristo Yacente", meta: "s. XVII · Autor desconocido", desc: "Escultura barroca de Cristo en reposo." },
-      "virgen-romanica": { title: "Virgen Románica", meta: "s. XII · Madera policromada", desc: "Talla medieval de la Virgen con el Niño." }
-    };
-
-    // --- Cartela ---
+    // ---------- Cartela ----------
     function renderInfo(slug){
-      const d = infoData[slug] || {};
-      infoTitle.textContent = d.title || slug.replace(/-/g,' ');
-      infoMeta.textContent = d.meta || '';
-      infoDesc.textContent = d.desc || 'Descripción pendiente.';
-      topBar.classList.remove('hidden');
+      // Datos mínimos (se puede conectar a info.json después)
+      const fallbackTitle = slug ? slug.replace(/-/g,' ') : 'Obra';
+      infoTitle.textContent = fallbackTitle;
+      pieceTitle.textContent = fallbackTitle;
+      infoMeta.textContent = '';
+      infoDesc.textContent = '';
+      show(topBar);
     }
-    function openSheet(){ infoSheet.classList.remove('hidden'); }
-    function closeSheet(){ infoSheet.classList.add('hidden'); }
+    infoBtn.onclick = () => { renderInfo(slug); show(infoSheet); infoSheet.setAttribute('aria-hidden','false'); };
+    infoClose.onclick = () => { hide(infoSheet); infoSheet.setAttribute('aria-hidden','true'); };
+    infoSheet.addEventListener('click', (e)=>{ if (e.target === infoSheet) infoClose.click(); });
 
-    infoBtn.onclick = openSheet;
-    infoClose.onclick = closeSheet;
-    infoSheet.addEventListener('click', e => { if (e.target === infoSheet) closeSheet(); });
+    // ---------- Carga GLB ----------
+    function loadGLB(name){
+      // src y poster (no usamos HEAD para evitar problemas de servidores que no soportan HEAD)
+      mv.src = `/models/${name}/${name}.glb`;
+      mv.poster = `/assets/posters/${name}.webp`;
 
-    // --- Inicialización ---
-    (async()=>{
-      try {
-        if(type==='glb' && model){
-          mv.src = glbUrl(model);
+      // eventos de carga/errores
+      mv.addEventListener('load', () => { hide(skel); show(mv); }, { once:true });
+      mv.addEventListener('error', () => {
+        console.warn('Fallo al cargar GLB o póster, probando placeholder.');
+        mv.poster = '/assets/posters/placeholder.webp';
+        show(mv);
+        hide(skel);
+      }, { once:true });
 
-          const poster = `/assets/posters/${model}.webp`;
-          mv.poster = (await exists(poster)) ? poster : '/assets/posters/placeholder.webp';
+      renderInfo(name);
+      // si por lo que sea no dispara 'load' (GLB roto), a los 3s mostramos igualmente
+      setTimeout(()=>{ if (!mv || mv.classList.contains('hidden')) { show(mv); hide(skel); }}, 3000);
+    }
 
-          renderInfo(model);
-          mv.classList.remove('hidden');
-          skel.classList.add('hidden');
-          return;
-        }
+    // ---------- Carga SPLAT ----------
+    function loadSPLAT(name){
+      // Poster de espera
+      splatPoster.style.backgroundImage = "url('/assets/posters/placeholder.webp')";
+      show(splatPoster);
+      requestAnimationFrame(()=> splatPoster.classList.add('visible'));
 
-        if(type==='splat' && figure){
-          const splatPoster = document.getElementById('splatPoster');
-          splatPoster.style.backgroundImage = "url('/assets/posters/placeholder.webp')";
-          splatPoster.classList.remove('hidden');
-          requestAnimationFrame(()=>splatPoster.classList.add('visible'));
-          (async()=>{
-            const p = `/assets/posters/${figure}.webp`;
-            if(await exists(p)) splatPoster.style.backgroundImage = `url('${p}')`;
-          })();
-          splat.src = splatUrl(figure);
-          splat.classList.remove('hidden');
-          skel.classList.add('hidden');
-          renderInfo(figure);
-          return;
-        }
+      // Intento de póster específico (sin HEAD; si 404, el navegador lo gestiona solo)
+      const img = new Image();
+      img.onload = () => { splatPoster.style.backgroundImage = `url('/assets/posters/${name}.webp')`; };
+      img.src = `/assets/posters/${name}.webp`;
 
-        // Fallback
-        document.getElementById('msg').innerHTML = '<b>URL inválida</b>';
-        document.getElementById('msg').classList.remove('hidden');
-        skel.classList.add('hidden');
-      } catch(e){
-        console.error(e);
-        skel.classList.add('hidden');
+      // Carga del visor SPLAT (iframe)
+      splat.onload = () => {
+        hide(skel);
+        show(splat);
+        splatPoster.classList.add('fade-out');
+        setTimeout(()=> hide(splatPoster), 600);
+      };
+      splat.onerror = () => {
+        setError(`<b>No se pudo cargar el SPLAT:</b> /splat/${name}/index.html`);
+      };
+      splat.src = `/splat/${name}/index.html`;
+
+      renderInfo(name);
+      // safety: si no llamara onload
+      setTimeout(()=>{ if (splat.classList.contains('hidden')) { show(splat); hide(skel); }}, 4000);
+    }
+
+    // ---------- Inicio ----------
+    try{
+      if (type === 'glb' && model){
+        document.body.classList.remove('mode-splat');
+        loadGLB(model);
+      } else if (type === 'splat' && figure){
+        document.body.classList.add('mode-splat');
+        loadSPLAT(figure);
+      } else {
+        setError(`<b>Ruta/URL inválida.</b><br>Ejemplos:<br>/cristo-yacente<br>/splat/calvo-anillo`);
       }
-    })();
-
+    }catch(err){
+      console.error(err);
+      setError('Error inesperado al inicializar el visor.');
+    }
   });
   </script>
 </body>
