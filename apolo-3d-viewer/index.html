@@ -242,7 +242,7 @@
       const splatUrl = (name) => `/splat/${name}/index.html`;
 
       async function exists(url){
-        try{ const r = await fetch(url, { method:'HEAD', cache:'force-cache' }); return r.ok; }
+        try{ const r = await fetch(url, { method:'HEAD', cache:'force-cache', priority:'low', keepalive:true }); return r.ok; }
         catch{ return false; }
       }
 
@@ -610,21 +610,49 @@
               mv.appendChild(blocker);
             }
 
-            // Botón AR unificado (iOS síncrono + overlay)
+            // ✅ Botón AR unificado (optimizado para carga instantánea)
             arBtn.classList.remove('hidden');
-            arBtn.onclick = () => {
+
+            // Precarga silenciosa de recursos AR (GLB + USDZ)
+            (async () => {
+              try {
+                const preloadUrls = [ glbUrl(model), usdzUrl(model) ];
+                preloadUrls.forEach(u => {
+                  fetch(url, { method:'HEAD', cache:'force-cache', priority:'low', keepalive:true }).catch(()=>{});
+                });
+              } catch {}
+            })();
+
+            arBtn.onclick = async () => {
               showARLoading();
+
+              // iOS → QuickLook inmediato (sincrónico)
               if (isIOS) {
                 const ok = openQuickLookSync(model);
-                if (!ok) window.location.href = usdzUrl(model); // fallback duro
+                if (!ok) window.location.href = usdzUrl(model);
                 return;
               }
-              if (mv?.activateAR) {
-                mv.activateAR().catch(()=> openARFor(model));
-              } else {
+
+              // Android → Scene Viewer precalentado
+              if (isAndroid) {
+                // Precalienta el intent con delay controlado
+                const intent = () => openARFor(model);
+                requestAnimationFrame(() => setTimeout(intent, 60));
+                return;
+              }
+
+              // WebXR o fallback → model-viewer
+              try {
+                if (mv?.activateAR) {
+                  await mv.activateAR();
+                } else {
+                  openARFor(model);
+                }
+              } catch {
                 openARFor(model);
               }
             };
+
 
             if (slug) {
               infoData = await loadInfoDataOrFallback(infoData);
