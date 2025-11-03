@@ -625,6 +625,9 @@
               } else {
                 openARFor(model);
               }
+
+              arBtn.classList.add('is-active');
+              setTimeout(() => arBtn.classList.remove('is-active'), 2000);
             };
 
             if (slug) {
