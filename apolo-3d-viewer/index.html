@@ -199,7 +199,7 @@
   <!-- Cartela -->
   <div id="infoSheet" class="info-sheet hidden" aria-hidden="true">
     <div class="info-sheet__drag"></div>
-    <button id="infoClose" class="info-sheet__close" aria-label="Cerrar">✕</button>
+    <button id="infoClose" class="info-sheet__close" aria-label="Cerrar información">✕</button>
     <div class="info-sheet__content">
       <h2 id="infoTitle">Obra</h2>
       <p class="info-meta" id="infoMeta"></p>
@@ -261,6 +261,13 @@
       const infoMeta   = document.getElementById('infoMeta');
       const infoDesc   = document.getElementById('infoDesc');
       const audioBtn   = document.getElementById('audioBtn');
+
+      // === Accesibilidad mejorada ===
+      arBtn.setAttribute('role', 'button');
+      audioBtn.setAttribute('role', 'button');
+      arBtn.setAttribute('aria-live', 'polite');
+      audioBtn.setAttribute('aria-live', 'polite');
+
 
       // ---------------- Rutas y helpers ----------------
       const glbUrl   = (name) => `/models/${name}/${name}.glb`;
@@ -639,6 +646,8 @@
             // Botón AR unificado (iOS síncrono + overlay)
             arBtn.classList.remove('hidden');
             arBtn.onclick = () => {
+
+              if (navigator.vibrate) navigator.vibrate(15);
               showARLoading();
               if (isIOS) {
                 const ok = openQuickLookSync(model);

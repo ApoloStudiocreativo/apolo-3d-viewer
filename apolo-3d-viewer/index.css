@@ -457,3 +457,13 @@ model-viewer[src] {
   opacity: 0;
   filter: blur(12px);
 }
+
+/* === Feedback visual universal === */
+button:active {
+  transform: scale(0.97);
+  transition: transform 0.1s ease-out;
+}
+button:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+}
