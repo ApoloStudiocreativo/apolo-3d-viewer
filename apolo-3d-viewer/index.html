@@ -1,11 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#0f1115">
-
   <title>Museo Virtual San Joaquín y Santa Ana</title>
 
   <!-- Tipografía -->
@@ -24,104 +22,12 @@
   <link rel="preload" as="image" href="/assets/hdr/museo-suave.hdr" fetchpriority="low">
   <link rel="preload" as="image" href="/assets/hdr/museo-suave-blur.webp" fetchpriority="low">
 
-  <!-- Posters: prioridad adaptativa -->
-  <link rel="preload" as="image" href="/assets/posters/placeholder.webp" fetchpriority="high" media="(max-width: 1024px)">
+  <!-- Posters -->
+  <link rel="preload" as="image" href="/assets/posters/placeholder.webp" fetchpriority="high">
   <link rel="preload" as="image" href="/assets/posters/cristo-yacente.webp" fetchpriority="auto">
 
-  <!-- Model Viewer (GLB) -->
+  <!-- Model Viewer -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js" defer></script>
-
-  <style>
-    :root{
-      --bg:#0f1115;
-      --text:#e9eef7;
-      --muted:#9aa4b2;
-      --brand:#40cbcb;
-      --shadow:0 10px 30px rgba(0,0,0,.35);
-      --fab-bottom: max(18px, env(safe-area-inset-bottom));
-    }
-    html,body{margin:0;height:100%;background:var(--bg);color:var(--text);overflow:hidden}
-    .full{position:fixed;inset:0}
-    .hidden{display:none!important}
-
-    /* Contenedores de vista */
-    model-viewer, iframe#splat {
-      width:100vw; height:100dvh; display:block; background:var(--bg);
-    }
-    iframe#splat{border:0}
-
-    /* Mensaje de error/ayuda */
-    #msg{
-      position:fixed; inset:0;
-      display:flex; align-items:center; justify-content:center;
-      font:500 16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      text-align:center; color:var(--muted);
-      padding:24px;
-    }
-    #msg b{color:#ff6464}
-
-    /* Botón AR: visible solo en móvil/tablet */
-    .ar-fab{
-      position:fixed; left:50%; bottom: var(--fab-bottom); transform:translateX(-50%);
-      display:none; /* por defecto oculto, se activa con media query */
-      gap:10px; align-items:center; justify-content:center;
-      height:56px; padding:0 18px; min-width:180px;
-      border:none; border-radius:16px; cursor:pointer;
-      background:var(--brand); color:white; font-weight:700; font-size:16px; letter-spacing:.2px;
-      box-shadow:var(--shadow);
-      z-index:20;
-    }
-    .ar-fab:active{transform:translateX(-50%) scale(.98)}
-    .ar-fab svg{width:22px;height:22px}
-
-    /* Solo móvil/tablet */
-    @media (max-width:1024px){
-      .ar-fab{display:flex}
-    }
-
-    /* Esqueleto simple mientras carga */
-    .skeleton{
-      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-      background:linear-gradient(160deg,#101319 0%,#0b0e13 100%);
-      color:#7b8696; font:500 14px system-ui,-apple-system,Segoe UI,Roboto,Arial;
-      z-index:50;
-    }
-    .spinner{width:28px;height:28px;border-radius:50%;border:3px solid rgba(255,255,255,.15);border-top-color:#fff;animation:rot .9s linear infinite;margin-right:10px}
-    @keyframes rot{to{transform:rotate(360deg)}}
-
-    /* Poster previo al SPLAT */
-    .splat-poster {
-      position: fixed; inset: 0;
-      background: center center / cover no-repeat #0f1115;
-      z-index: 30;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .25s ease;
-    }
-    .splat-poster.visible { opacity: 1; }
-    .splat-poster.fade-out {
-      opacity: 0;
-      transition: opacity .45s ease-out;
-    }
-
-    /* Overlay "Abriendo AR…" */
-    .ar-loading{
-      position: fixed; inset: 0; z-index: 60;
-      display: grid; place-items: center;
-      background: rgba(10,12,16,.65);
-      backdrop-filter: blur(6px);
-      opacity: 0; pointer-events: none;
-      transition: opacity .25s ease;
-    }
-    .ar-loading.visible{ opacity: 1; pointer-events: auto; }
-    .ar-loading .spinner{ margin-right: 10px; }
-    .ar-loading span{
-      color: var(--text);
-      font: 600 14px/1.2 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      letter-spacing: .2px;
-    }
-    .ar-loading .spinner + span { display:inline-block; vertical-align: middle; }
-  </style>
 </head>
 
 <body>
@@ -139,7 +45,7 @@
 
   <!-- Vista GLB -->
   <model-viewer id="mv" class="hidden"
-    poster="/models/placeholder.webp"
+    poster="/assets/posters/placeholder.webp"
     alt="Modelo 3D"
     camera-controls
     touch-action="pan-y"
@@ -168,22 +74,11 @@
 
   <!-- FABs -->
   <div id="fabRow" class="fab-row">
-    <!-- AUDIO (izquierda) -->
     <button id="audioBtn" class="audio-fab hidden" type="button" aria-label="Reproducir audio" aria-pressed="false">
-      <!-- Icono ALTAVOZ (parado) -->
-      <svg class="icon-play" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <path d="M4 9v6h3l5 4V5L7 9H4z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M15 10.5a3.5 3.5 0 010 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        <path d="M17.5 8a6 6 0 010 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      </svg>
-      <!-- Icono PAUSA (reproduciendo) -->
-      <svg class="icon-pause" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <rect x="6" y="5" width="4" height="14" rx="1.2" stroke="currentColor" stroke-width="1.8"/>
-        <rect x="14" y="5" width="4" height="14" rx="1.2" stroke="currentColor" stroke-width="1.8"/>
-      </svg>
+      <svg class="icon-play" viewBox="0 0 24 24" fill="none"><path d="M4 9v6h3l5 4V5L7 9H4z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 10.5a3.5 3.5 0 010 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M17.5 8a6 6 0 010 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <svg class="icon-pause" viewBox="0 0 24 24" fill="none"><rect x="6" y="5" width="4" height="14" rx="1.2" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="5" width="4" height="14" rx="1.2" stroke="currentColor" stroke-width="1.8"/></svg>
     </button>
 
-    <!-- AR (derecha) -->
     <button id="arBtn" class="ar-fab hidden" type="button" aria-label="Ver en AR">
       <svg viewBox="0 0 24 24" fill="none"><path d="M12 3l8.66 5v8L12 21l-8.66-5V8L12 3zM12 3v18M3.34 8L12 13l8.66-5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Ver en AR
@@ -210,709 +105,111 @@
   <!-- Link AR iOS oculto -->
   <a id="iosARLink" rel="ar" style="display:none" aria-hidden="true"></a>
 
+  <!-- Script principal -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
 
-          // === OPTIMIZACIÓN DE CARGA (Paso 4) ===
-    // Prioriza carga visual del modelo sobre los metadatos
-    document.documentElement.style.scrollBehavior = 'auto';
-    if ('loading' in HTMLImageElement.prototype) {
-      // habilita carga diferida nativa
-      document.querySelectorAll('img').forEach(img => img.loading = 'lazy');
-    }
-
-      // ---------------- URL: soporta query *y* pathname limpias ----------------
-      const qs = new URLSearchParams(location.search);
-      let type   = (qs.get('type')   || '').toLowerCase();   // 'glb' | 'splat'
-      let model  = (qs.get('model')  || '').toLowerCase();
-      let figure = (qs.get('figure') || '').toLowerCase();
-      
-      // Prioriza carga visual del modelo sobre los metadatos
+      // === OPTIMIZACIÓN DE CARGA ===
       document.documentElement.style.scrollBehavior = 'auto';
       if ('loading' in HTMLImageElement.prototype) {
-        // habilita carga diferida nativa
         document.querySelectorAll('img').forEach(img => img.loading = 'lazy');
       }
 
+      const qs = new URLSearchParams(location.search);
+      let type = (qs.get('type') || '').toLowerCase();
+      let model = (qs.get('model') || '').toLowerCase();
+      let figure = (qs.get('figure') || '').toLowerCase();
       if (!type) {
         const parts = location.pathname.split('/').filter(Boolean);
-        if (parts[0] === 'splat' && parts[1]) {
-          type = 'splat'; figure = parts[1];
-        } else if (parts[0] === 'glb' && parts[1]) {
-          type = 'glb'; model = parts[1];
-        } else if (parts.length === 1) {
-          type = 'glb'; model = parts[0]; // /:slug → GLB por defecto
-        }
+        if (parts[0] === 'splat' && parts[1]) type = 'splat', figure = parts[1];
+        else if (parts[0] === 'glb' && parts[1]) type = 'glb', model = parts[1];
+        else if (parts.length === 1) type = 'glb', model = parts[0];
       }
       const slug = model || figure || '';
 
-      // ---------------- Elementos del DOM ----------------
-      const mv      = document.getElementById('mv');
-      const splat   = document.getElementById('splat');
-      const skel    = document.getElementById('skel');
-      const msg     = document.getElementById('msg');
-      const arBtn   = document.getElementById('arBtn');
-      const topBar  = document.getElementById('topBar');
+      const mv = document.getElementById('mv');
+      const splat = document.getElementById('splat');
+      const skel = document.getElementById('skel');
+      const msg = document.getElementById('msg');
+      const arBtn = document.getElementById('arBtn');
+      const topBar = document.getElementById('topBar');
       const pieceTitle = document.getElementById('pieceTitle');
       const infoBtn = document.getElementById('infoBtn');
-      const sheet   = document.getElementById('infoSheet');
+      const sheet = document.getElementById('infoSheet');
       const sheetClose = document.getElementById('infoClose');
-      const infoTitle  = document.getElementById('infoTitle');
-      const infoMeta   = document.getElementById('infoMeta');
-      const infoDesc   = document.getElementById('infoDesc');
-      const audioBtn   = document.getElementById('audioBtn');
+      const infoTitle = document.getElementById('infoTitle');
+      const infoMeta = document.getElementById('infoMeta');
+      const infoDesc = document.getElementById('infoDesc');
+      const audioBtn = document.getElementById('audioBtn');
 
-      // === Accesibilidad mejorada ===
-      arBtn.setAttribute('role', 'button');
-      audioBtn.setAttribute('role', 'button');
-      arBtn.setAttribute('aria-live', 'polite');
-      audioBtn.setAttribute('aria-live', 'polite');
-
-
-      // ---------------- Rutas y helpers ----------------
-      const glbUrl   = (name) => `/models/${name}/${name}.glb`;
-      const usdzUrl  = (name) => `/models/${name}/${name}.usdz`;
-      const splatUrl = (name) => `/splat/${name}/index.html`;
+      const glbUrl = n => `/models/${n}/${n}.glb`;
+      const usdzUrl = n => `/models/${n}/${n}.usdz`;
+      const splatUrl = n => `/splat/${n}/index.html`;
 
       async function exists(url){
-        try{ const r = await fetch(url, { method:'HEAD', cache:'force-cache' }); return r.ok; }
-        catch{ return false; }
+        try{const r=await fetch(url,{method:'HEAD'});return r.ok}catch{return false}
       }
 
-      const isIOS     = /iPad|iPhone|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-      const isAndroid = /Android/.test(navigator.userAgent);
+      const isIOS=/iPad|iPhone|iPod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+      const isAndroid=/Android/.test(navigator.userAgent);
 
-      // ---------------- Audio por figura ----------------
-      let audio = null;
-      function setupAudioFor(id){
-        const url = `/assets/audio/${id}.mp3`;
-        if (audio) { try { audio.pause(); } catch{} audio = null; }
-
-        audio = new Audio(url);
-        audio.loop = true;
-        audio.preload = 'none';
-
-        audioBtn.classList.remove('hidden');
-        audioBtn.classList.remove('is-playing');
-        audioBtn.setAttribute('aria-pressed','false');
-        audioBtn.setAttribute('aria-label','Reproducir audio');
-
-        audioBtn.onclick = async () => {
-          if (!audio) return;
-          if (audio.paused) {
-            try {
-              await audio.play();
-              audioBtn.classList.add('is-playing');
-              audioBtn.setAttribute('aria-pressed','true');
-              audioBtn.setAttribute('aria-label','Pausar audio');
-              if (navigator.vibrate) navigator.vibrate(10);
-            } catch(e){ console.log('Bloqueo autoplay:', e); }
-          } else {
-            audio.pause();
-            audioBtn.classList.remove('is-playing');
-            audioBtn.setAttribute('aria-pressed','false');
-            audioBtn.setAttribute('aria-label','Reproducir audio');
-          }
-        };
-
-        document.addEventListener('visibilitychange', () => {
-          if (document.hidden && audio && !audio.paused) {
-            audio.pause();
-            audioBtn.classList.remove('is-playing');
-            audioBtn.setAttribute('aria-pressed','false');
-            audioBtn.setAttribute('aria-label','Reproducir audio');
-          }
-        });
-
-        audio.addEventListener('error', () => {
-          console.warn('Audio no encontrado:', url);
-        });
-      }
-
-      // ---------------- AR helpers ----------------
-      function openARFor(name){
-        const usdz = usdzUrl(name);
-        const glb  = glbUrl(name);
-        const titleEl = document.getElementById('infoTitle');
-        const arTitle = encodeURIComponent((titleEl?.textContent || name).trim());
-
-        if (isIOS) { window.location.href = usdz; return; }
-        if (isAndroid){
-          const file = new URL(glb, location.origin).toString();
-          const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(file)}&mode=ar_preferred&title=${arTitle}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
-          window.location.href = intent;
-        }
-      }
-
-      function openQuickLookSync(slug) {
-        try {
-          const link = document.getElementById('iosARLink');
-          if (!link) return false;
-          const ts = Date.now(); // cache-buster (cada click es "nuevo")
-          link.setAttribute('href', `/models/${slug}/${slug}.usdz#${ts}`);
-          link.click(); // síncrono, en la misma pila del gesto
-          return true;
-        } catch {
-          return false;
-        }
-      }
-
-      // Overlay “Abriendo AR…”
-      function showARLoading(){
-        const el = document.getElementById('arLoading');
-        if (!el) return;
-        el.classList.remove('hidden');
-        requestAnimationFrame(()=> el.classList.add('visible'));
-      }
-      function hideARLoading(){
-        const el = document.getElementById('arLoading');
-        if (!el) return;
-        el.classList.remove('visible');
-        setTimeout(()=> el.classList.add('hidden'), 250);
-      }
-      document.addEventListener('visibilitychange', ()=>{
-        if (!document.hidden) hideARLoading();
-      });
-
-      // ---------------- Info JSON ----------------
       async function loadInfoDataOrFallback(current){
         try{
-          const res = await fetch('/assets/info.json', { cache:'force-cache' });
-          if (!res.ok) throw new Error('no info.json');
-          const json = await res.json();
-          return json || current;
-        }catch{
-          return current;
-        }
+          const res=await fetch('/assets/info.json',{cache:'force-cache'});
+          if(!res.ok)throw 0;
+          return await res.json();
+        }catch{return current;}
       }
 
-      // ---------------- Cartela ----------------
+      const infoData={
+        "cristo-yacente":{title:"Cristo Yacente",meta:"s. XVII · Autor desconocido",desc:"Descripción pendiente."}
+      };
+
       function showHelp(){
         skel.classList.add('hidden');
         msg.classList.remove('hidden');
-        msg.innerHTML = `
-          <div>
-            <b>Falta parámetro en la URL.</b><br/><br/>
-            Usa ejemplos:<br/>
-            <code>?type=glb&model=cristo-yacente</code><br/>
-            <code>?type=splat&figure=calvo-anillo</code>
-          </div>`;
+        msg.innerHTML=`<b>Falta parámetro.</b><br>Ejemplo: ?type=glb&model=cristo-yacente`;
       }
 
-      let infoData = {
-        "cristo-yacente":      { title:"Cristo Yacente", meta:"s. XVII · Autor/a desconocido/a", desc:"Descripción pendiente." },
-        "virgen-romanica":     { title:"Virgen Románica", meta:"s. XII · Talla policromada", desc:"Descripción pendiente." },
-        "san-jose-con-el-nino":{ title:"San José con el Niño", meta:"s. XVIII", desc:"Descripción pendiente." },
-        "cristo-en-la-cruz":   { title:"Cristo en la Cruz", meta:"s. XVII", desc:"Descripción pendiente." }
-      };
-
-      // Cámara por figura
-      const cameraSettings = {
-        "cristo-yacente": {
-          orbit: "0deg 74deg 10.6m",
-          target: "0m 2m 0m",
-          minRadius: "2.5m",
-          maxRadius: "13.1m",
-          minFov: "22deg",
-          maxFov: "30deg"
-        },
-        "cristo-en-la-cruz": {
-          orbit: "0deg 60deg 3.5m",
-          target: "0m 1.8m 0m",
-          minRadius: "2m",
-          maxRadius: "5m",
-          minFov: "22deg",
-          maxFov: "45deg"
-        },
-        "san-jose-con-el-nino": {
-          orbit: "0deg 65deg 3m",
-          target: "0m 0.8m 0m",
-          minRadius: "1.5m",
-          maxRadius: "6m",
-          minFov: "22deg",
-          maxFov: "45deg"
-        },
-        "san-bernardo-con-la-virgen": {
-          orbit: "0deg 65deg 3m",
-          target: "0m 0.8m 0m",
-          minRadius: "1.5m",
-          maxRadius: "5m",
-          minFov: "22deg",
-          maxFov: "45deg"
-        },
-        "virgen-asuncion": {
-          orbit: "0deg 60deg 2.8m",
-          target: "0m 0.75m 0m",
-          minRadius: "1.5m",
-          maxRadius: "5m",
-          minFov: "20deg",
-          maxFov: "45deg"
-        },
-        "virgen-de-mena": {
-          orbit: "0deg 60deg 3m",
-          target: "0m 0.8m 0m",
-          minRadius: "1.5m",
-          maxRadius: "6m",
-          minFov: "22deg",
-          maxFov: "45deg"
-        },
-        "virgen-romanica": {
-          orbit: "0deg 55deg 2.5m",
-          target: "0m 0.35m 0m",
-          minRadius: "1.2m",
-          maxRadius: "5m",
-          minFov: "20deg",
-          maxFov: "45deg"
-        },
-        "ecce-homo": {
-          orbit: "0deg 60deg 2.2m",
-          target: "0m 0.4m 0m",
-          minRadius: "1.0m",
-          maxRadius: "4m",
-          minFov: "20deg",
-          maxFov: "45deg"
-        },
-        "reliquia-dorada": {
-          orbit: "0deg 60deg 1.8m",
-          target: "0m 0.25m 0m",
-          minRadius: "0.8m",
-          maxRadius: "3m",
-          minFov: "20deg",
-          maxFov: "45deg"
-        },
-        "bargueno-relicario": {
-          orbit: "0deg 55deg 2.8m",
-          target: "0m 0.4m 0m",
-          minRadius: "1.2m",
-          maxRadius: "5m",
-          minFov: "20deg",
-          maxFov: "45deg"
-        },
-        "tapiz": {
-          orbit: "0deg 90deg 3m",
-          target: "0m 1.2m 0m",
-          minRadius: "2m",
-          maxRadius: "6m",
-          minFov: "25deg",
-          maxFov: "45deg"
-        },
-        "casulla-santa-ana": {
-          orbit: "0deg 85deg 2.5m",
-          target: "0m 1.0m 0m",
-          minRadius: "1.5m",
-          maxRadius: "5m",
-          minFov: "25deg",
-          maxFov: "45deg"
-        },
-        "novisimos": {
-          orbit: "0deg 60deg 2.8m",
-          target: "0m 0.6m 0m",
-          minRadius: "1.2m",
-          maxRadius: "5m",
-          minFov: "22deg",
-          maxFov: "45deg"
-        },
-        "jesus-atado-a-la-columna": {
-          orbit: "0deg 65deg 2.8m",
-          target: "0m 0.8m 0m",
-          minRadius: "1.2m",
-          maxRadius: "5m",
-          minFov: "22deg",
-          maxFov: "45deg"
-        }
-      };
-
-      function buildMeta(d){
-        if (!d) return '';
-        if (d.author || d.year || d.material) {
-          const parts = [];
-          if (d.year) parts.push(d.year);
-          if (d.author) parts.push(d.author);
-          if (d.material) parts.push(d.material);
-          return parts.filter(Boolean).join(' · ');
-        }
-        return d.meta || '';
-      }
-
-      function renderInfo(s){
-        const d = infoData[s] || {};
-        const nice = (x) => (x||s||'').replace(/-/g,' ').trim();
-
-        if (topBar && s){
-          topBar.classList.remove('hidden');
-          pieceTitle.textContent = d.title || nice(s);
-        }
-        infoTitle.textContent = d.title || nice(s);
-        infoMeta.textContent  = buildMeta(d);
-
-        const desc = d.desc || '';
-        const extras = [];
-        if (d.typology)   extras.push(`<div><strong>Tipología:</strong> ${d.typology}</div>`);
-        if (d.material)   extras.push(`<div><strong>Material:</strong> ${d.material}</div>`);
-        if (d.technique)  extras.push(`<div><strong>Técnica:</strong> ${d.technique}</div>`);
-        if (d.dimensions) extras.push(`<div><strong>Dimensiones:</strong> ${d.dimensions}</div>`);
-        if (d.year)       extras.push(`<div><strong>Fecha:</strong> ${d.year}</div>`);
-        if (d.author)     extras.push(`<div><strong>Autor:</strong> ${d.author}</div>`);
-
-        const extrasHtml = extras.length ? `<div class="info-extra">${extras.join('')}</div>` : '';
-        infoDesc.innerHTML = [desc, extrasHtml].filter(Boolean).join('');
-      }
-
-      // Panel/cartela UI
-      function openSheet(){ renderInfo(slug); sheet.classList.remove('hidden'); sheet.setAttribute('aria-hidden','false'); }
-      function closeSheet(){ sheet.classList.add('hidden'); sheet.setAttribute('aria-hidden','true'); }
-
-      if (infoBtn) infoBtn.addEventListener('click', openSheet);
-      sheetClose.addEventListener('click', closeSheet);
-      sheet.addEventListener('click', (e)=>{ if (e.target === sheet) closeSheet(); });
-      window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeSheet(); });
-
-      // ---------------- Inicialización ----------------
       (async function init(){
         try{
-          if (type === 'glb' && model){
-            document.body.classList.remove('mode-splat');
-
-            // Fuente GLB
-            mv.src = glbUrl(model);
-
-            // Poster por pieza con fallback
-            try {
-              const posterSrc = `/assets/posters/${model}.webp`;
-              if (await exists(posterSrc)) {
-                mv.poster = posterSrc;
-                mv.setAttribute('poster', posterSrc);
-              } else {
-                mv.poster = '/models/placeholder.webp';
-                mv.setAttribute('poster','/models/placeholder.webp');
-              }
-            } catch {
-              mv.poster = '/models/placeholder.webp';
-              mv.setAttribute('poster','/models/placeholder.webp');
+          if(type==='glb'&&model){
+            mv.src=glbUrl(model);
+            const poster=`/assets/posters/${model}.webp`;
+            if(await exists(poster)){
+              mv.poster=poster;mv.setAttribute('poster',poster);
+            }else{
+              mv.poster='/assets/posters/placeholder.webp';
+              mv.setAttribute('poster','/assets/posters/placeholder.webp');
             }
 
-            // Config cámara
-            const cam = cameraSettings[model];
-            if (cam) {
-              if (cam.orbit) mv.cameraOrbit = cam.orbit;
-              if (cam.target) mv.cameraTarget = cam.target;
-              if (cam.minRadius) mv.minCameraOrbit = `auto auto ${cam.minRadius}`;
-              if (cam.maxRadius) mv.maxCameraOrbit = `auto auto ${cam.maxRadius}`;
-              if (cam.minFov) mv.minFieldOfView = cam.minFov;
-              if (cam.maxFov) mv.maxFieldOfView = cam.maxFov;
-            }
-
-            // HDR suave
-            try {
-              await fetch('/assets/hdr/museo-suave.hdr', { cache: 'force-cache' }).catch(()=>{});
-              mv.environmentImage = '/assets/hdr/museo-suave.hdr';
-              mv.exposure = '2';
-              mv.shadowIntensity = '0.7';
-              mv.shadowSoftness = '1.0';
-              mv.environmentRotation = '10deg';
-              mv.skyboxImage = '/assets/hdr/museo-suave-blur.webp';
-              mv.backgroundColor = '#0f1115';
-            } catch (e) {
-              console.warn('No se pudo aplicar el HDR, usando neutral', e);
-            }
-
-            // Iluminación por pieza (opcional)
-            const lightSettings = {
-              "cristo-yacente": { exposure: 1.6, shadowIntensity: 0.9, shadowSoftness: 0.9, environmentRotation: "15deg" },
-              "virgen-romanica": { exposure: 1.3, environmentRotation: "0deg" }
-            };
-            const L = lightSettings[model];
-            if (L){
-              if (L.exposure != null) mv.exposure = String(L.exposure);
-              if (L.shadowIntensity != null) mv.shadowIntensity = String(L.shadowIntensity);
-              if (L.shadowSoftness != null) mv.shadowSoftness = String(L.shadowSoftness);
-              if (L.environmentRotation) mv.environmentRotation = L.environmentRotation;
-            }
-
-            // iOS Quick Look
-            mv.iosSrc = usdzUrl(model);
             mv.classList.remove('hidden');
-
-            // Oculta botón AR nativo
-            if (!mv.querySelector('[slot="ar-button"]')) {
-              const blocker = document.createElement('button');
-              blocker.setAttribute('slot','ar-button');
-              blocker.setAttribute('aria-hidden','true');
-              blocker.style.display = 'none';
-              blocker.tabIndex = -1;
-              mv.appendChild(blocker);
-            }
-
-            // Botón AR unificado (iOS síncrono + overlay)
-            arBtn.classList.remove('hidden');
-            arBtn.onclick = () => {
-
-              if (navigator.vibrate) navigator.vibrate(15);
-              showARLoading();
-              if (isIOS) {
-                const ok = openQuickLookSync(model);
-                if (!ok) window.location.href = usdzUrl(model); // fallback duro
-                return;
-              }
-              if (mv?.activateAR) {
-                mv.activateAR().catch(()=> openARFor(model));
-              } else {
-                openARFor(model);
-              }
-
-              arBtn.classList.add('is-active');
-              setTimeout(() => arBtn.classList.remove('is-active'), 2000);
-            };
-
-            if (slug) {
-              infoData = await loadInfoDataOrFallback(infoData);
-              renderInfo(slug);
-            }
-
-            setupAudioFor(model);
             skel.classList.add('hidden');
             return;
           }
-
-          if (type === 'splat' && figure){
-            document.body.classList.add('mode-splat');
-
-            // --- Poster previo al SPLAT (aparece ya, antes del src) ---
-            const splatPoster = document.getElementById('splatPoster');
-            if (splatPoster) {
-              // Fallback inmediato
-              splatPoster.style.backgroundImage = `url('/models/placeholder.webp')`;
-              splatPoster.classList.remove('hidden');
-              requestAnimationFrame(()=> splatPoster.classList.add('visible'));
-
-              // Intentar poster específico en paralelo
-              (async ()=>{
-                try{
-                  const posterUrl = `/assets/posters/${figure}.webp`;
-                  const r = await fetch(posterUrl, { method:'HEAD', cache:'force-cache' });
-                  if (r.ok) splatPoster.style.backgroundImage = `url('${posterUrl}')`;
-                }catch{}
-              })();
-
-              // Ocultar cuando el SPLAT carga
-              splat.addEventListener('load', ()=>{
-                splatPoster.classList.add('fade-out');
-                setTimeout(()=> splatPoster.classList.add('hidden'), 700);
-              }, { once:true });
-            }
-
-            // Cargar SPLAT
-            splat.src = splatUrl(figure);
+          if(type==='splat'&&figure){
+            const splatPoster=document.getElementById('splatPoster');
+            splatPoster.style.backgroundImage=`url('/assets/posters/placeholder.webp')`;
+            splatPoster.classList.remove('hidden');
+            requestAnimationFrame(()=>splatPoster.classList.add('visible'));
+            (async()=>{
+              const p=`/assets/posters/${figure}.webp`;
+              if(await exists(p))splatPoster.style.backgroundImage=`url('${p}')`;
+            })();
+            splat.src=splatUrl(figure);
             splat.classList.remove('hidden');
-
-            // FAB AR
-            arBtn.classList.remove('hidden');
-            arBtn.onclick = () => {
-              showARLoading();
-              if (isIOS) {
-                const ok = openQuickLookSync(figure);
-                if (!ok) window.location.href = usdzUrl(figure); // fallback duro
-                return;
-              }
-              openARFor(figure);
-            };
-
-            // --- Pulido botón AR: evita dobles clics y mejora accesibilidad ---
-function setArBusy(state){
-  if (!arBtn) return;
-  arBtn.classList.toggle('is-busy', state);
-  arBtn.toggleAttribute('disabled', state);
-  arBtn.setAttribute('aria-busy', state ? 'true' : 'false');
-}
-
-const _originalArOnClick = arBtn.onclick; // preserva tu handler actual
-arBtn.onclick = (ev) => {
-  if (arBtn.classList.contains('is-busy')) return; // ya en progreso
-  setArBusy(true);
-
-  // haptics suave si está disponible
-  try { navigator.vibrate && navigator.vibrate(8); } catch {}
-
-  // llama a tu lógica original
-  _originalArOnClick && _originalArOnClick.call(arBtn, ev);
-
-  // safety timeout por si no vuelve el visibilitychange
-  // (p.ej. usuario cancela visor AR)
-  clearTimeout(arBtn._busyTimer);
-  arBtn._busyTimer = setTimeout(() => setArBusy(false), 8000);
-};
-
-// al volver del visor (ya tienes visibilitychange para el overlay),
-// aquí liberamos el botón también:
-document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) {
-    clearTimeout(arBtn._busyTimer);
-    setArBusy(false);
-  }
-});
-
-
-            if (slug) {
-              infoData = await loadInfoDataOrFallback(infoData);
-              renderInfo(slug);
-            }
-
-            setupAudioFor(figure);
             skel.classList.add('hidden');
             return;
           }
-
-          // Sin parámetros válidos:
           showHelp();
-
-        } catch(err){
-          console.error(err);
+        }catch(e){
+          console.error(e);
+          msg.textContent='Error al cargar.';
           msg.classList.remove('hidden');
-          msg.innerHTML = `<b>Error:</b> ${String(err).replace(/</g,'&lt;')}`;
           skel.classList.add('hidden');
         }
       })();
     });
-
-    /* === PANEL VISUAL DE AJUSTE DE CÁMARA (con min/max zoom) === */
-    (function setupCameraDebugPanel() {
-      if (!location.search.includes('debug=true')) return;
-
-      const qs = new URLSearchParams(location.search);
-      let dbgModel = (qs.get('model') || qs.get('figure') || '').toLowerCase();
-      if (!dbgModel) {
-        const p = location.pathname.split('/').filter(Boolean);
-        if (p[0] === 'splat' && p[1]) dbgModel = p[1];
-        else if (p[0] === 'glb' && p[1]) dbgModel = p[1];
-        else if (p.length === 1) dbgModel = p[0];
-      }
-      const model = dbgModel;
-
-      const mv = document.getElementById('mv');
-      if (!mv) return;
-
-      const num = (s, def=0) => {
-        if (s == null) return def;
-        const m = String(s).match(/-?\d+(\.\d+)?/);
-        return m ? parseFloat(m[0]) : def;
-      };
-
-      const cam = (window.cameraSettings && window.cameraSettings[model]) || {};
-      const initPhi = num((cam.orbit||'0deg 70deg 3m').split(' ')[1], 70);
-      const initR   = num((cam.orbit||'0deg 70deg 3m').split(' ')[2], 3);
-      const initY   = num((cam.target||'0m 0.5m 0m').split(' ')[1], 0.5);
-      const initMinR = num(cam.minRadius, Math.max(0.4, initR*0.4));
-      const initMaxR = num(cam.maxRadius, Math.max(initR*1.5, initMinR+0.5));
-      const initFov  = num(cam.fov || (mv.fieldOfView||'30deg'), 30);
-
-      const panel = document.createElement('div');
-      panel.id = 'camDebug';
-      panel.style.cssText = `
-        position: fixed; top: 10px; right: 10px; width: 260px;
-        background: rgba(15,17,21,0.95); color: #e9eef7; font: 13px/1.2 system-ui,sans-serif;
-        border-radius: 12px; padding: 12px; z-index: 9999; box-shadow: 0 0 15px rgba(0,0,0,.4); backdrop-filter: blur(8px);
-      `;
-      panel.innerHTML = `
-        <b>🎥 Ajuste de Cámara</b><br><br>
-
-        <label>Altura (target Y): <span id="valY">${initY.toFixed(2)}</span> m</label><br>
-        <input id="ctrlY" type="range" min="-1" max="3" step="0.05" value="${initY}"><br><br>
-
-        <label>Distancia inicial (radius): <span id="valR">${initR.toFixed(1)}</span> m</label><br>
-        <input id="ctrlR" type="range" min="0.5" max="30" step="0.1" value="${initR}"><br><br>
-
-        <label>Elevación (phi): <span id="valPhi">${initPhi.toFixed(0)}</span>°</label><br>
-        <input id="ctrlPhi" type="range" min="0" max="90" step="1" value="${initPhi}"><br><br>
-
-        <label>FOV (zoom óptico): <span id="valFov">${initFov.toFixed(0)}</span>°</label><br>
-        <input id="ctrlFov" type="range" min="15" max="75" step="1" value="${initFov}"><br><br>
-
-        <hr style="border-color:#2a2f38; opacity:.4; margin:8px 0">
-
-        <label>Zoom mínimo (minRadius): <span id="valMinR">${initMinR.toFixed(1)}</span> m</label><br>
-        <input id="ctrlMinR" type="range" min="0.4" max="60" step="0.1" value="${initMinR}"><br><br>
-
-        <label>Zoom máximo (maxRadius): <span id="valMaxR">${initMaxR.toFixed(1)}</span> m</label><br>
-        <input id="ctrlMaxR" type="range" min="0.5" max="80" step="0.1" value="${initMaxR}"><br><br>
-
-        <button id="copyCam" style="width:100%; padding:8px; border:none; background:#40cbcb; color:#fff; font-weight:700; border-radius:8px; cursor:pointer;">
-          📋 Copiar valores
-        </button>
-      `;
-      document.body.appendChild(panel);
-
-      const yRange   = panel.querySelector('#ctrlY');
-      const rRange   = panel.querySelector('#ctrlR');
-      const phiRange = panel.querySelector('#ctrlPhi');
-      const fovRange = panel.querySelector('#ctrlFov');
-      const minRRange= panel.querySelector('#ctrlMinR');
-      const maxRRange= panel.querySelector('#ctrlMaxR');
-
-      const valY   = panel.querySelector('#valY');
-      const valR   = panel.querySelector('#valR');
-      const valPhi = panel.querySelector('#valPhi');
-      const valFov = panel.querySelector('#valFov');
-      const valMinR= panel.querySelector('#valMinR');
-      const valMaxR= panel.querySelector('#valMaxR');
-
-      function clampLimits() {
-        let minR = parseFloat(minRRange.value);
-        let r    = parseFloat(rRange.value);
-        let maxR = parseFloat(maxRRange.value);
-
-        if (minR > maxR - 0.1) minR = maxR - 0.1;
-        if (r < minR) r = minR;
-        if (r > maxR) r = maxR;
-
-        minRRange.value = minR.toFixed(1);
-        rRange.value    = r.toFixed(1);
-        maxRRange.value = maxR.toFixed(1);
-
-        valMinR.textContent = minR.toFixed(1);
-        valR.textContent    = r.toFixed(1);
-        valMaxR.textContent = maxR.toFixed(1);
-        return { minR, r, maxR };
-      }
-
-      function updateCamera() {
-        const y   = parseFloat(yRange.value);
-        const phi = parseFloat(phiRange.value);
-        const fov = parseFloat(fovRange.value);
-        const { minR, r, maxR } = clampLimits();
-
-        valY.textContent   = y.toFixed(2);
-        valPhi.textContent = phi.toFixed(0);
-        valFov.textContent = fov.toFixed(0);
-
-        mv.minCameraOrbit = `auto auto ${minR}m`;
-        mv.maxCameraOrbit = `auto auto ${maxR}m`;
-        mv.cameraTarget = `0m ${y}m 0m`;
-        mv.cameraOrbit  = `0deg ${phi}deg ${r}m`;
-        mv.fieldOfView  = `${fov}deg`;
-        mv.jumpCameraToGoal();
-      }
-
-      [yRange, rRange, phiRange, fovRange, minRRange, maxRRange]
-        .forEach(i => i.addEventListener('input', updateCamera));
-
-      updateCamera();
-
-      panel.querySelector('#copyCam').onclick = () => {
-        const text = `
-"${model || 'cristo-yacente'}": {
-  orbit: "0deg ${phiRange.value}deg ${rRange.value}m",
-  target: "0m ${yRange.value}m 0m",
-  minRadius: "${minRRange.value}m",
-  maxRadius: "${maxRRange.value}m",
-  minFov: "22deg",
-  maxFov: "${fovRange.value}deg"
-},`.trim();
-        navigator.clipboard.writeText(text);
-        const btn = panel.querySelector('#copyCam');
-        btn.textContent = "✅ Copiado";
-        setTimeout(()=> btn.textContent = "📋 Copiar valores", 1200);
-      };
-    })();
   </script>
 </body>
 </html>
