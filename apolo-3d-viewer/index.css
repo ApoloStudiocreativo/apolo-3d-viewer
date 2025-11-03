@@ -148,7 +148,7 @@ body.mode-splat{
   .fab-row{ display: flex; }
 }
 
-/* 📱 AR FAB — estilo cristalino azul */
+/* === AR FAB — Estilo cristal azul (mismo efecto que el botón de audio) === */
 .ar-fab {
   height: 56px;
   min-width: 180px;
@@ -173,35 +173,44 @@ body.mode-splat{
     0 0 12px rgba(48,134,135,0.45),
     0 6px 22px rgba(48,134,135,0.30),
     inset 0 2px 6px rgba(255,255,255,0.18);
-  transition: all 0.25s ease;
+  transition:
+    transform .12s ease,
+    box-shadow .25s ease,
+    background .25s ease,
+    border-color .25s ease;
   z-index: 20;
+  transform-origin: center;
+  will-change: transform, box-shadow, background;
 }
 
+/* 💡 Mismo “tap” que el botón de audio */
 .ar-fab:active {
   transform: scale(0.97);
+  background:
+    radial-gradient(circle at 30% 30%, rgba(48,134,135,.66), rgba(20,60,60,.48)),
+    linear-gradient(135deg, rgba(48,134,135,.70), rgba(10,50,50,.50));
+  border-color: rgba(48,134,135,.9);
+  box-shadow:
+    0 0 18px rgba(48,134,135,.65),
+    0 12px 28px rgba(48,134,135,.40),
+    inset 0 2px 8px rgba(255,255,255,.22);
 }
 
-/* ✨ Estado activo / glow pulsante */
+/* ✨ Estado “activo” con animación suave */
 .ar-fab.is-active {
-  background:
-    radial-gradient(circle at 30% 30%, rgba(48,134,135,0.66), rgba(20,60,60,0.48)),
-    linear-gradient(135deg, rgba(48,134,135,0.70), rgba(10,50,50,0.50));
-  border-color: rgba(48,134,135,0.9);
   animation: pulse-glow-ar 1.8s ease-in-out infinite;
-  box-shadow:
-    0 0 18px rgba(48,134,135,0.65),
-    0 12px 28px rgba(48,134,135,0.40),
-    inset 0 2px 8px rgba(255,255,255,0.22);
 }
 
 @keyframes pulse-glow-ar {
-  0%,100% {
-    box-shadow: 0 0 14px rgba(48,134,135,0.45);
-  }
-  50% {
-    box-shadow: 0 0 22px rgba(48,134,135,0.75);
-  }
+  0%, 100% { box-shadow: 0 0 14px rgba(48,134,135,.45); }
+  50%      { box-shadow: 0 0 22px rgba(48,134,135,.75); }
 }
+
+/* 🧩 FIX: evitar desplazamientos en hover */
+.ar-fab:hover {
+  transform: none;
+}
+
 
 
 
