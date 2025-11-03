@@ -739,3 +739,31 @@ filter: blur(0);
 .ar-fab[style*="translateX(-50%)"]:active {
   transform: translateX(-50%) scale(0.97);
 }
+
+/* ===== AR FAB — override de color (AZUL POTENTE) ===== */
+/* Pégalo al FINAL del archivo */
+.ar-fab {
+  /* base azul */
+  background:
+    radial-gradient(circle at 30% 30%, rgba(13,110,253,0.88), rgba(0,42,120,0.62)),
+    linear-gradient(135deg, rgba(13,110,253,0.88), rgba(0,42,120,0.62));
+  border-color: rgba(13,110,253,0.98);
+  box-shadow:
+    0 0 12px rgba(13,110,253,0.55),
+    0 8px 24px rgba(13,110,253,0.40),
+    inset 0 2px 8px rgba(255,255,255,0.18);
+}
+
+.ar-fab.is-active {
+  /* estado activo / glow */
+  background:
+    radial-gradient(circle at 30% 30%, rgba(0,140,255,0.95), rgba(0,70,170,0.78)),
+    linear-gradient(135deg, rgba(0,140,255,0.95), rgba(0,70,170,0.78));
+  border-color: rgba(0,140,255,1);
+  box-shadow:
+    0 0 18px rgba(0,140,255,0.78),
+    0 12px 28px rgba(0,100,210,0.48),
+    inset 0 2px 10px rgba(255,255,255,0.22);
+}
+
+
