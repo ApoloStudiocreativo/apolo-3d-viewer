@@ -50,32 +50,6 @@
     }
     #msg b{color:#ff6464}
 
-    /* Botón AR: visible solo en móvil/tablet */
-      .ar-fab{
-      position:fixed;
-      left:50%;
-      bottom: var(--fab-bottom);
-      transform:translateX(-50%);
-      display:none;      /* se activa por media query */
-      gap:10px;
-      align-items:center;
-      justify-content:center;
-      height:56px; 
-      padding:0 18px; 
-      min-width:180px;
-      border:none; 
-      border-radius:16px;
-      cursor:pointer;
-      z-index:20;
-    }
-    .ar-fab:active{transform:translateX(-50%) scale(.98)}
-    .ar-fab svg{width:22px;height:22px}
-
-    /* Solo móvil/tablet */
-    @media (max-width:1024px){
-      .ar-fab{display:flex}
-    }
-
     /* Esqueleto simple mientras carga */
     .skeleton{
       position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
