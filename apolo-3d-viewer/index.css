@@ -187,7 +187,7 @@ body.mode-splat{
 .ar-fab:active {
   transform: scale(0.97);
   background:
-    radial-gradient(circle at 30% 30%, rgba(48,134,135,.66), rgba(20,60,60,.48)),
+    radial-gradient(circle at 30% 30%, rgba(255, 0, 242, 0.66), rgba(20,60,60,.48)),
     linear-gradient(135deg, rgba(48,134,135,.70), rgba(10,50,50,.50));
   border-color: rgba(48,134,135,.9);
   box-shadow:
