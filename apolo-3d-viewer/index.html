@@ -8,22 +8,24 @@
 
   <title>Museo Virtual San Joaquín y Santa Ana</title>
 
-  <!-- Tipografía para títulos -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
+  <!-- Tipografía -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 
   <!-- CSS principal -->
+  <link rel="preload" href="/index.css" as="style" fetchpriority="high">
   <link rel="stylesheet" href="/index.css">
 
   <!-- Datos/metadatos -->
-  <link rel="preload" href="/assets/info.json" as="fetch" type="application/json" crossorigin="anonymous">
+  <link rel="preload" href="/assets/info.json" as="fetch" type="application/json" crossorigin="anonymous" fetchpriority="low">
 
-  <!-- HDR / skybox -->
-  <link rel="preload" as="image" href="/assets/hdr/museo-suave.hdr">
-  <link rel="preload" as="image" href="/assets/hdr/museo-suave-blur.webp">
+  <!-- HDR / Skybox -->
+  <link rel="preload" as="image" href="/assets/hdr/museo-suave.hdr" fetchpriority="low">
+  <link rel="preload" as="image" href="/assets/hdr/museo-suave-blur.webp" fetchpriority="low">
 
-  <!-- model-viewer (GLB) -->
-  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"></script>
+ <!-- Model Viewer (GLB) -->
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js" defer></script>
 
   <style>
     :root{
@@ -206,11 +208,27 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+
+          // === OPTIMIZACIÓN DE CARGA (Paso 4) ===
+    // Prioriza carga visual del modelo sobre los metadatos
+    document.documentElement.style.scrollBehavior = 'auto';
+    if ('loading' in HTMLImageElement.prototype) {
+      // habilita carga diferida nativa
+      document.querySelectorAll('img').forEach(img => img.loading = 'lazy');
+    }
+
       // ---------------- URL: soporta query *y* pathname limpias ----------------
       const qs = new URLSearchParams(location.search);
       let type   = (qs.get('type')   || '').toLowerCase();   // 'glb' | 'splat'
       let model  = (qs.get('model')  || '').toLowerCase();
       let figure = (qs.get('figure') || '').toLowerCase();
+      
+      // Prioriza carga visual del modelo sobre los metadatos
+      document.documentElement.style.scrollBehavior = 'auto';
+      if ('loading' in HTMLImageElement.prototype) {
+        // habilita carga diferida nativa
+        document.querySelectorAll('img').forEach(img => img.loading = 'lazy');
+      }
 
       if (!type) {
         const parts = location.pathname.split('/').filter(Boolean);
