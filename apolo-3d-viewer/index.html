@@ -24,7 +24,11 @@
   <link rel="preload" as="image" href="/assets/hdr/museo-suave.hdr" fetchpriority="low">
   <link rel="preload" as="image" href="/assets/hdr/museo-suave-blur.webp" fetchpriority="low">
 
- <!-- Model Viewer (GLB) -->
+  <!-- Posters: prioridad adaptativa -->
+  <link rel="preload" as="image" href="/assets/posters/placeholder.webp" fetchpriority="high" media="(max-width: 1024px)">
+  <link rel="preload" as="image" href="/assets/posters/cristo-yacente.webp" fetchpriority="auto">
+
+  <!-- Model Viewer (GLB) -->
   <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js" defer></script>
 
   <style>
@@ -366,7 +370,7 @@
       // ---------------- Info JSON ----------------
       async function loadInfoDataOrFallback(current){
         try{
-          const res = await fetch('/assets/info.json', { cache:'no-store' });
+          const res = await fetch('/assets/info.json', { cache:'force-cache' });
           if (!res.ok) throw new Error('no info.json');
           const json = await res.json();
           return json || current;

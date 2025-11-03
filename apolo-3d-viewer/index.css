@@ -438,3 +438,22 @@ body.in-ar .info-sheet {
 .ar-fab:active:not(.is-busy){
   transform: scale(.985);
 }
+
+/* === Mejora visual de carga de posters === */
+model-viewer {
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
+}
+
+model-viewer[src] {
+  opacity: 1;
+}
+
+#splatPoster {
+  transition: opacity 0.4s ease-out, filter 0.4s ease-out;
+  filter: blur(6px);
+}
+#splatPoster.fade-out {
+  opacity: 0;
+  filter: blur(12px);
+}
