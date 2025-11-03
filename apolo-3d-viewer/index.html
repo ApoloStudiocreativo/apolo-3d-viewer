@@ -222,6 +222,53 @@
           type = 'glb'; model = parts[0]; // /:slug → GLB por defecto
         }
       }
+
+      /* ===== Paso 1: Pulido UX ===== */
+
+        // 1) Cuando GLB termina de cargar → mostrar con fade-in y quitar skeleton
+        if (mv){
+          mv.addEventListener('load', () => {
+            mv.classList.add('is-visible');
+            if (skel){ skel.classList.add('is-fading'); setTimeout(()=> skel.classList.add('hidden'), 350); }
+          }, { once:true });
+        }
+
+        // 2) Cuando SPLAT (iframe) carga → fade-in y quitar poster/skeleton si quedaran
+        if (splat){
+          splat.addEventListener('load', () => {
+            splat.classList.add('is-visible');
+            if (skel && !skel.classList.contains('hidden')){
+              skel.classList.add('is-fading'); setTimeout(()=> skel.classList.add('hidden'), 350);
+            }
+          }, { once:true });
+        }
+
+        // 3) Al mostrar topBar por primera vez, anímalo levemente
+        (function animateTopbarOnce(){
+          let revealed = false;
+          const mo = new MutationObserver(() => {
+            if (!revealed && topBar && !topBar.classList.contains('hidden')) {
+              topBar.classList.add('reveal');
+              revealed = true;
+              mo.disconnect();
+              // quitar la clase tras la animación por si cambia luego
+              setTimeout(()=> topBar.classList.remove('reveal'), 400);
+            }
+          });
+          if (topBar) mo.observe(topBar, { attributes:true, attributeFilter:['class'] });
+        })();
+
+        // 4) Micro-interacción del botón de Info (feedback visual al tap)
+        if (infoBtn){
+          infoBtn.addEventListener('click', () => {
+            infoBtn.classList.add('tap');
+            setTimeout(()=> infoBtn.classList.remove('tap'), 160);
+          });
+        }
+
+
+
+
       const slug = model || figure || '';
 
       // ---------------- Elementos del DOM ----------------
