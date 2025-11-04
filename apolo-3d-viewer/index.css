@@ -87,40 +87,6 @@ body.mode-splat{
   transform:none;
 }
 
-/* AUDIO a la izquierda */
-.audio-fab{
-  position:fixed;
-  left: 18px;
-  bottom: var(--fab-bottom);
-  width: 120px;
-  height: 56px;
-  border:none;
-  border-radius:16px;
-  background:rgba(255,255,255,0.10);
-  display:none; /* se muestra por media query */
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  z-index:20;
-  backdrop-filter: saturate(180%) blur(8px);
-  box-shadow: var(--shadow);
-}
-.audio-fab:active{ transform:scale(.96) }
-.audio-fab svg{ width:24px;height:24px }
-
-/* Estado activo (sonando) */
-.audio-fab.is-playing{
-  background: var(--brand);
-}
-
-/* Mostrar ambos solo en móvil/tablet */
-@media (max-width:1024px){
-  .ar-fab,
-  .audio-fab{
-    display:flex;
-  }
-}
-
 /* ====== Fila de FABs (evita solapamientos) ====== */
 .fab-row{
   position: fixed;
@@ -147,23 +113,6 @@ body.mode-splat{
 @media (max-width:1024px){
   .fab-row{ display: flex; }
 }
-
-/* Botón Audio ancho configurable */
-.audio-fab{
-  height: 56px;
-  width: 120px;                  /* tu ancho “pastilla”; prueba 140/160 si quieres */
-  border: none;
-  border-radius: 16px;
-  background: rgba(255,255,255,0.10);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow);
-  backdrop-filter: saturate(180%) blur(8px);
-  color: #fff;
-}
-.audio-fab.is-playing{ background: var(--brand); }
-.audio-fab svg{ width:24px; height:24px; }
 
 /* ===== Cartela inferior (info-sheet) ===== */
 .info-sheet{
