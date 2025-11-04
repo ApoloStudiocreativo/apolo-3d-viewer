@@ -566,8 +566,18 @@ filter: blur(0);
 }
 
 /* === AR FAB — Glass Blue LOOK (en index.css, al final) === */
+/* === AR FAB — Glass Blue LOOK (en index.css, al final) === */
 .ar-fab {
+  /* tamaño y caja */
+  height: 56px;            /* ← restaura “grosor” de la pastilla */
+  min-width: 180px;
+  padding: 0 18px;
   border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* look previo (no tocamos colores aquí) */
   background:
     radial-gradient(circle at 30% 30%, rgba(48,134,135,0.55), rgba(10,40,40,0.45)),
     linear-gradient(135deg, rgba(48,134,135,0.55), rgba(8,30,30,0.42));
@@ -577,7 +587,6 @@ filter: blur(0);
   font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.2px;
-  padding: 0 18px;
   backdrop-filter: blur(14px) saturate(200%);
   -webkit-backdrop-filter: blur(14px) saturate(200%);
   box-shadow:
@@ -589,6 +598,7 @@ filter: blur(0);
     box-shadow .25s ease,
     transform .12s ease;
 }
+
 
 .ar-fab:active { transform: scale(0.97); }
 
