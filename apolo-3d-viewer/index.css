@@ -766,4 +766,16 @@ filter: blur(0);
     inset 0 2px 10px rgba(255,255,255,0.22);
 }
 
+/* Ajuste fino: tamaño del icono en el botón AR (sin tocar estilos previos) */
+.ar-fab > svg {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto; /* evita que crezca por el layout */
+}
+
+.ar-fab { gap: 8px; } /* opcional: separa un poco menos icono/texto */
+
+@media (max-width: 420px) {
+  .ar-fab > svg { width: 20px; height: 20px; }
+}
 
