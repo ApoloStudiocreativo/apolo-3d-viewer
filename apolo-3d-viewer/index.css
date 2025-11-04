@@ -14,30 +14,6 @@ model-viewer::part(ar-button) {
   model-viewer button[slot="ar-button"] {
   display: none !important;
   }
-  
-  /*********************************************
-    * 2️⃣ Posicionamiento inteligente del FAB "Ver en AR"
-    *    → centrado abajo por defecto (GLB)
-    *    → más alto en SPLAT para no tapar UI
-    *********************************************/
-  :root{
-  --fab-bottom: calc(18px + env(safe-area-inset-bottom));
-  }
-  
-  .ar-fab{
-  bottom: var(--fab-bottom);
-  }
-
-  body.mode-splat .fab-row{
-    bottom: var(--fab-bottom);
-  }
-
-  @media (max-width: 420px){
-    body.mode-splat{
-      --fab-bottom: calc(170px + env(safe-area-inset-bottom));
-    }
-  }
-  
 
   /* ====== FAB AR: posicionamiento sólido con clamp + safe-area ====== */
 :root{
@@ -57,13 +33,6 @@ body.mode-splat{
 
 /* móviles muy estrechos: un poco más alto */
 @media (max-width: 420px){
-  body.mode-splat{
-    --fab-bottom: calc(70px + env(safe-area-inset-bottom));
-  }
-}
-
-/* móviles muy estrechos: un poco más alto */
-@media (max-width: 390px){
   body.mode-splat{
     --fab-bottom: calc(70px + env(safe-area-inset-bottom));
   }
@@ -515,7 +484,7 @@ filter: blur(0);
 }
 
 /* === AR FAB — Glass Blue LOOK (en index.css, al final) === */
-/* === AR FAB — Glass Blue LOOK (en index.css, al final) === */
+
 .ar-fab {
   /* tamaño y caja */
   height: 56px;            /* ← restaura “grosor” de la pastilla */
@@ -547,9 +516,6 @@ filter: blur(0);
     box-shadow .25s ease,
     transform .12s ease;
 }
-
-
-.ar-fab:active { transform: scale(0.97); }
 
 .ar-fab.is-active {
   background:
