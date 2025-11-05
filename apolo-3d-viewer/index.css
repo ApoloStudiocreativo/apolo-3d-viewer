@@ -419,7 +419,27 @@ iframe#splat{ border: 0; }
   animation: spin .9s linear infinite;
 }
 
-/* Reutiliza la animación ya usada en el loader general.
-   Si no existiera @keyframes spin en tu hoja, descomenta este bloque:
-@keyframes spin { to { transform: rotate(360deg); } }
-*/
+/* === Estado deshabilitado del botón de audio === */
+.audio-fab[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: grayscale(70%);
+  transition: opacity 0.25s ease, filter 0.25s ease;
+}
+
+.audio-fab[disabled] svg {
+  opacity: 0.6;
+}
+
+.audio-fab[disabled]::after {
+  content: "Audio no disponible";
+  position: absolute;
+  bottom: -1.8em;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: #ccc;
+  opacity: 0.8;
+  white-space: nowrap;
+}
