@@ -405,6 +405,8 @@
         }
       };
 
+      window.cameraSettings = cameraSettings;
+
       function buildMeta(d){
         if (!d) return '';
         if (d.author || d.year || d.material) {
@@ -439,6 +441,13 @@
 
         const extrasHtml = extras.length ? `<div class="info-extra">${extras.join('')}</div>` : '';
         infoDesc.innerHTML = [desc, extrasHtml].filter(Boolean).join('');
+
+        // Actualizar <title> del documento
+        try {
+          const txt = (infoTitle?.textContent || s || 'Museo Virtual').trim();
+          if (txt) document.title = `${txt} · Museo Virtual San Joaquín y Santa Ana`;
+        } catch {}
+
       }
 
       // Panel/cartela UI
