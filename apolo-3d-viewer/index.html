@@ -526,6 +526,16 @@ async function setupAudioFor(id){
             // Fuente GLB
             mv.src = glbUrl(model);
 
+            // Failsafe: oculta el skeleton si algún navegador no dispara 'load'
+            setTimeout(() => {
+              const sk = document.getElementById('skel');
+              if (sk && !sk.classList.contains('hidden')) {
+                sk.style.opacity = '0';
+                setTimeout(() => sk.classList.add('hidden'), 600);
+              }
+            }, 12000);
+
+
                         // === Indicador de progreso del modelo ===
             const progressEl = document.getElementById('loaderProgress');
             if (mv) {

@@ -443,3 +443,38 @@ iframe#splat{ border: 0; }
   opacity: 0.8;
   white-space: nowrap;
 }
+
+/* === FAB row: separación y safe area === */
+.fab-row{
+  gap: 12px;
+  padding: 0 18px calc(env(safe-area-inset-bottom) + 0px);
+}
+@media (max-width: 420px){
+  .fab-row{
+    gap: 10px;
+    padding: 0 14px calc(env(safe-area-inset-bottom) + 0px);
+  }
+}
+
+/* === Cartela: scroll interno + bloqueo de scroll de fondo === */
+body.sheet-open{ overflow: hidden; }
+
+.info-sheet{
+  max-height: min(78vh, 640px);
+}
+.info-sheet__content{
+  max-height: calc(min(78vh, 640px) - 54px); /* 54px ≈ drag + paddings */
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* === Accesibilidad: reducir movimientos si el usuario lo pide === */
+@media (prefers-reduced-motion: reduce){
+  .skeleton,
+  .ar-loading,
+  .info-sheet{
+    transition: none !important;
+    animation: none !important;
+  }
+}
