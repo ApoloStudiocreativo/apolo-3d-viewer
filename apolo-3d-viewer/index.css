@@ -304,6 +304,30 @@
    font-size:14px; color:#FFFFFF; opacity:.85; line-height:1.5; margin-top:10px; font-weight:400; max-width:80%;
  }
  
+  /* === Corregir rotación del loader: el texto no gira === */
+  .loader-circle {
+    position: relative;
+    animation: spin 1.6s linear infinite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .loader-progress {
+    position: absolute;
+    transform: rotate(-1 * var(--spin-angle, 0deg));
+    font-weight: 600;
+    font-family: system-ui, sans-serif;
+    color: #fff;
+  }
+
+  /* La animación de rotación solo afecta al círculo */
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+
  
  /******************************
   * M) Botón AR (glass azul) – base y estados
