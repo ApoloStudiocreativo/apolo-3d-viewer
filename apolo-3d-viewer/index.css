@@ -544,3 +544,26 @@ body.sheet-open{ overflow: hidden; }
   text-shadow: 0 0 6px rgba(48,134,135,0.4);
 }
 
+/* === Toast mínimo (para avisos como "toca para habilitar audio") === */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--fab-bottom) + 72px);
+  transform: translateX(-50%);
+  background: rgba(20, 24, 30, 0.9);
+  color: #e9eef7;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font: 600 13px/1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 1200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}

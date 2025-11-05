@@ -157,6 +157,43 @@
       const infoDesc   = document.getElementById('infoDesc');
       const audioBtn   = document.getElementById('audioBtn');
 
+      // Accesibilidad: anuncia el progreso del loader
+      const loaderProgressEl = document.getElementById('loaderProgress');
+      if (loaderProgressEl) {
+        loaderProgressEl.setAttribute('role', 'status');
+        loaderProgressEl.setAttribute('aria-live', 'polite');
+        loaderProgressEl.setAttribute('aria-atomic', 'true');
+      }
+
+      // Wake Lock para evitar que se apague la pantalla mientras se usa la app
+      let wakeLock = null;
+
+      async function requestWakeLock() {
+        try {
+          if ('wakeLock' in navigator && !wakeLock) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            wakeLock.addEventListener('release', () => { wakeLock = null; });
+          }
+        } catch (e) {
+          // Algunos móviles lo bloquean; sin drama
+          console.debug('WakeLock no disponible:', e?.message || e);
+        }
+      }
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          requestWakeLock();
+        } else if (wakeLock) {
+          try { wakeLock.release(); } catch {}
+          wakeLock = null;
+        }
+      });
+
+      // Primer intento en cuanto cargue
+      requestWakeLock();
+
+
+
       // ---------------- Rutas y helpers ----------------
       const glbUrl   = (name) => `/models/${name}/${name}.glb`;
       const usdzUrl  = (name) => `/models/${name}/${name}.usdz`;
