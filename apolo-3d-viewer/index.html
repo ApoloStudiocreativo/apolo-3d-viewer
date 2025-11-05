@@ -152,89 +152,80 @@
       const infoDesc   = document.getElementById('infoDesc');
       const audioBtn   = document.getElementById('audioBtn');
 
-        // ---------------- Rutas y helpers ----------------
-        const glbUrl   = (name) => `/models/${name}/${name}.glb`;
-        const usdzUrl  = (name) => `/models/${name}/${name}.usdz`;
-        const splatUrl = (name) => `/splat/${name}/index.html`;
+      // ---------------- Rutas y helpers ----------------
+      const glbUrl   = (name) => `/models/${name}/${name}.glb`;
+      const usdzUrl  = (name) => `/models/${name}/${name}.usdz`;
+      const splatUrl = (name) => `/splat/${name}/index.html`;
 
-        async function exists(url){
-          try{
-            const r = await fetch(url, { method:'HEAD', cache:'force-cache', priority:'low', keepalive:true });
-            return r.ok;
-          }catch{
-            return false;
-          }
+      async function exists(url){
+        try{
+          const r = await fetch(url, { method:'HEAD', cache:'force-cache', priority:'low', keepalive:true });
+          return r.ok;
+        }catch{
+          return false;
         }
+      }
 
-        // Helpers de plataforma
-        const isIOS     = /iPad|iPhone|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-        const isAndroid = /Android/.test(navigator.userAgent);
+      // Helpers de plataforma
+      const isIOS     = /iPad|iPhone|iPod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isAndroid = /Android/.test(navigator.userAgent);
 
-        // Helper para resetear listeners de un botón sin cambiar su HTML ni clases
-        function resetClick(el){
-          const clone = el.cloneNode(true);
-          el.replaceWith(clone);
-          return clone; // el nuevo nodo sin listeners
-        }
+      // Helper para resetear listeners de un botón sin cambiar su HTML ni clases
+      function resetClick(el){
+        const clone = el.cloneNode(true);
+        el.replaceWith(clone);
+        return clone; // el nuevo nodo sin listeners
+      }
 
-        // Helpers de visibilidad
-        function show(el){ if (el) el.classList.remove('hidden'); }
-        function hide(el){ if (el) el.classList.add('hidden'); }
+      // Helpers de visibilidad
+      function show(el){ if (el) el.classList.remove('hidden'); }
+      function hide(el){ if (el) el.classList.add('hidden'); }
 
       // ---------------- Audio por figura ----------------
       let audio = null;
       function setupAudioFor(id){
-        function setupAudioFor(id){
-  const url = `/assets/audio/${id}.mp3`;
+        const url = `/assets/audio/${id}.mp3`;
+        if (audio) { try { audio.pause(); } catch{} audio = null; }
 
-  // parar y limpiar audio anterior
-  if (audio) { try { audio.pause(); } catch{} audio = null; }
+        audio = new Audio(url);
+        audio.loop = true;
+        audio.preload = 'none';
 
-  audio = new Audio(url);
-  audio.loop = true;
-  audio.preload = 'none';
+        audioBtn.classList.remove('hidden');
+        audioBtn.classList.remove('is-playing');
+        audioBtn.setAttribute('aria-pressed','false');
+        audioBtn.setAttribute('aria-label','Reproducir audio');
 
-  // Reset seguro del botón (evita listeners duplicados)
-  const _btnOld = document.getElementById('audioBtn');
-  const audioBtnFresh = resetClick(_btnOld);
+        audioBtn.onclick = async () => {
+          if (!audio) return;
+          if (audio.paused) {
+            try {
+              await audio.play();
+              audioBtn.classList.add('is-playing');
+              audioBtn.setAttribute('aria-pressed','true');
+              audioBtn.setAttribute('aria-label','Pausar audio');
+              if (navigator.vibrate) navigator.vibrate(10);
+            } catch(e){ console.log('Bloqueo autoplay:', e); }
+          } else {
+            audio.pause();
+            audioBtn.classList.remove('is-playing');
+            audioBtn.setAttribute('aria-pressed','false');
+            audioBtn.setAttribute('aria-label','Reproducir audio');
+          }
+        };
 
-  // Estado base del botón
-  audioBtnFresh.classList.remove('hidden', 'is-playing');
-  audioBtnFresh.setAttribute('aria-pressed','false');
-  audioBtnFresh.setAttribute('aria-label','Reproducir audio');
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden && audio && !audio.paused) {
+            audio.pause();
+            audioBtn.classList.remove('is-playing');
+            audioBtn.setAttribute('aria-pressed','false');
+            audioBtn.setAttribute('aria-label','Reproducir audio');
+          }
+        });
 
-  audioBtnFresh.onclick = async () => {
-    if (!audio) return;
-    if (audio.paused) {
-      try {
-        await audio.play();
-        audioBtnFresh.classList.add('is-playing');
-        audioBtnFresh.setAttribute('aria-pressed','true');
-        audioBtnFresh.setAttribute('aria-label','Pausar audio');
-        if (navigator.vibrate) navigator.vibrate(10);
-      } catch(e){ console.log('Bloqueo autoplay:', e); }
-    } else {
-      audio.pause();
-      audioBtnFresh.classList.remove('is-playing');
-      audioBtnFresh.setAttribute('aria-pressed','false');
-      audioBtnFresh.setAttribute('aria-label','Reproducir audio');
-    }
-  };
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden && audio && !audio.paused) {
-      audio.pause();
-      audioBtnFresh.classList.remove('is-playing');
-      audioBtnFresh.setAttribute('aria-pressed','false');
-      audioBtnFresh.setAttribute('aria-label','Reproducir audio');
-    }
-  }, { once:false });
-
-  audio.addEventListener('error', () => {
-    console.warn('Audio no encontrado:', url);
-  }, { once:true });
-}
-
+        audio.addEventListener('error', () => {
+          console.warn('Audio no encontrado:', url);
+        });
       }
 
       // ---------------- AR helpers ----------------
@@ -578,36 +569,46 @@
               mv.appendChild(blocker);
             }
 
-            // ✅ Botón AR unificado (optimizado y reseteado por carga)
-            if (arBtn) {
-              const newArBtn = resetClick(arBtn); // elimina listeners previos de memoria/recarga
-              show(newArBtn);
+           // ✅ Botón AR unificado (optimizado y reseteado por carga)
+if (arBtn) {
+  // Elimina handlers previos si la página fue recargada desde memoria
+  arBtn.replaceWith(arBtn.cloneNode(true));
+  const newArBtn = document.getElementById('arBtn');
 
-              newArBtn.addEventListener('click', async () => {
-                showARLoading();
-                try {
-                  if (isIOS) {
-                    const ok = openQuickLookSync(model);
-                    if (!ok) window.location.href = usdzUrl(model);
-                    return;
-                  }
-                  if (isAndroid) {
-                    const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(glbUrl(model))}&mode=ar_preferred&title=${encodeURIComponent(model)}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
-                    const a = document.createElement('a');
-                    a.href = intent; a.style.display = 'none';
-                    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-                    return;
-                  }
-                  if (mv?.activateAR) await mv.activateAR();
-                  else openARFor(model);
-                } catch (err) {
-                  console.error('Error abriendo AR:', err);
-                  openARFor(model);
-                } finally {
-                  hideARLoading();
-                }
-              });
-            }
+  newArBtn.classList.remove('hidden');
+  newArBtn.addEventListener('click', async () => {
+    showARLoading();
+
+    try {
+      if (isIOS) {
+        const ok = openQuickLookSync(model);
+        if (!ok) window.location.href = usdzUrl(model);
+        return;
+      }
+
+      if (isAndroid) {
+        const a = document.createElement('a');
+        const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(glbUrl(model))}&mode=ar_preferred&title=${encodeURIComponent(model)}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+        a.href = intent;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        return;
+      }
+
+      if (mv?.activateAR) await mv.activateAR();
+      else openARFor(model);
+    } catch (err) {
+      console.error('Error abriendo AR:', err);
+      openARFor(model);
+    } finally {
+      hideARLoading();
+    }
+  });
+}
+
+
 
             if (slug) {
               infoData = await loadInfoDataOrFallback(infoData);
@@ -653,9 +654,6 @@
             // FAB AR
             arBtn.classList.remove('hidden');
             arBtn.onclick = () => {
-            const arBtnFresh = resetClick(arBtn);
-            show(arBtnFresh);
-            arBtnFresh.onclick = () => {
               showARLoading();
               if (isIOS) {
                 const ok = openQuickLookSync(figure);
@@ -664,7 +662,6 @@
               }
               openARFor(figure);
             };
-          }
 
             if (slug) {
               infoData = await loadInfoDataOrFallback(infoData);
