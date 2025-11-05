@@ -197,12 +197,22 @@
         audioBtn.setAttribute('aria-pressed','false');
         audioBtn.setAttribute('aria-label','Reproducir audio');
 
+        // Asegurar visibilidad de la fila y del botón, sin depender del CSS
+        if (fabRow) {
+          fabRow.style.display = 'flex';     // anula media-queries que pongan display:none
+          fabRow.classList.remove('hidden'); // por si acaso
+        }
+        if (audioBtn) {
+          audioBtn.style.display = 'flex';   // por si alguna regla lo deja en none
+          audioBtn.classList.remove('hidden');
+        }
+
+
         // Asegura que la fila de FABs se muestre (sin tocar tu CSS)
         if (fabRow) {
           fabRow.style.display = 'flex';
           fabRow.classList.remove('hidden');
         }
-
 
         audioBtn.onclick = async () => {
           if (!audio) return;
