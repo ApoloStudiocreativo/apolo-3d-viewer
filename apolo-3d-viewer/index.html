@@ -137,6 +137,7 @@
       const slug = model || figure || '';
 
       // ---------------- Elementos del DOM ----------------
+      const fabRow  = document.getElementById('fabRow');
       const mv      = document.getElementById('mv');
       const splat   = document.getElementById('splat');
       const skel    = document.getElementById('skel');
@@ -195,6 +196,13 @@
         audioBtn.classList.remove('is-playing');
         audioBtn.setAttribute('aria-pressed','false');
         audioBtn.setAttribute('aria-label','Reproducir audio');
+
+        // Asegura que la fila de FABs se muestre (sin tocar tu CSS)
+        if (fabRow) {
+          fabRow.style.display = 'flex';
+          fabRow.classList.remove('hidden');
+        }
+
 
         audioBtn.onclick = async () => {
           if (!audio) return;
