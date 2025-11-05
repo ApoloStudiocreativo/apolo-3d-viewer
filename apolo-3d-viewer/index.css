@@ -369,3 +369,57 @@
    .ar-fab > svg{ width:20px; height:20px; }
  }
  
+ /* ====== Variables base de tema (sin tocar --fab-bottom) ====== */
+:root{
+  --bg:#0f1115;
+  --text:#e9eef7;
+  --muted:#9aa4b2;
+  --brand:#40cbcb;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
+}
+
+/* ====== Reseteo base del documento ====== */
+html, body{
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden; /* la escena ocupa toda la pantalla */
+}
+
+/* Utilidades */
+.full{ position: fixed; inset: 0; }
+.hidden{ display: none !important; }
+
+/* ====== Viewports de las escenas ====== */
+model-viewer,
+iframe#splat{
+  width: 100vw;
+  height: 100dvh;
+  display: block;
+  background: var(--bg);
+}
+iframe#splat{ border: 0; }
+
+/* ====== Mensaje de ayuda/error ====== */
+#msg{
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font: 500 16px/1.4 system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  text-align: center; color: var(--muted);
+  padding: 24px;
+}
+#msg b{ color: #ff6464; }
+
+/* ====== Spinner visual para el overlay AR ====== */
+.ar-loading .spinner{
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 3px solid rgba(255,255,255,.22);
+  border-top-color: #fff;
+  animation: spin .9s linear infinite;
+}
+
+/* Reutiliza la animación ya usada en el loader general.
+   Si no existiera @keyframes spin en tu hoja, descomenta este bloque:
+@keyframes spin { to { transform: rotate(360deg); } }
+*/
