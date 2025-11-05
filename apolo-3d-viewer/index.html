@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f1115" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
   <title>Museo Virtual San Joaquín y Santa Ana</title>
 
   <!-- Tipografía para títulos -->
@@ -183,68 +187,89 @@
       function hide(el){ if (el) el.classList.add('hidden'); }
 
       // ---------------- Audio por figura ----------------
-      let audio = null;
-      function setupAudioFor(id){
-        const url = `/assets/audio/${id}.mp3`;
-        if (audio) { try { audio.pause(); } catch{} audio = null; }
+// ---------------- Audio por figura (botón siempre visible + cleanup) ----------------
+let audio = null;
+let audioCleanup = () => {};
 
-        audio = new Audio(url);
-        audio.loop = true;
-        audio.preload = 'none';
+async function setupAudioFor(id){
+  // Limpia lo anterior
+  try { audioCleanup(); } catch {}
+  audioCleanup = () => {};
+  audio = null;
 
-        audioBtn.classList.remove('hidden');
-        audioBtn.classList.remove('is-playing');
-        audioBtn.setAttribute('aria-pressed','false');
-        audioBtn.setAttribute('aria-label','Reproducir audio');
+  if (!audioBtn) return;
 
-        // Asegurar visibilidad de la fila y del botón, sin depender del CSS
-        if (fabRow) {
-          fabRow.style.display = 'flex';     // anula media-queries que pongan display:none
-          fabRow.classList.remove('hidden'); // por si acaso
-        }
-        if (audioBtn) {
-          audioBtn.style.display = 'flex';   // por si alguna regla lo deja en none
-          audioBtn.classList.remove('hidden');
-        }
+  const url = `/assets/audio/${id}.mp3`;
 
+  // Mostrar SIEMPRE la fila y el botón (respetando tu CSS cuando se pueda)
+  if (fabRow) { fabRow.classList.remove('hidden'); fabRow.style.display = 'flex'; }
+  audioBtn.classList.remove('hidden', 'is-playing');
+  audioBtn.style.display = 'flex';
+  audioBtn.removeAttribute('disabled');
+  audioBtn.dataset.state = 'idle'; // para estilos opcionales
+  audioBtn.setAttribute('aria-pressed','false');
+  audioBtn.setAttribute('aria-label','Reproducir audio');
 
-        // Asegura que la fila de FABs se muestre (sin tocar tu CSS)
-        if (fabRow) {
-          fabRow.style.display = 'flex';
-          fabRow.classList.remove('hidden');
-        }
+  // Crea el elemento de audio
+  audio = new Audio(url);
+  audio.loop = true;
+  audio.preload = 'none';
 
-        audioBtn.onclick = async () => {
-          if (!audio) return;
-          if (audio.paused) {
-            try {
-              await audio.play();
-              audioBtn.classList.add('is-playing');
-              audioBtn.setAttribute('aria-pressed','true');
-              audioBtn.setAttribute('aria-label','Pausar audio');
-              if (navigator.vibrate) navigator.vibrate(10);
-            } catch(e){ console.log('Bloqueo autoplay:', e); }
-          } else {
-            audio.pause();
-            audioBtn.classList.remove('is-playing');
-            audioBtn.setAttribute('aria-pressed','false');
-            audioBtn.setAttribute('aria-label','Reproducir audio');
-          }
-        };
-
-        document.addEventListener('visibilitychange', () => {
-          if (document.hidden && audio && !audio.paused) {
-            audio.pause();
-            audioBtn.classList.remove('is-playing');
-            audioBtn.setAttribute('aria-pressed','false');
-            audioBtn.setAttribute('aria-label','Reproducir audio');
-          }
-        });
-
-        audio.addEventListener('error', () => {
-          console.warn('Audio no encontrado:', url);
-        });
+  const onClick = async () => {
+    if (!audio) return;
+    if (audio.paused) {
+      try {
+        await audio.play();
+        audioBtn.classList.add('is-playing');
+        audioBtn.dataset.state = 'playing';
+        audioBtn.setAttribute('aria-pressed','true');
+        audioBtn.setAttribute('aria-label','Pausar audio');
+        if (navigator.vibrate) navigator.vibrate(10);
+      } catch (e) {
+        console.log('Bloqueo autoplay:', e);
       }
+    } else {
+      audio.pause();
+      audioBtn.classList.remove('is-playing');
+      audioBtn.dataset.state = 'idle';
+      audioBtn.setAttribute('aria-pressed','false');
+      audioBtn.setAttribute('aria-label','Reproducir audio');
+    }
+  };
+
+  const onVisibility = () => {
+    if (document.hidden && audio && !audio.paused) {
+      audio.pause();
+      audioBtn.classList.remove('is-playing');
+      audioBtn.dataset.state = 'idle';
+      audioBtn.setAttribute('aria-pressed','false');
+      audioBtn.setAttribute('aria-label','Reproducir audio');
+    }
+  };
+
+  const onError = () => {
+    console.warn('Audio no encontrado o no reproducible:', url);
+    // Mantenemos el botón visible, pero lo desactivamos para no confundir
+    audioBtn.classList.remove('is-playing');
+    audioBtn.dataset.state = 'error';
+    audioBtn.setAttribute('aria-pressed','false');
+    audioBtn.setAttribute('aria-label','Audio no disponible');
+    audioBtn.setAttribute('disabled', 'true');
+  };
+
+  audioBtn.addEventListener('click', onClick);
+  document.addEventListener('visibilitychange', onVisibility);
+  audio.addEventListener('error', onError);
+
+  // Cleanup para la siguiente figura
+  audioCleanup = () => {
+    try { if (audio) audio.pause(); } catch {}
+    audio = null;
+    audioBtn.removeEventListener('click', onClick);
+    document.removeEventListener('visibilitychange', onVisibility);
+    try { audio.removeEventListener('error', onError); } catch {}
+  };
+}
 
       // ---------------- AR helpers ----------------
       function openARFor(name){
