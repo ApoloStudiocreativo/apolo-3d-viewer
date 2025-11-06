@@ -699,17 +699,46 @@ async function setupAudioFor(id){
                 const ratio = Math.round(e.detail.totalProgress * 100);
                 if (progressEl) progressEl.textContent = `${ratio}%`;
               });
-              mv.addEventListener('load', () => {
-                // desvanecer la pantalla de carga suavemente
-                const skel = document.getElementById('skel');
-                if (skel) {
-                  skel.style.opacity = '0';
-                  setTimeout(() => skel.classList.add('hidden'), 600);
-                }
-                // ...ya tienes el fade-out del skeleton
-                requestAnimationFrame(() => mv.classList.add('is-visible')); // activa el fade-in del modelo
 
-              });
+              // ▶ PÓSTER GLB (overlay separado para poder hacer fade)
+              let glbPoster = document.getElementById('glbPoster');
+              if (!glbPoster) {
+                glbPoster = document.createElement('div');
+                glbPoster.id = 'glbPoster';
+                glbPoster.className = 'glb-poster';
+                document.body.appendChild(glbPoster);
+              }
+
+              // Usa el mismo póster que intentas para <model-viewer> o el placeholder
+              const glbPosterUrl = (await exists(`/assets/posters/${model}.webp`))
+                ? `/assets/posters/${model}.webp`
+                : '/models/placeholder.webp';
+
+              glbPoster.style.backgroundImage = `url('${glbPosterUrl}')`;
+
+              // muestralo ya (queda bajo el skeleton hasta que se oculte)
+              glbPoster.classList.add('visible');
+
+              mv.addEventListener('load', () => {
+              // ... tu código para ocultar skeleton ...
+
+              // ya haces visible el modelo:
+              requestAnimationFrame(() => mv.classList.add('is-visible'));
+
+              // ▶ Crossfade: poster GLB se desvanece tras un frame
+              const glbPoster = document.getElementById('glbPoster');
+              if (glbPoster) {
+                // da un pequeño margen para que el modelo ya esté pintado
+                setTimeout(() => {
+                  glbPoster.classList.add('fade-out');
+                  // limpia el DOM tras la animación
+                  setTimeout(() => {
+                    glbPoster.remove();
+                  }, 500); // ≈ a tu transition .45s
+                }, 30);
+              }
+            });
+
             }
 
 

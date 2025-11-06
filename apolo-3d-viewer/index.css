@@ -236,6 +236,21 @@
    opacity:0; transition:opacity .6s ease-out, filter .6s ease-out; filter: blur(12px);
  }
  
+ /* H2) Poster GLB (mismo patrón que SPLAT) */
+.glb-poster{
+  position:fixed; inset:0;
+  background:center center/cover no-repeat #0f1115;
+  z-index:8;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .45s ease, filter .45s ease;
+}
+.glb-poster.visible{ opacity:1; }
+.glb-poster.fade-out{
+  opacity:0;
+  filter: blur(10px);
+}
+
  
  /******************************
   * I) Tipografías y tamaños cartela
