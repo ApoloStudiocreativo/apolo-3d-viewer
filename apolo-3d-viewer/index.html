@@ -42,7 +42,6 @@
     <script
       type="module"
       src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"
-      
     ></script>
   </head>
 
@@ -203,19 +202,6 @@
         let model = (qs.get('model') || '').toLowerCase();
         let figure = (qs.get('figure') || '').toLowerCase();
 
-                if (location.search.includes('debug=true')) {
-          const mvEl = document.getElementById('mv');
-          mvEl?.addEventListener('click', (e) => {
-            const hit = mvEl.positionAndNormalFromPoint?.(e.clientX, e.clientY);
-            if (!hit) { console.log('Sin intersección'); return; }
-            const pos = hit.position; const nrm = hit.normal;
-            const p = `${pos.x.toFixed(2)}m ${pos.y.toFixed(2)}m ${pos.z.toFixed(2)}m`;
-            const n = `${nrm.x.toFixed(2)}m ${nrm.y.toFixed(2)}m ${nrm.z.toFixed(2)}m`;
-            console.log('Hotspot position:', p, 'normal:', n);
-          });
-        }
-
-
         if (!type) {
           const parts = location.pathname.split('/').filter(Boolean);
           if (parts[0] === 'splat' && parts[1]) {
@@ -250,67 +236,6 @@
         const infoMeta = document.getElementById('infoMeta');
         const infoDesc = document.getElementById('infoDesc');
         const audioBtn = document.getElementById('audioBtn');
-
-        // --- Hotspots (GLB) ---
-let hotspotsData = null;
-
-async function loadHotspotsData() {
-  if (hotspotsData) return hotspotsData;
-  try {
-    const r = await fetch('/assets/hotspots.json', { cache: 'no-store' });
-    if (!r.ok) return (hotspotsData = {});
-    const json = await r.json();
-    hotspotsData = json || {};
-  } catch {
-    hotspotsData = {};
-  }
-  return hotspotsData;
-}
-function clearMvHotspots() {
-  const mvEl = document.getElementById('mv');
-  if (!mvEl) return;
-  [...mvEl.querySelectorAll('[slot^="hotspot-"]')].forEach(n => n.remove());
-}
-function applyMvHotspotsForSlug(slug) {
-  const mvEl = document.getElementById('mv');
-  if (!mvEl || !slug) return;
-  const piecePoints = (hotspotsData && hotspotsData[slug]) || [];
-  clearMvHotspots();
-  piecePoints.forEach((p, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'mv-hotspot';
-    btn.setAttribute('slot', `hotspot-${p.id || i}`);
-    if (p.position) btn.setAttribute('data-position', p.position); // "x y z" en m
-    if (p.normal)   btn.setAttribute('data-normal',   p.normal);
-    btn.setAttribute('data-visibility-attribute', 'aria-hidden');
-    btn.setAttribute('aria-label', p.label || 'Punto de información');
-    btn.innerHTML = `
-      <span class="mv-hotspot__dot" aria-hidden="true"></span>
-      <span class="mv-hotspot__label">${p.label ? String(p.label) : ''}</span>
-    `;
-    btn.addEventListener('click', () => {
-      if (p.desc) {
-        const cont = document.querySelector('#infoSheet .info-sheet__content');
-        if (cont) {
-          const old = cont.querySelector('#hotspotNote'); if (old) old.remove();
-          const note = document.createElement('div');
-          note.id = 'hotspotNote';
-          note.style.cssText = 'margin:0 0 12px; padding:10px; border-radius:10px; background:rgba(64,203,203,.12); color:#e9eef7;';
-          note.innerHTML = `<strong>${p.label || 'Detalle'}:</strong> ${p.desc}`;
-          cont.prepend(note);
-        }
-      }
-      if (typeof openSheet === 'function') openSheet();
-    });
-    mvEl.appendChild(btn);
-  });
-}
-// Inicialización por modelo GLB
-async function initHotspotsForModel(slug) {
-  await loadHotspotsData();
-  applyMvHotspotsForSlug(slug);
-}
-
 
         if (infoBtn) {
           infoBtn.setAttribute('aria-controls', 'infoSheet');
@@ -1122,12 +1047,6 @@ async function initHotspotsForModel(slug) {
                 infoData = await loadInfoDataOrFallback(infoData);
                 renderInfo(slug);
               }
-
-                            // Hotspots (GLB): carga y dibuja
-              initHotspotsForModel(model);
-              // (opcional) re-aplicar tras el "load" del modelo
-              mv.addEventListener('load', () => applyMvHotspotsForSlug(model), { once: true });
-
 
               // Auto-open si el usuario lo dejó abierto para este slug o si viene con ?info=1 o #info
               const wantsInfo =
