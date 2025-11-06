@@ -223,6 +223,24 @@
       function show(el){ if (el) el.classList.remove('hidden'); }
       function hide(el){ if (el) el.classList.add('hidden'); }
 
+      // 🔔 Vibración háptica ligera al pulsar botones principales
+      function addHapticFeedback(selector, intensity = 10) {
+        const btn = document.querySelector(selector);
+        if (!btn) return;
+        btn.addEventListener('click', () => {
+          try { if (navigator.vibrate) navigator.vibrate(intensity); } catch {}
+        });
+      }
+
+      // Asigna vibración a los botones más usados
+      document.addEventListener('DOMContentLoaded', () => {
+        addHapticFeedback('#infoBtn', 12);
+        addHapticFeedback('#infoClose', 12);
+        addHapticFeedback('#arBtn', 14);
+        addHapticFeedback('#audioBtn', 10);
+      });
+
+
       // Toast reutilizable (mensaje flotante)
       function showToast(message = 'Pulsa de nuevo para habilitar el audio', ms = 1800) {
         let t = document.querySelector('.toast');
