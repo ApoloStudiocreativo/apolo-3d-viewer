@@ -1,8 +1,8 @@
 {
   "routes": [
-
     { "src": "^/splat/([a-z0-9-]+)/?$", "dest": "/?type=splat&figure=$1" },
     { "src": "^/glb/([a-z0-9-]+)/?$",   "dest": "/?type=glb&model=$1" },
+
     {
       "src": "^/models/(.*)\\.usdz$",
       "headers": {
@@ -28,11 +28,57 @@
       }
     },
 
+    {
+      "src": "^/assets/posters/(.*)\\.webp$",
+      "headers": {
+        "Content-Type": "image/webp",
+        "X-Content-Type-Options": "nosniff",
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "^/assets/audio/(.*)\\.mp3$",
+      "headers": {
+        "Content-Type": "audio/mpeg",
+        "X-Content-Type-Options": "nosniff",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Accept-Ranges": "bytes"
+      }
+    },
+    {
+      "src": "^/splat/(.*)$",
+      "headers": {
+        "X-Content-Type-Options": "nosniff",
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "^/manifest\\.webmanifest$",
+      "headers": {
+        "Content-Type": "application/manifest+json",
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+
+    {
+      "src": "^/$",
+      "headers": {
+        "Content-Security-Policy": "default-src 'self' https://ajax.googleapis.com; img-src 'self' data: blob: https://*; media-src 'self' https://*; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' https://ajax.googleapis.com; connect-src 'self' https://*; object-src 'none'; base-uri 'self'; frame-ancestors 'self';",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "accelerometer=(), camera=(), microphone=(), gyroscope=(), geolocation=()"
+      }
+    },
+    {
+      "src": "^/index\\.html$",
+      "headers": {
+        "Content-Security-Policy": "default-src 'self' https://ajax.googleapis.com; img-src 'self' data: blob: https://*; media-src 'self' https://*; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' https://ajax.googleapis.com; connect-src 'self' https://*; object-src 'none'; base-uri 'self'; frame-ancestors 'self';",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "accelerometer=(), camera=(), microphone=(), gyroscope=(), geolocation=()"
+      }
+    },
+
     { "handle": "filesystem" },
 
     { "src": "^/([a-z0-9-]+)/?$", "dest": "/?type=glb&model=$1" }
-    
   ]
 }
-
-
