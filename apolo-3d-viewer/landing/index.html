@@ -65,24 +65,27 @@
     /* Bloqueo de zoom accidental SOLO en UI */
     header, .search, .grid, .card { touch-action: manipulation; }
 
-    .badge {
-  font-size: 0;                 /* ocultar cualquier texto residual */
+.badge {
+  font-size: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0;                   /* la pill ya tiene padding por CSS previo */
+  padding: 0;
+  width: 24px;
+  height: 24px;
 }
 
 .badge svg {
   width: 14px;
   height: 14px;
   display: block;
-  stroke: #66e0da;              /* mismo tono del botón AR */
+  stroke: #66e0da; /* mismo color que el botón AR */
   stroke-width: 1.8;
   stroke-linecap: round;
   stroke-linejoin: round;
   fill: none;
 }
+
 
 /* (opcional) si quieres diferenciar SPLAT con otro color */
 .badge--splat svg {
@@ -141,6 +144,21 @@
 
     const grid = document.getElementById('grid');
     const q = document.getElementById('q');
+
+    // Icono común (cubo AR)
+const ICON_CUBE = `
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      d="M12 3l8.66 5v8L12 21l-8.66-5V8L12 3zM12 3v18M3.34 8L12 13l8.66-5"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      fill="none"
+    />
+  </svg>
+`;
+
     // Iconos inline
     const ICONS = {
   glb: `
@@ -161,11 +179,11 @@
       <a class="card" href="${toURL(item)}">
         <div class="thumb-wrap">
           <div class="thumb" style="background-image:url('${item.poster || '/models/placeholder.webp'}')"></div>
-          <span class="badge ${item.type === 'splat' ? 'badge--splat' : 'badge--glb'}" 
-      aria-label="${item.type === 'splat' ? 'SPLAT' : 'GLB'}">
-  ${item.type === 'splat' ? ICONS.splat : ICONS.glb}
-  <span class="sr-only">${item.type === 'splat' ? 'SPLAT' : 'GLB'}</span>
-</span>
+          <span class="badge" aria-label="${item.type.toUpperCase()}">
+        ${ICON_CUBE}
+        <span class="sr-only">${item.type.toUpperCase()}</span>
+        </span>
+
 
         </div>
         <div class="body">
