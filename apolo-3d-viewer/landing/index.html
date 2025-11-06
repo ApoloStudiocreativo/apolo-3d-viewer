@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
   <title>Museo Virtual · Obras</title>
   <meta name="theme-color" content="#0f1115" />
   <link rel="manifest" href="/manifest.webmanifest" />
@@ -52,7 +53,6 @@
         .title{ font-size:13px; }
         .sub{ font-size:11px; }
         }
-
   </style>
 </head>
 <body>
@@ -143,5 +143,32 @@
       render();
     }));
   </script>
+
+    <script>
+    /* === Bloquear zoom accidental en la landing (pinch, double-tap, etc.) === */
+    (function preventZoom(){
+      const onGesture = e => e.preventDefault(); // bloquea pinch zoom
+      document.addEventListener('gesturestart', onGesture, {passive:false});
+      document.addEventListener('gesturechange', onGesture, {passive:false});
+    
+      // Evita zoom con Ctrl+wheel (en desktop)
+      window.addEventListener('wheel', e => {
+        if(e.ctrlKey) e.preventDefault();
+      }, {passive:false});
+    
+      // Evita double-tap zoom en iOS
+      let lastTouch = 0;
+      document.addEventListener('touchend', e => {
+        const now = Date.now();
+        if(now - lastTouch < 350) e.preventDefault();
+        lastTouch = now;
+      }, {passive:false});
+    })();
+    </script>
+    
+
+
+
+
 </body>
 </html>
