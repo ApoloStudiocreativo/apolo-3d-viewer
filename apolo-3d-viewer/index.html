@@ -264,17 +264,11 @@
         btn.addEventListener('pointerdown', onDown);
       }
 
-      // Asigna a los botones (cuando el DOM está listo)
-      document.addEventListener('DOMContentLoaded', () => {
-        addHapticFeedback('#infoBtn', [14]);
-        addHapticFeedback('#infoClose', [14]);
-        addHapticFeedback('#arBtn', [20]);
-        addHapticFeedback('#audioBtn', [12, 8]); // dobleto corto para notarse más
-        // Diagnóstico en consola
-        console.debug('[haptics] vibrate supported?', supportsVibrate());
-      });
-
-
+            addHapticFeedback('#infoBtn', [14]);
+      addHapticFeedback('#infoClose', [14]);
+      addHapticFeedback('#arBtn', [20]);
+      addHapticFeedback('#audioBtn', [12, 8]);
+      console.debug('[haptics] vibrate supported?', supportsVibrate());
 
       // Toast reutilizable (mensaje flotante)
       function showToast(message = 'Pulsa de nuevo para habilitar el audio', ms = 1800) {
@@ -658,7 +652,7 @@ async function setupAudioFor(id){
 
 
       window.addEventListener('keydown', (e)=>{
-        
+
         // Ignorar si escribes dentro de inputs/textarea/contenteditable
         const t = e.target;
         const typing = t && (
@@ -686,6 +680,7 @@ async function setupAudioFor(id){
             mv.src = glbUrl(model);
 
             // ▼▼ AÑADE ESTA LÍNEA AQUÍ ▼▼
+            mv.classList.remove('hidden');
             mv.classList.remove('is-visible'); // resetea el fade-in por si venías de otra pieza
 
             // Failsafe: oculta el skeleton si algún navegador no dispara 'load'
@@ -1123,14 +1118,6 @@ async function setupAudioFor(id){
   sheet.addEventListener('touchstart', onStart, { passive: true });
   sheet.addEventListener('touchmove', onMove, { passive: true });
   sheet.addEventListener('touchend', onEnd);
-
-  // Reapertura desde el botón de info
-  infoBtn.addEventListener('click', () => {
-    sheet.classList.remove('hidden');
-    sheet.setAttribute('aria-hidden','false');
-    sheet.style.transform = 'translateY(0)';
-    sheet.style.opacity = '1';
-  });
 })();
 
 /* 🔒 Bloquear page-zoom del navegador solo cuando el gesto ocurre sobre la UI */
