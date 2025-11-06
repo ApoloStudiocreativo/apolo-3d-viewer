@@ -140,6 +140,10 @@
       }
       const slug = model || figure || '';
 
+      // Estado persistente de la cartela por pieza
+      const sheetKeyFor = (s) => `sheet:${s}`;
+
+
       // ---------------- Elementos del DOM ----------------
       const fabRow  = document.getElementById('fabRow');
       const mv      = document.getElementById('mv');
@@ -156,6 +160,12 @@
       const infoMeta   = document.getElementById('infoMeta');
       const infoDesc   = document.getElementById('infoDesc');
       const audioBtn   = document.getElementById('audioBtn');
+
+      if (infoBtn) {
+        infoBtn.setAttribute('aria-controls', 'infoSheet');
+        infoBtn.setAttribute('aria-expanded', 'false');
+      }
+
 
       // Accesibilidad: anuncia el progreso del loader
       const loaderProgressEl = document.getElementById('loaderProgress');
@@ -605,13 +615,66 @@ async function setupAudioFor(id){
       }
 
       // Panel/cartela UI
-      function openSheet(){ renderInfo(slug); sheet.classList.remove('hidden'); sheet.setAttribute('aria-hidden','false'); }
-      function closeSheet(){ sheet.classList.add('hidden'); sheet.setAttribute('aria-hidden','true'); }
+      function openSheet(){
+        renderInfo(slug);
+        sheet.classList.remove('hidden');
+        sheet.setAttribute('aria-hidden','false');
+        document.body.classList.add('sheet-open');
 
-      if (infoBtn) infoBtn.addEventListener('click', openSheet);
+        if (infoBtn) {
+          infoBtn.setAttribute('aria-expanded','true');
+          infoBtn.setAttribute('aria-label','Ocultar información');
+        }
+
+        if (slug) {
+          try { localStorage.setItem(sheetKeyFor(slug), 'open'); } catch {}
+        }
+      }
+
+      function closeSheet(){
+        sheet.classList.add('hidden');
+        sheet.setAttribute('aria-hidden','true');
+        document.body.classList.remove('sheet-open');
+
+        if (infoBtn) {
+          infoBtn.setAttribute('aria-expanded','false');
+          infoBtn.setAttribute('aria-label','Mostrar información');
+        }
+
+        if (slug) {
+          try { localStorage.setItem(sheetKeyFor(slug), 'closed'); } catch {}
+        }
+      }
+
+      function toggleSheet(){
+        const hidden = sheet.classList.contains('hidden');
+        hidden ? openSheet() : closeSheet();
+      }
+
+
+      if (infoBtn) infoBtn.addEventListener('click', toggleSheet);
       sheetClose.addEventListener('click', closeSheet);
       sheet.addEventListener('click', (e)=>{ if (e.target === sheet) closeSheet(); });
-      window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape') closeSheet(); });
+
+
+      window.addEventListener('keydown', (e)=>{
+        
+        // Ignorar si escribes dentro de inputs/textarea/contenteditable
+        const t = e.target;
+        const typing = t && (
+          t.tagName === 'INPUT' ||
+          t.tagName === 'TEXTAREA' ||
+          t.isContentEditable
+        );
+        if (typing) return;
+
+        if (e.key === 'Escape') {
+          closeSheet();
+        } else if (e.key.toLowerCase() === 'i') {
+          toggleSheet();
+        }
+      });
+
 
       // ---------------- Inicialización ----------------
       (async function init(){
@@ -724,43 +787,43 @@ async function setupAudioFor(id){
             }
 
            // ✅ Botón AR unificado (optimizado y reseteado por carga)
-if (arBtn) {
-  // Elimina handlers previos si la página fue recargada desde memoria
-  arBtn.replaceWith(arBtn.cloneNode(true));
-  const newArBtn = document.getElementById('arBtn');
+            if (arBtn) {
+              // Elimina handlers previos si la página fue recargada desde memoria
+              arBtn.replaceWith(arBtn.cloneNode(true));
+              const newArBtn = document.getElementById('arBtn');
 
-  newArBtn.classList.remove('hidden');
-  newArBtn.addEventListener('click', async () => {
-    showARLoading();
+              newArBtn.classList.remove('hidden');
+              newArBtn.addEventListener('click', async () => {
+                showARLoading();
 
-    try {
-      if (isIOS) {
-        const ok = openQuickLookSync(model);
-        if (!ok) window.location.href = usdzUrl(model);
-        return;
-      }
+                try {
+                  if (isIOS) {
+                    const ok = openQuickLookSync(model);
+                    if (!ok) window.location.href = usdzUrl(model);
+                    return;
+                  }
 
-      if (isAndroid) {
-        const a = document.createElement('a');
-        const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(glbUrl(model))}&mode=ar_preferred&title=${encodeURIComponent(model)}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
-        a.href = intent;
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        return;
-      }
+                  if (isAndroid) {
+                    const a = document.createElement('a');
+                    const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(glbUrl(model))}&mode=ar_preferred&title=${encodeURIComponent(model)}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+                    a.href = intent;
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    return;
+                  }
 
-      if (mv?.activateAR) await mv.activateAR();
-      else openARFor(model);
-    } catch (err) {
-      console.error('Error abriendo AR:', err);
-      openARFor(model);
-    } finally {
-      hideARLoading();
-    }
-  });
-}
+                  if (mv?.activateAR) await mv.activateAR();
+                  else openARFor(model);
+                } catch (err) {
+                  console.error('Error abriendo AR:', err);
+                  openARFor(model);
+                } finally {
+                  hideARLoading();
+                }
+              });
+            }
 
 
 
@@ -768,6 +831,17 @@ if (arBtn) {
               infoData = await loadInfoDataOrFallback(infoData);
               renderInfo(slug);
             }
+
+            // Auto-open si el usuario lo dejó abierto para este slug o si viene con ?info=1 o #info
+            const wantsInfo = (new URLSearchParams(location.search).get('info') === '1') || (location.hash === '#info');
+            let lastState = 'closed';
+            try { lastState = localStorage.getItem(sheetKeyFor(slug)) || 'closed'; } catch {}
+
+            if (wantsInfo || lastState === 'open') {
+              // Deja un frame para que el DOM pinte antes del open (suaviza la transición)
+              requestAnimationFrame(() => openSheet());
+            }
+
 
             setupAudioFor(model);
             skel.classList.add('hidden');
@@ -822,6 +896,16 @@ if (arBtn) {
             if (slug) {
               infoData = await loadInfoDataOrFallback(infoData);
               renderInfo(slug);
+            }
+
+            // Auto-open si el usuario lo dejó abierto para este slug o si viene con ?info=1 o #info
+            const wantsInfo = (new URLSearchParams(location.search).get('info') === '1') || (location.hash === '#info');
+            let lastState = 'closed';
+            try { lastState = localStorage.getItem(sheetKeyFor(slug)) || 'closed'; } catch {}
+
+            if (wantsInfo || lastState === 'open') {
+              // Deja un frame para que el DOM pinte antes del open (suaviza la transición)
+              requestAnimationFrame(() => openSheet());
             }
 
             setupAudioFor(figure);
