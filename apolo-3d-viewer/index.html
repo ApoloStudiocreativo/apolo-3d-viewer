@@ -223,6 +223,21 @@
       function show(el){ if (el) el.classList.remove('hidden'); }
       function hide(el){ if (el) el.classList.add('hidden'); }
 
+      // Toast reutilizable (mensaje flotante)
+      function showToast(message = 'Pulsa de nuevo para habilitar el audio', ms = 1800) {
+        let t = document.querySelector('.toast');
+        if (!t) {
+          t = document.createElement('div');
+          t.className = 'toast';
+          document.body.appendChild(t);
+        }
+        t.textContent = message;
+        t.classList.add('show');
+        window.clearTimeout(showToast._timer);
+        showToast._timer = window.setTimeout(() => t.classList.remove('show'), ms);
+      }
+
+
       // ---------------- Audio por figura ----------------
 // ---------------- Audio por figura (botón siempre visible + cleanup) ----------------
 let audio = null;
@@ -263,8 +278,9 @@ async function setupAudioFor(id){
         audioBtn.setAttribute('aria-label','Pausar audio');
         if (navigator.vibrate) navigator.vibrate(10);
       } catch (e) {
-        console.log('Bloqueo autoplay:', e);
+      showToast('Pulsa de nuevo para habilitar el audio');
       }
+
     } else {
       audio.pause();
       audioBtn.classList.remove('is-playing');
