@@ -17,10 +17,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <!-- Tipografía para títulos -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght=600&display=swap" rel="stylesheet"></noscript>
+    
 
     <!-- CSS principal -->
     <link rel="stylesheet" href="/index.css" />
@@ -37,12 +36,25 @@
     <!-- HDR / skybox -->
     <link rel="preload" as="image" href="/assets/hdr/museo-suave.hdr" />
     <link rel="preload" as="image" href="/assets/hdr/museo-suave-blur.webp" />
+    <link rel="manifest" href="/manifest.webmanifest">
+
 
     <!-- model-viewer (GLB) -->
     <script
       type="module"
       src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"
     ></script>
+
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch((e) =>
+            console.debug('[sw] no registrado:', e?.message || e)
+          );
+        });
+      }
+    </script>
+    
   </head>
 
   <body>
