@@ -691,3 +691,77 @@
  /* Deja el host visible (el póster vive aquí) */
  model-viewer { opacity: 1; transition: opacity .35s ease; }
  
+ /* Hotspots 3D (GLB) */
+.mv-hotspot {
+  --hit-size: 44px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--hit-size);
+  height: var(--hit-size);
+  border-radius: 999px;
+  border: 2px solid rgba(64,203,203,.85);
+  background: rgba(15,17,21,.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #e9eef7;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.mv-hotspot:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(64,203,203,.35); }
+.mv-hotspot .mv-hotspot__dot {
+  width: 10px; height: 10px; border-radius: 999px; background: #40cbcb;
+  box-shadow: 0 0 10px rgba(64,203,203,.85);
+}
+.mv-hotspot .mv-hotspot__label {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  bottom: calc(100% + 8px);
+  white-space: nowrap;
+  padding: 6px 10px; border-radius: 10px; font: 600 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: rgba(20,24,30,.92); color: #e9eef7; box-shadow: 0 6px 18px rgba(0,0,0,.35);
+}
+@media (max-width: 420px){ .mv-hotspot .mv-hotspot__label { font-size: 11px; } }
+/* Si el punto queda ocluido, atenuamos (model-viewer controla aria-hidden) */
+.mv-hotspot[aria-hidden="true"] { opacity: .35; }
+
+/* Por si el navegador expone la clase que pones al entrar en AR */
+body.in-ar .mv-hotspot { display: none !important; }
+
+/* Hotspots 3D (GLB) */
+.mv-hotspot {
+  --hit-size: 44px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--hit-size);
+  height: var(--hit-size);
+  border-radius: 999px;
+  border: 2px solid rgba(64,203,203,.85);
+  background: rgba(15,17,21,.55);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: #e9eef7;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.mv-hotspot:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(64,203,203,.35); }
+.mv-hotspot .mv-hotspot__dot {
+  width: 10px; height: 10px; border-radius: 999px; background: #40cbcb;
+  box-shadow: 0 0 10px rgba(64,203,203,.85);
+}
+.mv-hotspot .mv-hotspot__label {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  bottom: calc(100% + 8px);
+  white-space: nowrap;
+  padding: 6px 10px; border-radius: 10px; font: 600 12px/1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  background: rgba(20,24,30,.92); color: #e9eef7; box-shadow: 0 6px 18px rgba(0,0,0,.35);
+}
+@media (max-width: 420px){ .mv-hotspot .mv-hotspot__label { font-size: 11px; } }
+/* Atenuar cuando el punto está ocluido (model-viewer pone aria-hidden) */
+.mv-hotspot[aria-hidden="true"] { opacity: .35; }
+/* Cinturón y tirantes: oculta si el body entra en AR */
+body.in-ar .mv-hotspot { display: none !important; }
