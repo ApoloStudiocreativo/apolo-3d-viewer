@@ -284,6 +284,50 @@
         showToast._timer = window.setTimeout(() => t.classList.remove('show'), ms);
       }
 
+              // Mensaje de error con CTA de reintento
+        function showErrorAndRetry(kind, name, retryFn){
+          const cta = document.createElement('div');
+          cta.style.cssText = 'margin-top:12px; display:flex; gap:8px; justify-content:center;';
+          const btnRetry = document.createElement('button');
+          btnRetry.textContent = 'Reintentar';
+          btnRetry.className = 'info-btn';
+          btnRetry.style.minWidth = 'auto';
+          btnRetry.onclick = () => {
+            const msg = document.getElementById('msg');
+            if (msg) msg.classList.add('hidden');
+            retryFn?.();
+          };
+
+          const msg = document.getElementById('msg');
+          if (msg) {
+            msg.innerHTML = `
+              <div>
+                <b>No se pudo cargar la pieza</b><br/><br/>
+                Tipo: <code>${kind}</code> · Id: <code>${name}</code><br/>
+                Puede ser tu conexión o un archivo temporalmente no disponible.
+              </div>`;
+            msg.appendChild(cta);
+            cta.appendChild(btnRetry);
+            msg.classList.remove('hidden');
+          }
+
+          showToast('Error de carga. Pulsa “Reintentar”.', 2200);
+        }
+
+        // Habilita/Deshabilita el botón AR visual y funcionalmente
+        function setArEnabled(enabled){
+          const btn = document.getElementById('arBtn');
+          if (!btn) return;
+          if (enabled){
+            btn.removeAttribute('disabled');
+            btn.classList.remove('is-disabled');
+          } else {
+            btn.setAttribute('disabled','true');
+            btn.classList.add('is-disabled');
+          }
+        }
+
+
 
       // ---------------- Audio por figura ----------------
 // ---------------- Audio por figura (botón siempre visible + cleanup) ----------------
@@ -679,6 +723,40 @@ async function setupAudioFor(id){
             // Fuente GLB
             mv.src = glbUrl(model);
 
+            // Deshabilita AR hasta que el modelo esté listo
+setArEnabled(false);
+
+// Función de reintento (con cache-buster) y rehacer póster overlay si existe
+const retryGlb = () => {
+  const sk = document.getElementById('skel');
+  if (sk) { sk.classList.remove('hidden'); sk.style.opacity = '1'; }
+  const bust = `?v=${Date.now()}`;
+  mv.src = glbUrl(model) + bust;
+
+  const gp = document.getElementById('glbPoster');
+  if (gp) {
+    gp.classList.remove('fade-out');
+    gp.classList.add('visible');
+  }
+};
+
+// Si model-viewer reporta error: mostramos CTA de reintento
+mv.addEventListener('error', () => {
+  const sk = document.getElementById('skel');
+  if (sk) {
+    sk.style.opacity = '0';
+    setTimeout(()=> sk.classList.add('hidden'), 400);
+  }
+  showErrorAndRetry('glb', model, retryGlb);
+});
+
+// Auto-reintentar una vez al recuperar conexión si el estado era de error
+window.addEventListener('online', () => {
+  const msg = document.getElementById('msg');
+  if (msg && !msg.classList.contains('hidden')) retryGlb();
+});
+
+
             // ▼▼ AÑADE ESTA LÍNEA AQUÍ ▼▼
             mv.classList.remove('hidden');
 
@@ -736,7 +814,9 @@ async function setupAudioFor(id){
                     glbPoster.remove();
                   }, 500); // ≈ a tu transition .45s
                 }, 30);
-              }
+              } 
+                // Modelo listo → habilita AR
+                setArEnabled(true);
             });
 
             }

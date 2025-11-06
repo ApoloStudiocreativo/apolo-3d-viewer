@@ -496,6 +496,16 @@ iframe#splat.is-visible{
   white-space: nowrap;
 }
 
+/* AR deshabilitado mientras no carga el modelo */
+.ar-fab[disabled],
+.ar-fab.is-disabled{
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(30%);
+  pointer-events: none;
+}
+
+
 /* === FAB row: separación y safe area === */
 .fab-row{
   gap: 12px;
