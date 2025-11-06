@@ -320,14 +320,6 @@
  }
  
   /* === Corregir rotación del loader: el texto no gira === */
-  .loader-circle {
-    position: relative;
-    animation: spin 1.6s linear infinite;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
   .loader-progress {
     position: absolute;
     transform: rotate(-1 * var(--spin-angle, 0deg));
@@ -336,14 +328,6 @@
     color: #fff;
   }
 
-  /* La animación de rotación solo afecta al círculo */
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-
-
- 
  /******************************
   * M) Botón AR (glass azul) – base y estados
   ******************************/
@@ -611,6 +595,3 @@ body.sheet-open{ overflow: hidden; }
   transform: scale(0.98);
   transition: transform 120ms ease;
 }
-
-/* Deja el host visible (el póster vive aquí) */
-model-viewer { opacity: 1; transition: opacity .35s ease; }
