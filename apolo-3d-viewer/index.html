@@ -622,6 +622,9 @@ async function setupAudioFor(id){
             // Fuente GLB
             mv.src = glbUrl(model);
 
+            // ▼▼ AÑADE ESTA LÍNEA AQUÍ ▼▼
+            mv.classList.remove('is-visible'); // resetea el fade-in por si venías de otra pieza
+
             // Failsafe: oculta el skeleton si algún navegador no dispara 'load'
             setTimeout(() => {
               const sk = document.getElementById('skel');
@@ -646,6 +649,9 @@ async function setupAudioFor(id){
                   skel.style.opacity = '0';
                   setTimeout(() => skel.classList.add('hidden'), 600);
                 }
+                // ...ya tienes el fade-out del skeleton
+                requestAnimationFrame(() => mv.classList.add('is-visible')); // activa el fade-in del modelo
+
               });
             }
 
@@ -792,11 +798,13 @@ if (arBtn) {
               splat.addEventListener('load', ()=>{
                 splatPoster.classList.add('fade-out');
                 setTimeout(()=> splatPoster.classList.add('hidden'), 700);
+                requestAnimationFrame(() => splat.classList.add('is-visible'));
               }, { once:true });
             }
 
             // Cargar SPLAT
             splat.src = splatUrl(figure);
+            splat.classList.remove('is-visible');
             splat.classList.remove('hidden');
 
             // FAB AR

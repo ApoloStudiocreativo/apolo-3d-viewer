@@ -435,6 +435,19 @@ iframe#splat{ border: 0; }
 }
 #msg b{ color: #ff6464; }
 
+/* === Soft reveal de escenas (fade-in al cargar) === */
+model-viewer,
+iframe#splat{
+  opacity: 0;                 /* estado inicial: oculto */
+  transition: opacity .45s ease;
+}
+
+model-viewer.is-visible,
+iframe#splat.is-visible{
+  opacity: 1;                 /* visible cuando la escena está lista */
+}
+
+
 /* ====== Spinner visual para el overlay AR ====== */
 .ar-loading .spinner{
   width: 28px; height: 28px; border-radius: 50%;
