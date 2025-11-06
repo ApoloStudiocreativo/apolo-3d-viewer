@@ -954,6 +954,52 @@ window.addEventListener('online', () => {
           if (type === 'splat' && figure){
             document.body.classList.add('mode-splat');
 
+            // Deshabilita AR mientras el SPLAT no esté listo
+          setArEnabled(false);
+
+          // Estado de carga + watchdog de seguridad
+          let splatLoaded = false;
+          const WATCHDOG_MS = 12000;
+
+          const retrySplat = () => {
+            // Reaparece el skeleton suavemente
+            const sk = document.getElementById('skel');
+            if (sk) { sk.classList.remove('hidden'); sk.style.opacity = '1'; }
+
+            // Rehacer poster overlay si estaba
+            const sp = document.getElementById('splatPoster');
+            if (sp) {
+              sp.classList.remove('hidden', 'fade-out');
+              requestAnimationFrame(()=> sp.classList.add('visible'));
+            }
+
+            // Cache-buster al iframe
+            const bust = `?v=${Date.now()}`;
+            splat.src = splatUrl(figure) + bust;
+
+            // Reinicia estado
+            splatLoaded = false;
+            startWatchdog();
+          };
+
+          let watchdogTimer = null;
+          function startWatchdog(){
+            clearTimeout(watchdogTimer);
+            watchdogTimer = setTimeout(() => {
+              if (!splatLoaded) {
+                showErrorAndRetry('splat', figure, retrySplat);
+                // Al fallar, mantiene AR desactivado
+                setArEnabled(false);
+              }
+            }, WATCHDOG_MS);
+          }
+
+          // Si vuelve la conexión y aún no cargó, reintenta
+          window.addEventListener('online', () => {
+            if (!splatLoaded) retrySplat();
+          });
+
+
             // --- Poster previo al SPLAT (aparece ya, antes del src) ---
             const splatPoster = document.getElementById('splatPoster');
             if (splatPoster) {
@@ -961,6 +1007,7 @@ window.addEventListener('online', () => {
               splatPoster.style.backgroundImage = `url('/models/placeholder.webp')`;
               splatPoster.classList.remove('hidden');
               requestAnimationFrame(()=> splatPoster.classList.add('visible'));
+              startWatchdog();
 
               // Intentar poster específico en paralelo
               (async ()=>{
@@ -973,10 +1020,24 @@ window.addEventListener('online', () => {
 
               // Ocultar cuando el SPLAT carga
               splat.addEventListener('load', ()=>{
-                splatPoster.classList.add('fade-out');
-                setTimeout(()=> splatPoster.classList.add('hidden'), 700);
-                requestAnimationFrame(() => splat.classList.add('is-visible'));
-              }, { once:true });
+              splatLoaded = true;
+              clearTimeout(watchdogTimer);
+
+              splatPoster.classList.add('fade-out');
+              setTimeout(()=> splatPoster.classList.add('hidden'), 700);
+
+              // SPLAT ya pintado → habilita AR y muestra la escena
+              setArEnabled(true);
+              requestAnimationFrame(() => splat.classList.add('is-visible'));
+
+              // Oculta skeleton por si seguía visible
+              const sk = document.getElementById('skel');
+              if (sk) {
+                sk.style.opacity = '0';
+                setTimeout(()=> sk.classList.add('hidden'), 400);
+              }
+            }, { once:true });
+
             }
 
             // Cargar SPLAT
