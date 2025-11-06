@@ -23,7 +23,12 @@
     .filter{display:flex;gap:6px}
     .chip{border:1px solid #2a3342;background:#131823;color:var(--muted);padding:6px 10px;border-radius:999px;cursor:pointer}
     .chip[aria-pressed="true"]{border-color:var(--brand);color:var(--text);background:rgba(64,203,203,.12)}
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-top:10px}
+    .grid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr)); /* << 2 columnas fijas */
+  gap:14px;
+  margin-top:10px;
+}
     .card{background:var(--card);border:1px solid #222938;border-radius:var(--radius);overflow:hidden;display:flex;flex-direction:column;transition:transform .12s ease, box-shadow .2s ease}
     .card:focus-within,.card:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(0,0,0,.35)}
     .thumb{aspect-ratio:1/1;background:#0b0f14;position:relative}
@@ -34,7 +39,20 @@
     .badge{position:absolute;left:8px;top:8px;background:rgba(64,203,203,.16);color:#9fe9e9;border:1px solid rgba(64,203,203,.45);font:700 11px/1 system-ui;padding:6px 8px;border-radius:10px}
     .empty{color:var(--muted);text-align:center;padding:40px 0}
     .footer{margin:18px 0 4px;color:var(--muted);font-size:12px;text-align:center}
-    @media (min-width:960px){.grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}}
+    /* A partir de tablet ancha, subimos a 3 columnas */
+        @media (min-width: 720px){
+        .grid{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+        }
+
+        /* En desktop, auto-fill con cartas más anchas */
+        @media (min-width: 1100px){
+        .grid{ grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); }
+        }
+        @media (max-width: 380px){
+        .title{ font-size:13px; }
+        .sub{ font-size:11px; }
+        }
+
   </style>
 </head>
 <body>
