@@ -38,12 +38,18 @@
     <link rel="preload" as="image" href="/assets/hdr/museo-suave-blur.webp" />
     <link rel="manifest" href="/manifest.webmanifest">
 
+    <link rel="preconnect" href="https://ajax.googleapis.com" crossorigin>
+    <link rel="modulepreload" href="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js" crossorigin>
+
+
 
     <!-- model-viewer (GLB) -->
     <script
-      type="module"
-      src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"
-    ></script>
+    type="module"
+    crossorigin
+    src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js">
+    </script>
+  
 
     <script>
       if ('serviceWorker' in navigator) {
@@ -420,6 +426,29 @@
             btn.classList.add('is-disabled');
           }
         }
+
+                // --- Standalone detector (A2HS) ---
+        function isStandalone() {
+          const iosStandalone = ('standalone' in navigator) && navigator.standalone;
+          const pwaStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+          return iosStandalone || pwaStandalone;
+        }
+
+        // --- Watchdog de progreso de <model-viewer> ---
+        function startProgressWatchdog(mvEl, { timeoutMs = 8000, onStall } = {}) {
+          let progressed = false;
+          const onProg = (e) => {
+            const p = e?.detail?.totalProgress ?? 0;
+            if (p > 0) progressed = true;
+          };
+          mvEl.addEventListener('progress', onProg, { passive: true });
+          const timer = setTimeout(() => {
+            mvEl.removeEventListener('progress', onProg);
+            if (!progressed) onStall?.();
+          }, timeoutMs);
+          return () => { clearTimeout(timer); mvEl.removeEventListener('progress', onProg); };
+        }
+
 
         // ---------------- Audio por figura (botón siempre visible + cleanup) ----------------
         let audio = null;
@@ -841,6 +870,32 @@
 
               // Fuente GLB
               mv.src = glbUrl(model);
+
+                          const stopWatchdog = startProgressWatchdog(mv, {
+              timeoutMs: isStandalone() ? 7000 : 10000,
+              onStall: () => {
+                // Sin progreso real: muestra CTA y reintenta con cache-buster
+                showErrorAndRetry('glb', model, () => {
+                  const bust = `?v=${Date.now()}`;
+                  mv.src = glbUrl(model) + bust;
+
+                  // Segundo watchdog por si sigue atascado
+                  startProgressWatchdog(mv, {
+                    timeoutMs: 9000,
+                    onStall: () => showToast('Todavía no hay datos. Reintenta en unos segundos.', 2200)
+                  });
+
+                  // Re-mostrar póster y skeleton durante el reintento
+                  const gp = document.getElementById('glbPoster');
+                  if (gp) { gp.classList.remove('fade-out'); gp.classList.add('visible'); }
+                  const sk = document.getElementById('skel');
+                  if (sk) { sk.classList.remove('hidden'); sk.style.opacity = '1'; }
+                });
+              }
+            });
+            // Al cargar, paramos el watchdog
+            mv.addEventListener('load', () => { try { stopWatchdog?.(); } catch {} }, { once: true });
+
 
               // Deshabilita AR hasta que el modelo esté listo
               setArEnabled(false);
