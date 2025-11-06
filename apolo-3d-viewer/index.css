@@ -586,3 +586,6 @@ body.sheet-open{ overflow: hidden; }
   transform: scale(0.98);
   transition: transform 120ms ease;
 }
+
+/* Deja el host visible (el póster vive aquí) */
+model-viewer { opacity: 1; transition: opacity .35s ease; }
