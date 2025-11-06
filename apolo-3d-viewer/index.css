@@ -567,3 +567,9 @@ body.sheet-open{ overflow: hidden; }
   opacity: 1;
   transform: translateX(-50%) translateY(-4px);
 }
+
+/* Fallback visual al tocar (para iOS/desktop sin vibración) */
+.tap-pulse {
+  transform: scale(0.98);
+  transition: transform 120ms ease;
+}

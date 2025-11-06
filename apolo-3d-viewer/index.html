@@ -223,22 +223,47 @@
       function show(el){ if (el) el.classList.remove('hidden'); }
       function hide(el){ if (el) el.classList.add('hidden'); }
 
-      // 🔔 Vibración háptica ligera al pulsar botones principales
-      function addHapticFeedback(selector, intensity = 10) {
-        const btn = document.querySelector(selector);
-        if (!btn) return;
-        btn.addEventListener('click', () => {
-          try { if (navigator.vibrate) navigator.vibrate(intensity); } catch {}
-        });
+      // 🟢 Haptics robusto + fallback visual
+      function supportsVibrate(){
+        return typeof navigator !== 'undefined'
+          && typeof navigator.vibrate === 'function';
       }
 
-      // Asigna vibración a los botones más usados
+      function addHapticFeedback(selector, pattern = [18]) {
+        const btn = document.querySelector(selector);
+        if (!btn) return;
+
+        // Fallback visual (escala rápida) para iOS/desktop
+        const pulse = () => {
+          btn.classList.add('tap-pulse');
+          setTimeout(()=> btn.classList.remove('tap-pulse'), 120);
+        };
+
+        const onDown = () => {
+          let didVibrate = false;
+          try {
+            if (supportsVibrate()) {
+              // En algunos Android un solo valor pequeño se ignora: patrón corto ayuda
+              didVibrate = navigator.vibrate(pattern);
+            }
+          } catch {}
+          if (!didVibrate) pulse();
+        };
+
+        // feedback inmediato
+        btn.addEventListener('pointerdown', onDown);
+      }
+
+      // Asigna a los botones (cuando el DOM está listo)
       document.addEventListener('DOMContentLoaded', () => {
-        addHapticFeedback('#infoBtn', 12);
-        addHapticFeedback('#infoClose', 12);
-        addHapticFeedback('#arBtn', 14);
-        addHapticFeedback('#audioBtn', 10);
+        addHapticFeedback('#infoBtn', [14]);
+        addHapticFeedback('#infoClose', [14]);
+        addHapticFeedback('#arBtn', [20]);
+        addHapticFeedback('#audioBtn', [12, 8]); // dobleto corto para notarse más
+        // Diagnóstico en consola
+        console.debug('[haptics] vibrate supported?', supportsVibrate());
       });
+
 
 
       // Toast reutilizable (mensaje flotante)
