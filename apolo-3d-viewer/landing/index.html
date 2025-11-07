@@ -8,9 +8,17 @@
   />
   <title>Museo y Real Monasterio de San Joaquin y Santa Ana · Museo Virtual</title>
   <!-- Favicon estándar -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/favicon.png" />
+<!-- Favicons -->
+<link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png">
 
+<!-- Iconos para apps / PWA / Android -->
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/app-icon-192.png">
+
+<!-- iOS (pantalla de inicio) -->
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/app-icon-180.png">
+
+  
     <!-- Para iOS (pantalla de inicio) -->
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/favicon.png" />
 
@@ -107,7 +115,12 @@
   <div class="wrap">
     <header>
       <div class="brand">
-        <img src="/icons/icon-192.png" alt="" width="28" height="28" style="border-radius:8px;object-fit:cover;"/>
+        <img class="brand-icon"
+     src="/assets/icons/app-icon-48.png"
+     srcset="/assets/icons/app-icon-48.png 1x, /assets/icons/app-icon-96.png 2x"
+     width="28" height="28" alt="" decoding="async"
+     style="border-radius:8px;object-fit:cover;" />
+
         <div>
           <h1>Museo Virtual</h1>
           <small>Colección</small>
