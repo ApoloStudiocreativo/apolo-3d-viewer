@@ -98,25 +98,12 @@ body {
     /* Bloqueo de zoom accidental SOLO en UI */
     header, .search, .grid, .card { touch-action: manipulation; }
 
-.badge {
-  font-size: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  width: 24px;
-  height: 24px;
+    .badge{
+  background:rgba(179,138,60,0.08);
+  border:1px solid var(--border-soft);
 }
-
-.badge svg {
-  width: 14px;
-  height: 14px;
-  display: block;
-  stroke: #66e0da; /* mismo color que el botón AR */
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  fill: none;
+.badge svg{
+  stroke:var(--brand);
 }
 
 
