@@ -37,13 +37,14 @@
 
     /* ===== Layout base ===== */
       html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
-      html,body{
-      margin:0;
-      min-height:100%;
-      background:var(--bg);
-      color:var(--text);
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      html, body {
+        margin: 0;
+        min-height: 100%;
+        color: var(--text);
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+        background: none; /* quitamos cualquier fondo previo aquí */
       }
+
 
     .wrap{max-width:1100px;margin:0 auto;padding:18px 16px 28px;}
 
@@ -172,43 +173,36 @@
       }
 
 
-    /* Tipografía/jerarquía en tema */
-    body.theme-museo .mast-title h1{ color: var(--marfil); }
-    body.theme-museo .mast-title small{ color: color-mix(in oklab, var(--marfil) 65%, transparent); }
+      html.theme-museo {
+  /* Paleta */
+  --granate-osc: #6A0000;
+  --granate:     #00ffee;
+  --marfil:      #F7F4EA;
+  --azul:        #00deff;
+  --azul-osc:    #359b95;
 
-    body.theme-museo .mast-logo img{
-      box-shadow: 0 0 0 2px rgba(247,244,234,.07), 0 8px 24px rgba(0,0,0,.35);
-    }
+  /* Map a tokens */
+  --bg:          #06090a;
+  --text:        #EEF1F5;
+  --muted:       #B7C3CF;
+  --card:        #1a2931;
+  --card-hover:  #268386;
 
-    /* Buscador en tema */
-    body.theme-museo .search input{
-      background:#0C1721;
-      border-color: color-mix(in oklab, var(--azul) 45%, transparent);
-      color:var(--text);
-    }
-    body.theme-museo .search input::placeholder{ color: color-mix(in oklab, var(--muted) 80%, transparent); }
-    body.theme-museo .search svg{ color: color-mix(in oklab, var(--azul) 70%, white 10%); }
+  /* Fondo global */
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(1600px 900px at 12% -10%, rgba(177,10,20,.12), transparent 60%),
+    radial-gradient(1600px 900px at 88% 120%, rgba(31,73,101,.12), transparent 60%);
+  background-repeat: no-repeat;
+  background-attachment: scroll;
+  background-size: cover;
+  background-position: center top;
+}
 
-    /* Tarjeta en tema */
-    body.theme-museo .card{
-      background:var(--card);
-      border-color: color-mix(in oklab, var(--azul-osc) 65%, transparent);
-      box-shadow: 0 12px 28px rgba(3,31,50,.18);
-    }
-    body.theme-museo .card:hover{
-      background:var(--card-hover);
-      border-color: color-mix(in oklab, var(--azul) 45%, transparent);
-      box-shadow: 0 14px 34px rgba(3,31,50,.26);
-    }
-    body.theme-museo .title{ color: var(--marfil); }
-    body.theme-museo .sub{ color: color-mix(in oklab, var(--muted) 85%, transparent); }
+body.theme-museo {
+  background: transparent; /* body transparente, deja ver el fondo del html */
+}
 
-    /* Badge en tema (aro granate, trazo marfil) */
-    body.theme-museo .badge{
-      background: color-mix(in oklab, var(--granate) 14%, transparent);
-      border-color: color-mix(in oklab, var(--granate) 45%, transparent);
-    }
-    body.theme-museo .badge svg{ stroke: var(--marfil); }
   </style>
 </head>
 
