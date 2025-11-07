@@ -6,54 +6,40 @@
     name="viewport"
     content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
   />
-  <meta name="theme-color" content="#061f32" />
+  <meta name="theme-color" content="#061F32" />
 
   <title>Museo y Real Monasterio de San Joaquin y Santa Ana · Museo Virtual</title>
-  <!-- Favicon estándar -->
-<!-- Favicons -->
-<link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png">
 
-<!-- Iconos para apps / PWA / Android -->
-<link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/app-icon-192.png">
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/icons/favicon-16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/icons/favicon-32.png">
+  <!-- Android / PWA -->
+  <link rel="icon" type="image/png" sizes="192x192" href="/assets/icons/app-icon-192.png">
+  <!-- iOS -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/app-icon-180.png">
+  <!-- Manifest -->
+  <link rel="manifest" href="/manifest.json" />
 
-<!-- iOS (pantalla de inicio) -->
-<link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/app-icon-180.png">
-
-<link rel="manifest" href="/manifest.json" />
-
-    <!-- PWA manifest (si lo tienes) -->
-    <link rel="manifest" href="/manifest.json" />
-
-  <meta name="theme-color" content="#0f1115" />
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet"/>
 
   <style>
-:root{
-  --bg:#1c2027;
-  --text:#e9eef7;
-  --muted:#9aa4b2;
-  --brand:#40cbcb;
-  --card:#141720;
-  --card-hover:#1a1f2a;
-  --radius:16px;
-}
+    /* ===== Tokens base (mínimos) ===== */
+    :root{
+      --bg:#1c2027;
+      --text:#e9eef7;
+      --muted:#9aa4b2;
+      --card:#141720;
+      --card-hover:#1a1f2a;
+      --radius:16px;
+    }
 
+    /* ===== Layout base ===== */
     html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
     .wrap{max-width:1100px;margin:0 auto;padding:18px 16px 28px;}
-    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:6px 0 16px;}
-    .brand{display:flex;align-items:center;gap:10px;}
-    .brand h1{font:600 18px/1 'Poppins',sans-serif;margin:0;letter-spacing:.2px}
-    .brand small{color:var(--muted)}
-    .search{position:relative;flex:1;max-width:340px;}
-    .search input{
-      width:100%; height:40px; border-radius:12px; border:1px solid #253042; background:#11151d;
-      color:var(--text); padding:0 12px 0 36px; outline:none;
-    }
-    .search svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:#6b7583}
-    /* Grid: 2 columnas en móvil */
+
+    /* ===== Grid tarjetas ===== */
     .grid{
       display:grid; gap:14px;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -65,19 +51,22 @@
       display:block; text-decoration:none; color:inherit;
       background:var(--card); border:1px solid #1e2430; border-radius:var(--radius);
       overflow:hidden; transition:transform .12s ease, background .25s ease, border-color .25s ease, box-shadow .25s ease;
+      box-shadow:0 10px 28px rgba(0,0,0,.18);
     }
-    .card:hover{ transform:translateY(-2px); background:var(--card-hover); border-color:#2a3343; box-shadow:0 6px 18px rgba(0,0,0,.28); }
-    .thumb{
-      aspect-ratio: 4 / 3; width:100%; background:#0e1117 center/cover no-repeat;
-    }
+    .card:hover{ transform:translateY(-2px); background:var(--card-hover); border-color:#2a3343; box-shadow:0 14px 34px rgba(0,0,0,.25); }
+    .thumb{ aspect-ratio: 4 / 3; width:100%; background:#0e1117 center/cover no-repeat; }
     .card .body{padding:10px 12px 12px;}
     .title{font:600 14px/1.25 'Poppins',sans-serif; margin:0 0 6px;}
     .sub{color:var(--muted); font-size:12px; margin:0;}
+
+    /* Badge (estructura + tamaño; los colores los pone el tema) */
     .badge{
-      position:absolute; top:8px; right:8px; font:700 10px/1 system-ui;
-      background:rgba(64,203,203,.15); color:#aef; border:1px solid rgba(64,203,203,.35);
-      padding:5px 8px; border-radius:999px; letter-spacing:.4px;
+      position:absolute; top:8px; right:8px;
+      display:inline-flex; align-items:center; justify-content:center;
+      width:26px; height:26px; border-radius:999px; padding:0;
+      border:1px solid transparent; background:transparent;
     }
+    .badge svg{ width:14px; height:14px; display:block; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; fill:none; }
     .thumb-wrap{position:relative;}
 
     /* Texto compacto en móviles muy estrechos */
@@ -89,273 +78,140 @@
     /* Bloqueo de zoom accidental SOLO en UI */
     header, .search, .grid, .card { touch-action: manipulation; }
 
-.badge {
-  font-size: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  width: 24px;
-  height: 24px;
-}
+    /* ===== Masthead ===== */
+    .mast{
+      --mast-height: 72px;
+      display: grid;
+      grid-template-columns: auto 1fr var(--mast-height); /* logo | título | botón/inline */
+      align-items: center;
+      gap: 6px;
+      margin: 6px 0 12px;
+      min-height: var(--mast-height);
+    }
+    .mast-logo { height: var(--mast-height); width: var(--mast-height); display:flex; align-items:center; justify-content:flex-start; margin-left:-4px; }
+    .mast-logo img{ width:88%; height:auto; object-fit:contain; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.25); }
 
-.badge svg {
-  width: 14px;
-  height: 14px;
-  display: block;
-  stroke: #66e0da; /* mismo color que el botón AR */
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  fill: none;
-}
+    .mast-title{ text-align:center; line-height:1.1; }
+    .mast-title h1{ font:600 18px/1.15 'Poppins',sans-serif; margin:0 0 2px; letter-spacing:.2px; }
+    .mast-title small{ color:var(--muted); font-size:13px; }
 
+    /* Botón lupa móvil (mismo alto que el mast) */
+    .mast-search-btn{
+      width:var(--mast-height); height:var(--mast-height);
+      border-radius:16px; border:1px solid #253042; background:#11151d; color:#9fb1c5;
+      display:grid; place-items:center; cursor:pointer; -webkit-tap-highlight-color:transparent;
+    }
+    .mast-search-btn svg{ width:22px; height:22px; }
 
-/* (opcional) si quieres diferenciar SPLAT con otros colores */
-.badge--splat svg {
-  stroke: #8fe38f;              /* verde suave */
-}
+    /* Campo búsqueda */
+    .search{ position:relative; flex:1; max-width:340px; }
+    .search input{
+      width:100%; height:40px; border-radius:12px; border:1px solid #253042; background:#11151d;
+      color:var(--text); padding:0 12px 0 36px; outline:none;
+    }
+    .search svg{ position:absolute; left:10px; top:50%; transform:translateY(-50%); width:18px; height:18px; color:#6b7583; }
+    .search-inline{ display:none; margin-left:auto; }
 
-/* ====== Masthead (ajustes tamaño y grid) ====== */
-.mast{
-  --mast-height: 72px;
-  display: grid;
-  grid-template-columns: auto 1fr var(--mast-height);
-  align-items: center;
-  gap: 6px; /* menos separación */
-  margin: 6px 0 12px;
-  min-height: var(--mast-height);
-}
+    /* Drawer móvil (buscador) */
+    .search-drawer[hidden]{ display:none; }
+    .search-drawer{ padding:0 2px 10px; animation:drawerIn .18s ease; }
+    @keyframes drawerIn { from { opacity:0; transform: translateY(-6px); } to { opacity:1; transform: translateY(0); } }
 
-/* Logo ocupa exactamente su columna */
-.mast-logo {
-  height: var(--mast-height);
-  width: var(--mast-height);
-  display: flex;
-  align-items: center;
-  justify-content: flex-start; /* antes estaba centered */
-  margin-left: -4px; /* empuja un poco hacia la izquierda */
-}
-.mast-logo img{
-  width: 88%; /* ajusta tamaño visual sin tocar grid */
-  height: auto;
-  object-fit: contain;
-  border-radius: 12px;
-  box-shadow: 0 1px 4px rgba(0,0,0,.25);
-}
+    /* Desktop */
+    @media (min-width:768px){
+      .mast{
+        --mast-height:64px;
+        grid-template-columns: 72px auto 1fr; /* ancho logo fijo + título + buscador a la dcha */
+        column-gap:10px;
+      }
+      .mast-logo{ width:72px; margin-left:0; }
+      .mast-title{ text-align:left; }
+      .mast-search-btn{ display:none; }
+      .search-inline{ display:block; max-width:360px; width:100%; }
+      .search-drawer{ display:none !important; }
+    }
 
-/* Título centrado en móvil */
-.mast-title{
-  text-align: center;
-  line-height: 1.1;
-}
-.mast-title h1{
-  font: 600 18px/1.15 'Poppins',sans-serif;
-  margin: 0 0 2px;
-  letter-spacing: .2px;
-}
-.mast-title small{ color: var(--muted); font-size: 13px; }
+    /* A11y: texto solo lectores */
+    .sr-only{
+      position:absolute!important; width:1px; height:1px; padding:0; margin:-1px;
+      overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+    }
 
-/* Botón lupa con misma altura que el masthead */
-.mast-search-btn{
-  width: var(--mast-height);
-  height: var(--mast-height);
-  border-radius: 16px;
-  border: 1px solid #253042;
-  background: #11151d;
-  color: #9fb1c5;
-  display: grid; place-items: center;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-}
-.mast-search-btn svg{ width: 22px; height: 22px; }
+    /* ===== Tema “Museo” (granate + marfil + azules) ===== */
+    body.theme-museo{
+      /* Paleta */
+      --granate-osc: #6A0000;
+      --granate:     #B10A14;
+      --marfil:      #F7F4EA;
+      --azul:        #1F4965;
+      --azul-osc:    #061F32;
 
-/* Buscador inline (desktop) */
-.search-inline{ display: none; margin-left: auto; }
+      /* Map a tokens */
+      --bg:          #0E1A24;
+      --text:        #EEF1F5;
+      --muted:       #B7C3CF;
+      --card:        #122233;
+      --card-hover:  #1A2C40;
 
-/* Drawer móvil (oculto por defecto) */
-.search-drawer[hidden]{ display:none; }
-.search-drawer{
-  padding: 0 2px 10px;
-  animation: drawerIn .18s ease;
-}
-@keyframes drawerIn {
-  from { opacity:0; transform: translateY(-6px); }
-  to   { opacity:1; transform: translateY(0); }
-}
+      /* Fondo con “respiración” de color */
+      background:
+        radial-gradient(1200px 700px at 12% -10%, rgba(177,10,20,.08), transparent 55%),
+        radial-gradient(1200px 700px at 88% 110%, rgba(31,73,101,.11), transparent 55%),
+        var(--bg);
+    }
 
-/* ====== Desktop (no pisa, título a la izq, buscador a la dcha) ====== */
-@media (min-width: 768px){
-  .mast{
-    --mast-height: 64px;                                   /* un pelín más compacto en desktop */
-    grid-template-columns: 72px auto 1fr;                  /* ancho de col logo + título + buscador */
-  }
-  .mast-logo{ width: 72px; height: var(--mast-height); }   /* fija la caja del logo */
-  .mast-title{ text-align: left; }
-  .mast-search-btn{ display: none; }
-  .search-inline{ display: block; max-width: 360px; width: 100%; }
-  .search-drawer{ display:none !important; }
-}
+    /* Tipografía/jerarquía en tema */
+    body.theme-museo .mast-title h1{ color: var(--marfil); }
+    body.theme-museo .mast-title small{ color: color-mix(in oklab, var(--marfil) 65%, transparent); }
 
-/* (opcional) mayor separación en pantallas muy anchas */
-/* Desktop: corrige proporciones */
-@media (min-width: 768px){
-  .mast{
-    --mast-height: 64px;
-    grid-template-columns: 70px auto 1fr;
-    column-gap: 10px;
-  }
-  .mast-logo {
-    width: 70px;
-    margin-left: 0; /* ya no necesita empuje en desktop */
-  }
-}
+    body.theme-museo .mast-logo img{
+      box-shadow: 0 0 0 2px rgba(247,244,234,.07), 0 8px 24px rgba(0,0,0,.35);
+    }
 
+    /* Buscador en tema */
+    body.theme-museo .search input{
+      background:#0C1721;
+      border-color: color-mix(in oklab, var(--azul) 45%, transparent);
+      color:var(--text);
+    }
+    body.theme-museo .search input::placeholder{ color: color-mix(in oklab, var(--muted) 80%, transparent); }
+    body.theme-museo .search svg{ color: color-mix(in oklab, var(--azul) 70%, white 10%); }
 
-/* Accesibilidad: texto solo para lectores de pantalla */
-.sr-only{
-  position:absolute!important; width:1px; height:1px; padding:0; margin:-1px;
-  overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
-}
+    /* Tarjeta en tema */
+    body.theme-museo .card{
+      background:var(--card);
+      border-color: color-mix(in oklab, var(--azul-osc) 65%, transparent);
+      box-shadow: 0 12px 28px rgba(3,31,50,.18);
+    }
+    body.theme-museo .card:hover{
+      background:var(--card-hover);
+      border-color: color-mix(in oklab, var(--azul) 45%, transparent);
+      box-shadow: 0 14px 34px rgba(3,31,50,.26);
+    }
+    body.theme-museo .title{ color: var(--marfil); }
+    body.theme-museo .sub{ color: color-mix(in oklab, var(--muted) 85%, transparent); }
 
-/* ===== Tema Museo (granate + marfil + azules) ===== */
-body.theme-museo {
-    --granate-osc: #ffffff;
-    --granate: #06f4ff;
-    --marfil: #f7f4ea;
-    --azul: #0081d7;
-    --azul-osc: #00a8d2;
-    --bg: #0e0e0e;
-    --text: #eef1f5;
-    --muted: #b7c3cf;
-    --brand: #000000;
-    --brand-2: #1a5075;
-    --card: #232d3f;
-    --card-hover: #00767c;
-    --radius: 16px;
-}
-
-/* Título y subtítulo: contraste y jerarquía */
-body.theme-museo .mast-title h1{
-  color: var(--marfil);
-}
-body.theme-museo .mast-title small{
-  color: color-mix(in oklab, var(--marfil) 65%, transparent);
-}
-
-/* Logo: leve filo para destacar sobre fondo */
-body.theme-museo .mast-logo img{
-  box-shadow: 0 0 0 2px rgba(247,244,234,.07), 0 8px 24px rgba(0,0,0,.35);
-}
-
-/* Buscador: campo y borde siguiendo la paleta */
-body.theme-museo .search input{
-  background: #0c1721;
-  border-color: color-mix(in oklab, var(--azul) 45%, transparent);
-  color: var(--text);
-}
-body.theme-museo .search input::placeholder{
-  color: color-mix(in oklab, var(--muted) 80%, transparent);
-}
-body.theme-museo .search svg{
-  color: color-mix(in oklab, var(--azul) 70%, white 10%);
-}
-
-/* Tarjeta: borde y hover elegantes */
-body.theme-museo .card{
-  background: var(--card);
-  border-color: color-mix(in oklab, var(--azul-osc) 65%, white 0%);
-  box-shadow: 0 12px 28px rgba(3,31,50,.18);
-}
-body.theme-museo .card:hover{
-  background: var(--card-hover);
-  border-color: color-mix(in oklab, var(--azul) 45%, transparent);
-  box-shadow: 0 14px 34px rgba(3,31,50,.26);
-}
-
-/* Titulares de tarjeta y subtítulos */
-body.theme-museo .title{
-  color: var(--marfil);
-}
-body.theme-museo .sub{
-  color: color-mix(in oklab, var(--muted) 85%, transparent);
-}
-
-/* Badge del “cubo”: aro marfil con sutil fondo granate translúcido */
-body.theme-museo .badge{
-  width: 26px; height: 26px;
-  background: color-mix(in oklab, var(--granate) 14%, transparent);
-  border-color: color-mix(in oklab, var(--granate) 45%, transparent);
-}
-body.theme-museo .badge svg{
-  stroke: var(--marfil);
-  stroke-width: 2;
-}
-
-/* Si quieres distinguir SPLAT vs GLB, descomenta:
-body.theme-museo .badge--splat svg { stroke: #a4d7ff; }  /* azul luz */
-*/
-
-/* FABs (si los reutilizas en la landing): usa granate con vidrio suave */
-body.theme-museo .ar-fab{
-  background:
-    radial-gradient(circle at 30% 30%, color-mix(in oklab, var(--granate) 55%, transparent), rgba(0,0,0,.2)),
-    linear-gradient(135deg, color-mix(in oklab, var(--granate) 70%, black 10%), color-mix(in oklab, var(--azul-osc) 75%, black 10%));
-  border-color: color-mix(in oklab, var(--granate) 75%, white 0%);
-  box-shadow:
-    0 0 12px color-mix(in oklab, var(--granate) 35%, transparent),
-    0 8px 24px rgba(0,0,0,.35),
-    inset 0 2px 8px rgba(255,255,255,.12);
-}
-
-/* Info: acentos y focus visibles */
-body.theme-museo .info-btn{
-  border-color: var(--granate);
-  color: var(--marfil);
-  background: color-mix(in oklab, var(--granate) 14%, transparent);
-}
-body.theme-museo :focus-visible{
-  outline: 2px solid color-mix(in oklab, var(--granate) 70%, white 5%);
-  outline-offset: 3px;
-}
-
-/* Skeleton/loader: aro granate + número marfil */
-body.theme-museo .loader-circle::before{
-  border-color: rgba(177,10,20,.25);
-  border-top-color: var(--granate);
-  box-shadow: 0 0 10px rgba(177,10,20,.35);
-}
-body.theme-museo #loaderProgress{
-  color: var(--marfil);
-  text-shadow: 0 0 6px rgba(177,10,20,.35);
-}
-
-/* Ajuste general del body */
-body.theme-museo{
-  background: radial-gradient(1200px 700px at 12% -10%, rgba(177,10,20,.08), transparent 55%) ,
-              radial-gradient(1200px 700px at 88% 110%, rgba(31,73,101,.11), transparent 55%),
-              var(--bg);
-}
-
-/* Meta capa (color de barra del navegador en Android) – setéalo también con meta */
-
-
+    /* Badge en tema (aro granate, trazo marfil) */
+    body.theme-museo .badge{
+      background: color-mix(in oklab, var(--granate) 14%, transparent);
+      border-color: color-mix(in oklab, var(--granate) 45%, transparent);
+    }
+    body.theme-museo .badge svg{ stroke: var(--marfil); }
   </style>
 </head>
-<body>
-  <body class="theme-museo">
-    
+
+<body class="theme-museo">
   <div class="wrap">
     <header class="mast">
       <div class="mast-logo">
         <img src="/assets/icons/app-icon-192.png" alt="Museo Virtual" />
       </div>
-    
+
       <div class="mast-title">
         <h1>Museo San Joaquín Y<br/>Santa Ana</h1>
         <small>Museo Virtual</small>
       </div>
-    
+
       <!-- Botón de búsqueda (móvil). En desktop se oculta -->
       <button class="mast-search-btn" type="button" aria-label="Buscar">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -363,8 +219,8 @@ body.theme-museo{
                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
       </button>
-    
-      <!-- Campo de búsqueda: en móvil se despliega debajo del header -->
+
+      <!-- Campo de búsqueda inline en desktop -->
       <label class="search search-inline" aria-label="Buscar piezas">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"
@@ -373,8 +229,8 @@ body.theme-museo{
         <input id="q" type="search" placeholder="Buscar por título o autor…" autocomplete="off" />
       </label>
     </header>
-    
-    <!-- Contenedor del buscador desplegable en móvil -->
+
+    <!-- Buscador desplegable en móvil -->
     <div class="search-drawer" id="searchDrawer" hidden>
       <label class="search" aria-label="Buscar piezas">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -384,7 +240,6 @@ body.theme-museo{
         <input id="q-mobile" type="search" placeholder="Buscar por título o autor…" autocomplete="off" />
       </label>
     </div>
-    
 
     <main>
       <div id="grid" class="grid" aria-live="polite"></div>
@@ -410,14 +265,14 @@ body.theme-museo{
       { slug:'virgen-asuncion', title:'Virgen de la Asunción', subtitle:'—', type:'glb', poster:'/assets/posters/virgen-asuncion.webp' },
       { slug:'virgen-de-mena', title:'Virgen de Mena', subtitle:'—', type:'glb', poster:'/assets/posters/virgen-de-mena.webp' }
     ];
-  
+
     // DOM
     const grid = document.getElementById('grid');
     const qDesktop = document.getElementById('q');
     const qMobile = document.getElementById('q-mobile');
     const searchDrawer = document.getElementById('searchDrawer');
     const btnSearch = document.querySelector('.mast-search-btn');
-  
+
     // Icono cubo
     const ICON_CUBE = `
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -425,7 +280,7 @@ body.theme-museo{
               stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
       </svg>
     `;
-  
+
     const toURL = (item) => item.type === 'splat' ? `/splat/${item.slug}` : `/${item.slug}`;
     const toCardHTML = (item) => `
       <a class="card" href="${toURL(item)}">
@@ -442,14 +297,14 @@ body.theme-museo{
         </div>
       </a>
     `;
-  
-    // Termino de búsqueda según breakpoint
+
+    // Término de búsqueda según breakpoint
     function getTerm(){
       const v1 = qDesktop?.value?.trim().toLowerCase() || '';
       const v2 = qMobile?.value?.trim().toLowerCase() || '';
       return window.matchMedia('(min-width:768px)').matches ? v1 : v2;
     }
-  
+
     function render(){
       const term = getTerm();
       const items = !term ? DATA : DATA.filter(x => {
@@ -458,24 +313,23 @@ body.theme-museo{
       });
       grid.innerHTML = items.map(toCardHTML).join('');
     }
-  
+
     // Eventos
     qDesktop?.addEventListener('input', render);
     qMobile?.addEventListener('input', render);
-  
+
     btnSearch?.addEventListener('click', () => {
       const opened = !searchDrawer.hasAttribute('hidden');
-      if (opened) {
-        searchDrawer.setAttribute('hidden', '');
-      } else {
+      if (opened) searchDrawer.setAttribute('hidden', '');
+      else {
         searchDrawer.removeAttribute('hidden');
         setTimeout(() => qMobile?.focus(), 0);
       }
     });
-  
+
     // Render inicial
     render();
-  
+
     // Bloqueo zoom accidental en UI
     (function preventZoomOnUI(){
       const uiRoots = ['header', '.search', '.grid'];
@@ -493,6 +347,5 @@ body.theme-museo{
       }, {passive:false, capture:true});
     })();
   </script>
-  
 </body>
 </html>
