@@ -116,11 +116,11 @@
 
 /* ====== Masthead (ajustes tamaño y grid) ====== */
 .mast{
-  --mast-height: 72px;                    /* alto visual del bloque en móvil */
+  --mast-height: 72px;
   display: grid;
-  grid-template-columns: var(--mast-height) 1fr var(--mast-height); /* logo | título | botón */
+  grid-template-columns: auto 1fr var(--mast-height);
   align-items: center;
-  gap: 10px;
+  gap: 6px; /* menos separación */
   margin: 6px 0 12px;
   min-height: var(--mast-height);
 }
@@ -131,11 +131,12 @@
   width: var(--mast-height);
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* antes estaba centered */
+  margin-left: -4px; /* empuja un poco hacia la izquierda */
 }
 .mast-logo img{
-  width: 100%;
-  height: 100%;
+  width: 88%; /* ajusta tamaño visual sin tocar grid */
+  height: auto;
   object-fit: contain;
   border-radius: 12px;
   box-shadow: 0 1px 4px rgba(0,0,0,.25);
@@ -195,9 +196,17 @@
 }
 
 /* (opcional) mayor separación en pantallas muy anchas */
-@media (min-width: 1200px){
-  .mast{ grid-template-columns: 80px auto 420px; }
-  .mast-logo{ width: 80px; }
+/* Desktop: corrige proporciones */
+@media (min-width: 768px){
+  .mast{
+    --mast-height: 64px;
+    grid-template-columns: 70px auto 1fr;
+    column-gap: 10px;
+  }
+  .mast-logo {
+    width: 70px;
+    margin-left: 0; /* ya no necesita empuje en desktop */
+  }
 }
 
 
