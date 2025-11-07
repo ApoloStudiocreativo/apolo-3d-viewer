@@ -18,6 +18,9 @@
 <!-- iOS (pantalla de inicio) -->
 <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/app-icon-180.png">
 
+<link rel="manifest" href="/manifest.json" />
+
+
   
     <!-- Para iOS (pantalla de inicio) -->
     <link rel="apple-touch-icon" sizes="180x180" href="/assets/icons/favicon.png" />
@@ -115,24 +118,117 @@
 .badge--splat svg {
   stroke: #8fe38f;              /* verde suave */
 }
+
+/* ====== Masthead ====== */
+.mast{
+  --mast-height: 72px; /* altura visual del bloque */
+  display: grid;
+  grid-template-columns: 48px 1fr 40px; /* logo | título | botón */
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0 12px;
+  min-height: var(--mast-height);
+}
+
+/* Logo ocupa toda la altura del mast */
+.mast-logo {
+  height: var(--mast-height);
+  display: flex;
+  align-items: center;
+}
+.mast-logo img{
+  height: 100%;
+  width: auto;
+  border-radius: 12px;
+  object-fit: contain;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+}
+
+/* Título centrado */
+.mast-title{
+  text-align: center;
+  line-height: 1.1;
+}
+.mast-title h1{
+  font: 600 18px/1.15 'Poppins',sans-serif;
+  margin: 0 0 2px;
+  letter-spacing: .2px;
+}
+.mast-title small{
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Botón circular (móvil) */
+.mast-search-btn{
+  width: 36px; height: 36px;
+  border-radius: 12px;
+  border: 1px solid #253042;
+  background: #11151d;
+  color: #9fb1c5;
+  display: grid; place-items: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.mast-search-btn svg{ width: 18px; height: 18px; }
+
+/* Buscador inline (desktop) */
+.search-inline{ display: none; margin-left: auto; }
+
+/* Drawer móvil (oculto por defecto) */
+.search-drawer[hidden]{ display:none; }
+.search-drawer{
+  padding: 0 2px 10px;
+  animation: drawerIn .18s ease;
+}
+@keyframes drawerIn {
+  from { opacity:0; transform: translateY(-6px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+/* Reglas responsive */
+@media (min-width: 768px){
+  .mast{
+    grid-template-columns: 48px auto 1fr; /* logo | título a la izq | buscador a la dcha */
+    column-gap: 14px;
+  }
+  .mast-title{ text-align: left; }
+  .mast-search-btn{ display: none; }
+  .search-inline{ display: block; max-width: 360px; width: 100%; }
+  /* Oculta el drawer en desktop */
+  .search-drawer{ display:none !important; }
+}
+
+/* Accesibilidad: texto solo para lectores de pantalla */
+.sr-only{
+  position:absolute!important; width:1px; height:1px; padding:0; margin:-1px;
+  overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+
   </style>
 </head>
 <body>
   <div class="wrap">
-    <header>
-      <div class="brand">
-        <img class="brand-icon"
-     src="/assets/icons/app-icon-48.png"
-     srcset="/assets/icons/app-icon-48.png 1x, /assets/icons/app-icon-96.png 2x"
-     width="28" height="28" alt="" decoding="async"
-     style="border-radius:8px;object-fit:cover;" />
-
-        <div>
-          <h1>Museo San Joaquín Y Santa Ana</h1>
-          <small>Museo Virtual</small>
-        </div>
+    <header class="mast">
+      <div class="mast-logo">
+        <img src="/assets/icons/icon-192.png" alt="Museo Virtual" />
       </div>
-      <label class="search" aria-label="Buscar piezas">
+    
+      <div class="mast-title">
+        <h1>Museo San Joaquín Y<br/>Santa Ana</h1>
+        <small>Museo Virtual</small>
+      </div>
+    
+      <!-- Botón de búsqueda (móvil). En desktop se oculta -->
+      <button class="mast-search-btn" type="button" aria-label="Buscar">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"
+                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    
+      <!-- Campo de búsqueda: en móvil se despliega debajo del header -->
+      <label class="search search-inline" aria-label="Buscar piezas">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"
                 stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
@@ -140,6 +236,18 @@
         <input id="q" type="search" placeholder="Buscar por título o autor…" autocomplete="off" />
       </label>
     </header>
+    
+    <!-- Contenedor del buscador desplegable en móvil -->
+    <div class="search-drawer" id="searchDrawer" hidden>
+      <label class="search" aria-label="Buscar piezas">
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"
+                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <input id="q-mobile" type="search" placeholder="Buscar por título o autor…" autocomplete="off" />
+      </label>
+    </div>
+    
 
     <main>
       <div id="grid" class="grid" aria-live="polite"></div>
@@ -147,68 +255,49 @@
   </div>
 
   <script>
-    // Datos mínimos (puedes generarlos desde tu info.json en el build si quieres)
+    // Datos (los tuyos)
     const DATA = [
-  { slug:'cristo-yacente', title:'Cristo Yacente', subtitle:'Gregorio Fernández · s. XVII', type:'glb', poster:'/assets/posters/cristo-yacente.webp' },
-  { slug:'virgen-romanica', title:'Virgen Románica', subtitle:'Talla policromada · s. XII', type:'glb', poster:'/assets/posters/virgen-romanica.webp' },
-  { slug:'calvo-anillo', title:'Calvo – Anillo', subtitle:'SPLAT', type:'splat', poster:'/assets/posters/calvo-anillo.webp' },
-  { slug:'bargueno-relicario', title:'Bargueño Relicario', subtitle:'—', type:'glb', poster:'/assets/posters/bargueno-relicario.webp' },
-  { slug:'casulla-santa-ana', title:'Casulla Santa Ana', subtitle:'—', type:'glb', poster:'/assets/posters/casulla-santa-ana.webp' },
-  { slug:'cristo-en-la-cruz', title:'Cristo en la Cruz', subtitle:'—', type:'glb', poster:'/assets/posters/cristo-en-la-cruz.webp' },
-  { slug:'ecce-homo', title:'Ecce Homo', subtitle:'—', type:'glb', poster:'/assets/posters/ecce-homo.webp' },
-  { slug:'jesus-atado-a-la-columna', title:'Jesús Atado a la Columna', subtitle:'—', type:'glb', poster:'/assets/posters/jesus-atado-a-la-columna.webp' },
-  { slug:'novisimos', title:'Novísimos', subtitle:'—', type:'glb', poster:'/assets/posters/novisimos.webp' },
-  { slug:'reliquia-dorada', title:'Reliquia Dorada', subtitle:'—', type:'glb', poster:'/assets/posters/reliquia-dorada.webp' },
-  { slug:'san-bernardo-con-la-virgen', title:'San Bernardo con la Virgen', subtitle:'—', type:'glb', poster:'/assets/posters/san-bernardo-con-la-virgen.webp' },
-  { slug:'san-jose-con-el-nino', title:'San José con el Niño', subtitle:'—', type:'glb', poster:'/assets/posters/san-jose-con-el-nino.webp' },
-  { slug:'tapiz', title:'Tapiz', subtitle:'—', type:'glb', poster:'/assets/posters/tapiz.webp' },
-  { slug:'virgen-asuncion', title:'Virgen de la Asunción', subtitle:'—', type:'glb', poster:'/assets/posters/virgen-asuncion.webp' },
-  { slug:'virgen-de-mena', title:'Virgen de Mena', subtitle:'—', type:'glb', poster:'/assets/posters/virgen-de-mena.webp' }
-];
-
+      { slug:'cristo-yacente', title:'Cristo Yacente', subtitle:'Gregorio Fernández · s. XVII', type:'glb', poster:'/assets/posters/cristo-yacente.webp' },
+      { slug:'virgen-romanica', title:'Virgen Románica', subtitle:'Talla policromada · s. XII', type:'glb', poster:'/assets/posters/virgen-romanica.webp' },
+      { slug:'calvo-anillo', title:'Calvo – Anillo', subtitle:'SPLAT', type:'splat', poster:'/assets/posters/calvo-anillo.webp' },
+      { slug:'bargueno-relicario', title:'Bargueño Relicario', subtitle:'—', type:'glb', poster:'/assets/posters/bargueno-relicario.webp' },
+      { slug:'casulla-santa-ana', title:'Casulla Santa Ana', subtitle:'—', type:'glb', poster:'/assets/posters/casulla-santa-ana.webp' },
+      { slug:'cristo-en-la-cruz', title:'Cristo en la Cruz', subtitle:'—', type:'glb', poster:'/assets/posters/cristo-en-la-cruz.webp' },
+      { slug:'ecce-homo', title:'Ecce Homo', subtitle:'—', type:'glb', poster:'/assets/posters/ecce-homo.webp' },
+      { slug:'jesus-atado-a-la-columna', title:'Jesús Atado a la Columna', subtitle:'—', type:'glb', poster:'/assets/posters/jesus-atado-a-la-columna.webp' },
+      { slug:'novisimos', title:'Novísimos', subtitle:'—', type:'glb', poster:'/assets/posters/novisimos.webp' },
+      { slug:'reliquia-dorada', title:'Reliquia Dorada', subtitle:'—', type:'glb', poster:'/assets/posters/reliquia-dorada.webp' },
+      { slug:'san-bernardo-con-la-virgen', title:'San Bernardo con la Virgen', subtitle:'—', type:'glb', poster:'/assets/posters/san-bernardo-con-la-virgen.webp' },
+      { slug:'san-jose-con-el-nino', title:'San José con el Niño', subtitle:'—', type:'glb', poster:'/assets/posters/san-jose-con-el-nino.webp' },
+      { slug:'tapiz', title:'Tapiz', subtitle:'—', type:'glb', poster:'/assets/posters/tapiz.webp' },
+      { slug:'virgen-asuncion', title:'Virgen de la Asunción', subtitle:'—', type:'glb', poster:'/assets/posters/virgen-asuncion.webp' },
+      { slug:'virgen-de-mena', title:'Virgen de Mena', subtitle:'—', type:'glb', poster:'/assets/posters/virgen-de-mena.webp' }
+    ];
+  
+    // DOM
     const grid = document.getElementById('grid');
-    const q = document.getElementById('q');
-
-    // Icono común (cubo AR)
-const ICON_CUBE = `
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path
-      d="M12 3l8.66 5v8L12 21l-8.66-5V8L12 3zM12 3v18M3.34 8L12 13l8.66-5"
-      stroke="currentColor"
-      stroke-width="1.8"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      fill="none"
-    />
-  </svg>
-`;
-
-    // Iconos inline
-    const ICONS = {
-  glb: `
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 3l8.66 5v8L12 21l-8.66-5V8L12 3zM12 3v18M3.34 8L12 13l8.66-5"></path>
-    </svg>
-  `,
-  splat: `
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 3l8.66 5v8L12 21l-8.66-5V8L12 3zM12 3v18M3.34 8L12 13l8.66-5"></path>
-    </svg>
-  `
-};
-
-
+    const qDesktop = document.getElementById('q');
+    const qMobile = document.getElementById('q-mobile');
+    const searchDrawer = document.getElementById('searchDrawer');
+    const btnSearch = document.querySelector('.mast-search-btn');
+  
+    // Icono cubo
+    const ICON_CUBE = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 3l8.66 5v8L12 21l-8.66-5V8L12 3zM12 3v18M3.34 8L12 13l8.66-5"
+              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    `;
+  
     const toURL = (item) => item.type === 'splat' ? `/splat/${item.slug}` : `/${item.slug}`;
     const toCardHTML = (item) => `
       <a class="card" href="${toURL(item)}">
         <div class="thumb-wrap">
           <div class="thumb" style="background-image:url('${item.poster || '/models/placeholder.webp'}')"></div>
           <span class="badge" aria-label="${item.type.toUpperCase()}">
-        ${ICON_CUBE}
-        <span class="sr-only">${item.type.toUpperCase()}</span>
-        </span>
-
-
+            ${ICON_CUBE}
+            <span class="sr-only">${item.type.toUpperCase()}</span>
+          </span>
         </div>
         <div class="body">
           <h3 class="title">${item.title || item.slug.replace(/-/g,' ')}</h3>
@@ -216,32 +305,48 @@ const ICON_CUBE = `
         </div>
       </a>
     `;
-
+  
+    // Termino de búsqueda según breakpoint
+    function getTerm(){
+      const v1 = qDesktop?.value?.trim().toLowerCase() || '';
+      const v2 = qMobile?.value?.trim().toLowerCase() || '';
+      return window.matchMedia('(min-width:768px)').matches ? v1 : v2;
+    }
+  
     function render(){
-      const term = q.value.trim().toLowerCase();
+      const term = getTerm();
       const items = !term ? DATA : DATA.filter(x => {
         const hay = (x.title+' '+x.subtitle+' '+x.slug).toLowerCase();
         return hay.includes(term);
       });
       grid.innerHTML = items.map(toCardHTML).join('');
     }
-    q.addEventListener('input', render);
+  
+    // Eventos
+    qDesktop?.addEventListener('input', render);
+    qMobile?.addEventListener('input', render);
+  
+    btnSearch?.addEventListener('click', () => {
+      const opened = !searchDrawer.hasAttribute('hidden');
+      if (opened) {
+        searchDrawer.setAttribute('hidden', '');
+      } else {
+        searchDrawer.removeAttribute('hidden');
+        setTimeout(() => qMobile?.focus(), 0);
+      }
+    });
+  
+    // Render inicial
     render();
-
-    // Bloquear zoom accidental en UI (igual que en las figuras)
+  
+    // Bloqueo zoom accidental en UI
     (function preventZoomOnUI(){
       const uiRoots = ['header', '.search', '.grid'];
       const isInUI = (t)=> t?.closest && uiRoots.some(sel=> t.closest(sel));
-
-      // iOS pinch zoom
       const onGesture = (e)=>{ if(isInUI(e.target)) e.preventDefault(); };
       document.addEventListener('gesturestart', onGesture, {passive:false, capture:true});
       document.addEventListener('gesturechange', onGesture, {passive:false, capture:true});
-
-      // Ctrl+wheel (desktop)
       window.addEventListener('wheel', (e)=>{ if(e.ctrlKey && isInUI(e.target)) e.preventDefault(); }, {passive:false, capture:true});
-
-      // Double-tap zoom (iOS)
       let lastTouchEnd = 0;
       document.addEventListener('touchend', (e)=>{
         if(!isInUI(e.target)) return;
@@ -251,5 +356,6 @@ const ICON_CUBE = `
       }, {passive:false, capture:true});
     })();
   </script>
+  
 </body>
 </html>
