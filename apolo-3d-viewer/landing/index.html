@@ -36,7 +36,15 @@
     }
 
     /* ===== Layout base ===== */
-    html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
+      html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
+      html,body{
+      margin:0;
+      min-height:100%;
+      background:var(--bg);
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      }
+
     .wrap{max-width:1100px;margin:0 auto;padding:18px 16px 28px;}
 
     /* ===== Grid tarjetas ===== */
@@ -155,10 +163,14 @@
 
       /* Fondo con “respiración” de color */
       background:
-        radial-gradient(1200px 700px at 12% -10%, rgba(177,10,20,.08), transparent 55%),
-        radial-gradient(1200px 700px at 88% 110%, rgba(31,73,101,.11), transparent 55%),
-        var(--bg);
-    }
+      radial-gradient(1200px 700px at 12% -10%, rgba(177,10,20,.08), transparent 55%),
+      radial-gradient(1200px 700px at 88% 110%, rgba(31,73,101,.11), transparent 55%),
+      var(--bg);
+      /* importante: que no se repitan y que queden fijos al scroll */
+      background-repeat: no-repeat, no-repeat, no-repeat;
+      background-attachment: fixed, fixed, fixed;
+      }
+
 
     /* Tipografía/jerarquía en tema */
     body.theme-museo .mast-title h1{ color: var(--marfil); }
