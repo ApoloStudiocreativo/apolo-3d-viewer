@@ -6,6 +6,8 @@
     name="viewport"
     content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
   />
+  <meta name="theme-color" content="#061f32" />
+
   <title>Museo y Real Monasterio de San Joaquin y Santa Ana · Museo Virtual</title>
   <!-- Favicon estándar -->
 <!-- Favicons -->
@@ -216,9 +218,136 @@
   overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
 }
 
+/* ===== Tema Museo (granate + marfil + azules) ===== */
+body.theme-museo{
+  /* Paleta (según imagen) */
+  --granate-osc: #6a0000;   /* columna 1 */
+  --granate:      #b10a14;  /* columna 2 */
+  --marfil:       #f7f4ea;  /* columna 3 */
+  --azul:         #1f4965;  /* columna 4 */
+  --azul-osc:     #061f32;  /* columna 5 */
+
+  /* Tokens de tema basados en tu sistema */
+  --bg:           #0e1c28;      /* base: azul muy oscuro (ligeramente + cálido) */
+  --text:         #eef1f5;      /* texto principal (claro, no puro blanco) */
+  --muted:        #b7c3cf;      /* texto secundario */
+  --brand:        var(--granate); /* acento principal granate */
+  --brand-2:      var(--azul);    /* acento secundario azul */
+  --card:         #121e2a;      /* tarjetas/tiles */
+  --card-hover:   #172534;      /* hover tarjetas */
+  --radius:       16px;
+}
+
+/* Título y subtítulo: contraste y jerarquía */
+body.theme-museo .mast-title h1{
+  color: var(--marfil);
+}
+body.theme-museo .mast-title small{
+  color: color-mix(in oklab, var(--marfil) 65%, transparent);
+}
+
+/* Logo: leve filo para destacar sobre fondo */
+body.theme-museo .mast-logo img{
+  box-shadow: 0 0 0 2px rgba(247,244,234,.07), 0 8px 24px rgba(0,0,0,.35);
+}
+
+/* Buscador: campo y borde siguiendo la paleta */
+body.theme-museo .search input{
+  background: #0c1721;
+  border-color: color-mix(in oklab, var(--azul) 45%, transparent);
+  color: var(--text);
+}
+body.theme-museo .search input::placeholder{
+  color: color-mix(in oklab, var(--muted) 80%, transparent);
+}
+body.theme-museo .search svg{
+  color: color-mix(in oklab, var(--azul) 70%, white 10%);
+}
+
+/* Tarjeta: borde y hover elegantes */
+body.theme-museo .card{
+  background: var(--card);
+  border-color: color-mix(in oklab, var(--azul-osc) 65%, white 0%);
+  box-shadow: 0 12px 28px rgba(3,31,50,.18);
+}
+body.theme-museo .card:hover{
+  background: var(--card-hover);
+  border-color: color-mix(in oklab, var(--azul) 45%, transparent);
+  box-shadow: 0 14px 34px rgba(3,31,50,.26);
+}
+
+/* Titulares de tarjeta y subtítulos */
+body.theme-museo .title{
+  color: var(--marfil);
+}
+body.theme-museo .sub{
+  color: color-mix(in oklab, var(--muted) 85%, transparent);
+}
+
+/* Badge del “cubo”: aro marfil con sutil fondo granate translúcido */
+body.theme-museo .badge{
+  width: 26px; height: 26px;
+  background: color-mix(in oklab, var(--granate) 14%, transparent);
+  border-color: color-mix(in oklab, var(--granate) 45%, transparent);
+}
+body.theme-museo .badge svg{
+  stroke: var(--marfil);
+  stroke-width: 2;
+}
+
+/* Si quieres distinguir SPLAT vs GLB, descomenta:
+body.theme-museo .badge--splat svg { stroke: #a4d7ff; }  /* azul luz */
+*/
+
+/* FABs (si los reutilizas en la landing): usa granate con vidrio suave */
+body.theme-museo .ar-fab{
+  background:
+    radial-gradient(circle at 30% 30%, color-mix(in oklab, var(--granate) 55%, transparent), rgba(0,0,0,.2)),
+    linear-gradient(135deg, color-mix(in oklab, var(--granate) 70%, black 10%), color-mix(in oklab, var(--azul-osc) 75%, black 10%));
+  border-color: color-mix(in oklab, var(--granate) 75%, white 0%);
+  box-shadow:
+    0 0 12px color-mix(in oklab, var(--granate) 35%, transparent),
+    0 8px 24px rgba(0,0,0,.35),
+    inset 0 2px 8px rgba(255,255,255,.12);
+}
+
+/* Info: acentos y focus visibles */
+body.theme-museo .info-btn{
+  border-color: var(--granate);
+  color: var(--marfil);
+  background: color-mix(in oklab, var(--granate) 14%, transparent);
+}
+body.theme-museo :focus-visible{
+  outline: 2px solid color-mix(in oklab, var(--granate) 70%, white 5%);
+  outline-offset: 3px;
+}
+
+/* Skeleton/loader: aro granate + número marfil */
+body.theme-museo .loader-circle::before{
+  border-color: rgba(177,10,20,.25);
+  border-top-color: var(--granate);
+  box-shadow: 0 0 10px rgba(177,10,20,.35);
+}
+body.theme-museo #loaderProgress{
+  color: var(--marfil);
+  text-shadow: 0 0 6px rgba(177,10,20,.35);
+}
+
+/* Ajuste general del body */
+body.theme-museo{
+  background: radial-gradient(1200px 700px at 12% -10%, rgba(177,10,20,.08), transparent 55%) ,
+              radial-gradient(1200px 700px at 88% 110%, rgba(31,73,101,.11), transparent 55%),
+              var(--bg);
+}
+
+/* Meta capa (color de barra del navegador en Android) – setéalo también con meta */
+
+
   </style>
 </head>
 <body>
+  <body class="theme-museo">
+    
   <div class="wrap">
     <header class="mast">
       <div class="mast-logo">
