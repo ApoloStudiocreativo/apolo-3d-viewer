@@ -80,16 +80,16 @@
 
     /* ===== Masthead ===== */
     .mast{
-      --mast-height: 72px;
+      --mast-height: 60px;
       display: grid;
       grid-template-columns: auto 1fr var(--mast-height); /* logo | título | botón/inline */
       align-items: center;
       gap: 6px;
-      margin: 6px 0 12px;
+      margin: 10px 0 15px;
       min-height: var(--mast-height);
     }
-    .mast-logo { height: var(--mast-height); width: var(--mast-height); display:flex; align-items:center; justify-content:flex-start; margin-left:-4px; }
-    .mast-logo img{ width:88%; height:auto; object-fit:contain; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.25); }
+    .mast-logo { height: var(--mast-height); width: var(--mast-height); display:flex; align-items:center; justify-content:flex-start; margin-left:0px; }
+    .mast-logo img{ width:100%; height:auto; object-fit:contain; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.25); }
 
     .mast-title{ text-align:center; line-height:1.1; }
     .mast-title h1{ font:600 18px/1.15 'Poppins',sans-serif; margin:0 0 2px; letter-spacing:.2px; }
@@ -98,7 +98,7 @@
     /* Botón lupa móvil (mismo alto que el mast) */
     .mast-search-btn{
       width:var(--mast-height); height:var(--mast-height);
-      border-radius:16px; border:1px solid #253042; background:#11151d; color:#9fb1c5;
+      border-radius:16px; border:1px solid #119095; background:#11151d; color:#9fb1c5;
       display:grid; place-items:center; cursor:pointer; -webkit-tap-highlight-color:transparent;
     }
     .mast-search-btn svg{ width:22px; height:22px; }
@@ -141,17 +141,17 @@
     body.theme-museo{
       /* Paleta */
       --granate-osc: #6A0000;
-      --granate:     #B10A14;
+      --granate:     #00ffee;
       --marfil:      #F7F4EA;
-      --azul:        #1F4965;
-      --azul-osc:    #061F32;
+      --azul:        #00deff;
+      --azul-osc:    #00ffd4;
 
       /* Map a tokens */
-      --bg:          #0E1A24;
+      --bg:          #06090a;
       --text:        #EEF1F5;
       --muted:       #B7C3CF;
-      --card:        #122233;
-      --card-hover:  #1A2C40;
+      --card:        #005161;
+      --card-hover:  #0ba1a6;
 
       /* Fondo con “respiración” de color */
       background:
