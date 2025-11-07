@@ -32,14 +32,20 @@
 
   <style>
 :root{
-  --bg:#0f1115;
-  --text:#e9eef7;
-  --muted:#9aa4b2;
-  --brand:#40cbcb;
-  --card:#141720;
-  --card-hover:#1a1f2a;
+  --bg:#171114;                          /* fondo principal borgoña oscuro */
+  --text:#f0ece7;                        /* marfil claro */
+  --muted:#a99387;                       /* beige cálido */
+  --brand:#d9b06c;                       /* dorado envejecido */
+  --card:#1e161a;                        /* tarjeta */
+  --card-hover:#281c21;                  /* tarjeta hover */
   --radius:16px;
+  --border-soft:rgba(217,176,108,0.2);   /* borde translúcido dorado */
 }
+body {
+  background:linear-gradient(180deg, #171114 0%, #120c0f 100%);
+  color:var(--text);
+}
+
 
     html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
     .wrap{max-width:1100px;margin:0 auto;padding:18px 16px 28px;}
@@ -89,25 +95,13 @@
     /* Bloqueo de zoom accidental SOLO en UI */
     header, .search, .grid, .card { touch-action: manipulation; }
 
-.badge {
-  font-size: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  width: 24px;
-  height: 24px;
+    .badge {
+  background: rgba(217,176,108,0.08);
+  border: 1px solid var(--border-soft);
 }
 
 .badge svg {
-  width: 14px;
-  height: 14px;
-  display: block;
-  stroke: #66e0da; /* mismo color que el botón AR */
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  fill: none;
+  stroke: var(--brand);
 }
 
 
