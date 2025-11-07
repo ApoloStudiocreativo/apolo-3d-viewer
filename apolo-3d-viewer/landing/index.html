@@ -32,20 +32,14 @@
 
   <style>
 :root{
-  --bg:#f4f1ec;
-  --text:#2c2320;
-  --muted:#6e5a50;
-  --brand:#b38a3c;
-  --card:#ffffff;
-  --card-hover:#f8f4ef;
+  --bg:#0f1115;
+  --text:#e9eef7;
+  --muted:#9aa4b2;
+  --brand:#40cbcb;
+  --card:#141720;
+  --card-hover:#1a1f2a;
   --radius:16px;
-  --border-soft:rgba(179,138,60,0.3);
 }
-body {
-  background:linear-gradient(180deg, #f4f1ec 0%, #efe9e2 100%);
-  color:var(--text);
-}
-
 
     html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
     .wrap{max-width:1100px;margin:0 auto;padding:18px 16px 28px;}
@@ -68,14 +62,11 @@ body {
     @media(min-width:920px){ .grid{ grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
     .card{
-  border:1px solid var(--border-soft);
-  box-shadow:0 2px 6px rgba(0,0,0,0.05);
-}
-.card:hover{
-  transform:translateY(-3px);
-  background:var(--card-hover);
-  box-shadow:0 8px 20px rgba(0,0,0,0.08);
-}
+      display:block; text-decoration:none; color:inherit;
+      background:var(--card); border:1px solid #1e2430; border-radius:var(--radius);
+      overflow:hidden; transition:transform .12s ease, background .25s ease, border-color .25s ease, box-shadow .25s ease;
+    }
+    .card:hover{ transform:translateY(-2px); background:var(--card-hover); border-color:#2a3343; box-shadow:0 6px 18px rgba(0,0,0,.28); }
     .thumb{
       aspect-ratio: 4 / 3; width:100%; background:#0e1117 center/cover no-repeat;
     }
@@ -98,12 +89,25 @@ body {
     /* Bloqueo de zoom accidental SOLO en UI */
     header, .search, .grid, .card { touch-action: manipulation; }
 
-    .badge{
-  background:rgba(179,138,60,0.08);
-  border:1px solid var(--border-soft);
+.badge {
+  font-size: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: 24px;
+  height: 24px;
 }
-.badge svg{
-  stroke:var(--brand);
+
+.badge svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+  stroke: #66e0da; /* mismo color que el botón AR */
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
 }
 
 
