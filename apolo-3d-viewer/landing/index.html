@@ -32,17 +32,17 @@
 
   <style>
 :root{
-  --bg:#171114;                          /* fondo principal borgoña oscuro */
-  --text:#f0ece7;                        /* marfil claro */
-  --muted:#a99387;                       /* beige cálido */
-  --brand:#d9b06c;                       /* dorado envejecido */
-  --card:#1e161a;                        /* tarjeta */
-  --card-hover:#281c21;                  /* tarjeta hover */
+  --bg:#f4f1ec;
+  --text:#2c2320;
+  --muted:#6e5a50;
+  --brand:#b38a3c;
+  --card:#ffffff;
+  --card-hover:#f8f4ef;
   --radius:16px;
-  --border-soft:rgba(217,176,108,0.2);   /* borde translúcido dorado */
+  --border-soft:rgba(179,138,60,0.3);
 }
 body {
-  background:linear-gradient(180deg, #171114 0%, #120c0f 100%);
+  background:linear-gradient(180deg, #f4f1ec 0%, #efe9e2 100%);
   color:var(--text);
 }
 
@@ -68,11 +68,14 @@ body {
     @media(min-width:920px){ .grid{ grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
     .card{
-      display:block; text-decoration:none; color:inherit;
-      background:var(--card); border:1px solid #1e2430; border-radius:var(--radius);
-      overflow:hidden; transition:transform .12s ease, background .25s ease, border-color .25s ease, box-shadow .25s ease;
-    }
-    .card:hover{ transform:translateY(-2px); background:var(--card-hover); border-color:#2a3343; box-shadow:0 6px 18px rgba(0,0,0,.28); }
+  border:1px solid var(--border-soft);
+  box-shadow:0 2px 6px rgba(0,0,0,0.05);
+}
+.card:hover{
+  transform:translateY(-3px);
+  background:var(--card-hover);
+  box-shadow:0 8px 20px rgba(0,0,0,0.08);
+}
     .thumb{
       aspect-ratio: 4 / 3; width:100%; background:#0e1117 center/cover no-repeat;
     }
@@ -95,13 +98,25 @@ body {
     /* Bloqueo de zoom accidental SOLO en UI */
     header, .search, .grid, .card { touch-action: manipulation; }
 
-    .badge {
-  background: rgba(217,176,108,0.08);
-  border: 1px solid var(--border-soft);
+.badge {
+  font-size: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: 24px;
+  height: 24px;
 }
 
 .badge svg {
-  stroke: var(--brand);
+  width: 14px;
+  height: 14px;
+  display: block;
+  stroke: #66e0da; /* mismo color que el botón AR */
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
 }
 
 
