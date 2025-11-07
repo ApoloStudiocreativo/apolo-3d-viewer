@@ -114,32 +114,34 @@
   stroke: #8fe38f;              /* verde suave */
 }
 
-/* ====== Masthead ====== */
+/* ====== Masthead (ajustes tamaño y grid) ====== */
 .mast{
-  --mast-height: 72px; /* altura visual del bloque */
+  --mast-height: 72px;                    /* alto visual del bloque en móvil */
   display: grid;
-  grid-template-columns: 48px 1fr 40px; /* logo | título | botón */
+  grid-template-columns: var(--mast-height) 1fr var(--mast-height); /* logo | título | botón */
   align-items: center;
   gap: 10px;
   margin: 6px 0 12px;
   min-height: var(--mast-height);
 }
 
-/* Logo ocupa toda la altura del mast */
+/* Logo ocupa exactamente su columna */
 .mast-logo {
   height: var(--mast-height);
+  width: var(--mast-height);
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 .mast-logo img{
+  width: 100%;
   height: 100%;
-  width: auto;
-  border-radius: 12px;
   object-fit: contain;
+  border-radius: 12px;
   box-shadow: 0 1px 4px rgba(0,0,0,.25);
 }
 
-/* Título centrado */
+/* Título centrado en móvil */
 .mast-title{
   text-align: center;
   line-height: 1.1;
@@ -149,15 +151,13 @@
   margin: 0 0 2px;
   letter-spacing: .2px;
 }
-.mast-title small{
-  color: var(--muted);
-  font-size: 13px;
-}
+.mast-title small{ color: var(--muted); font-size: 13px; }
 
-/* Botón circular (móvil) */
+/* Botón lupa con misma altura que el masthead */
 .mast-search-btn{
-  width: 36px; height: 36px;
-  border-radius: 12px;
+  width: var(--mast-height);
+  height: var(--mast-height);
+  border-radius: 16px;
   border: 1px solid #253042;
   background: #11151d;
   color: #9fb1c5;
@@ -165,7 +165,7 @@
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.mast-search-btn svg{ width: 18px; height: 18px; }
+.mast-search-btn svg{ width: 22px; height: 22px; }
 
 /* Buscador inline (desktop) */
 .search-inline{ display: none; margin-left: auto; }
@@ -181,18 +181,25 @@
   to   { opacity:1; transform: translateY(0); }
 }
 
-/* Reglas responsive */
+/* ====== Desktop (no pisa, título a la izq, buscador a la dcha) ====== */
 @media (min-width: 768px){
   .mast{
-    grid-template-columns: 48px auto 1fr; /* logo | título a la izq | buscador a la dcha */
-    column-gap: 14px;
+    --mast-height: 64px;                                   /* un pelín más compacto en desktop */
+    grid-template-columns: 72px auto 1fr;                  /* ancho de col logo + título + buscador */
   }
+  .mast-logo{ width: 72px; height: var(--mast-height); }   /* fija la caja del logo */
   .mast-title{ text-align: left; }
   .mast-search-btn{ display: none; }
   .search-inline{ display: block; max-width: 360px; width: 100%; }
-  /* Oculta el drawer en desktop */
   .search-drawer{ display:none !important; }
 }
+
+/* (opcional) mayor separación en pantallas muy anchas */
+@media (min-width: 1200px){
+  .mast{ grid-template-columns: 80px auto 420px; }
+  .mast-logo{ width: 80px; }
+}
+
 
 /* Accesibilidad: texto solo para lectores de pantalla */
 .sr-only{
