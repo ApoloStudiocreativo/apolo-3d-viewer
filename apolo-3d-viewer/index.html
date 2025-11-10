@@ -1054,23 +1054,48 @@
                 if (cam.maxFov) mv.maxFieldOfView = cam.maxFov;
               }
 
-              // === HDR unificado con fallback ===
-// Iluminación (HDR de alta calidad)
-const HDR_PRIMARY = '/assets/hdr/studio_small_09_2k.hdr';
-// Fondo desenfocado (LDR muy comprimido)
-const SKYBOX_PRIMARY = '/assets/hdr/studio_small_09_blur.webp';
+// === HDR unificado con fallback (fondo visible) ===
+const HDR_PRIMARY     = '/assets/hdr/studio_small_09_2k.hdr';
+const SKYBOX_PRIMARY  = '/assets/hdr/studio_small_09_blur.webp';
+const HDR_FALLBACK    = '/assets/hdr/museo-suave.hdr';
+const SKYBOX_FALLBACK = '/assets/hdr/museo-suave-blur.webp';
 
+async function applyEnvAndSkybox(mv, hdrUrl, skyboxUrl) {
+  if (hdrUrl) {
+    mv.setAttribute('environment-image', hdrUrl);
+    mv.environmentImage = hdrUrl;
+  }
+  if (skyboxUrl) {
+    mv.setAttribute('skybox-image', skyboxUrl);
+    mv.skyboxImage = skyboxUrl;
+  }
+  // No fijar backgroundColor si quieres ver el skybox
+  // mv.backgroundColor = '#0f1115'; // <- mantener comentado
+  mv.exposure = '1.2';
+  mv.shadowIntensity = '0.7';
+  mv.shadowSoftness = '1.0';
+  mv.environmentRotation = '10deg';
+}
+
+let hdrToUse = null, skyToUse = null;
 if (await exists(HDR_PRIMARY)) {
-  mv.environmentImage = HDR_PRIMARY;
+  hdrToUse = HDR_PRIMARY;
+  skyToUse = (await exists(SKYBOX_PRIMARY)) ? SKYBOX_PRIMARY : '';
+} else if (await exists(HDR_FALLBACK)) {
+  hdrToUse = HDR_FALLBACK;
+  skyToUse = (await exists(SKYBOX_FALLBACK)) ? SKYBOX_FALLBACK : '';
 } else {
-  mv.environmentImage = 'neutral';
+  hdrToUse = 'neutral';
+  skyToUse = '';
 }
 
-if (await exists(SKYBOX_PRIMARY)) {
-  mv.skyboxImage = SKYBOX_PRIMARY;
-} else {
-  mv.skyboxImage = ''; // sin skybox → saldrá el fondo del CSS
-}
+await applyEnvAndSkybox(mv, hdrToUse, skyToUse);
+
+// Re-aplicar tras load (algunos navegadores resetean)
+mv.addEventListener('load', () => {
+  applyEnvAndSkybox(mv, hdrToUse, skyToUse);
+}, { once: true });
+
 
 // Opcional: afinado de look
 mv.exposure = '1.2';
