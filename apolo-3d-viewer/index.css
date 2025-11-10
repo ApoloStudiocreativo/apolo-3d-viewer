@@ -941,98 +941,129 @@ model-viewer {
   }
 }
 
-/* Cartela como panel lateral fijo (glass card) */
 @media (min-width: 1025px) {
-  /* Ocultamos el cierre en desktop (cartela siempre visible) */
+  /* --- Reset de elementos innecesarios --- */
   .info-sheet__close { display: none !important; }
+  .info-sheet__drag { display: none !important; }
 
-  /* El panel pasa a la derecha y siempre visible */
+  /* --- Panel lateral limpio, sin bordes redondeados --- */
   #infoSheet {
     position: fixed;
-    top: calc(var(--topbar-h) + 16px);
-    right: 24px;
-    bottom: 24px;
+    top: var(--topbar-h);
+    right: 0;
+    bottom: 0;
     left: auto;
-    width: clamp(360px, 28vw, 460px);
-    max-height: none;
+    width: clamp(380px, 28vw, 480px);
+    background: rgba(10, 10, 12, 0.92);
+    backdrop-filter: blur(12px) saturate(130%);
+    -webkit-backdrop-filter: blur(12px) saturate(130%);
+    border-left: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: inset 1px 0 0 rgba(255,255,255,.04);
+    z-index: 12;
     transform: none !important;
     opacity: 1 !important;
-    background: rgba(14,16,20,0.78);
-    backdrop-filter: blur(14px) saturate(150%);
-    -webkit-backdrop-filter: blur(14px) saturate(150%);
-    border-radius: 18px;
-    border: 1px solid rgba(255,255,255,.08);
-    box-shadow:
-      0 20px 50px rgba(0,0,0,.45),
-      inset 0 1px 0 rgba(255,255,255,.06);
-    z-index: 12; /* por encima de la escena */
-    padding-bottom: 16px;
   }
 
-  /* Contenido con header pegado y scroll "bonito" */
   #infoSheet .info-sheet__content {
-    max-height: none;
-    height: calc(100% - 40px); /* deja espacio al drag/aire */
-    padding: 12px 18px 16px;
-    overflow: auto;
-    overscroll-behavior: contain;
-    mask-image: linear-gradient(to bottom, transparent, black 10px, black calc(100% - 10px), transparent);
+    padding: 40px 42px 48px;
+    height: 100%;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,.15) transparent;
+  }
+  #infoSheet .info-sheet__content::-webkit-scrollbar {
+    width: 6px;
+  }
+  #infoSheet .info-sheet__content::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,.15);
+    border-radius: 0;
   }
 
-  /* Decor: barra finita a la izquierda del panel */
-  #infoSheet::before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 10px;
-    bottom: 10px;
-    width: 3px;
-    border-radius: 3px;
-    background: linear-gradient(180deg, #40cbcb 0%, rgba(64,203,203,.1) 100%);
-    opacity: .85;
+  /* --- Tipografía y jerarquía --- */
+  #infoTitle {
+    font-family: "Poppins", system-ui, sans-serif;
+    font-weight: 600;
+    font-size: clamp(22px, 1.8vw, 30px);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    margin-bottom: 0.8em;
+    color: #f5f6f8;
   }
-
-  /* Tipos algo más grandes en desktop */
-  #infoTitle { font-size: clamp(20px, 2vw, 28px); }
-  .info-meta { font-size: 14px; opacity: .9; }
-  .info-desc { font-size: 16px; }
-  .info-extra { font-size: 14px; }
-
-  /* Agrupar “extra” en dos columnas si hay espacio */
+  .info-meta {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #aaa;
+    margin-bottom: 1.6em;
+  }
+  .info-desc {
+    font-size: 15px;
+    color: #e3e3e3;
+    line-height: 1.6;
+  }
   .info-extra {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px 18px;
+    grid-template-columns: 1fr;
+    row-gap: 10px;
+    margin-top: 1.8em;
+    font-size: 14px;
+    color: #dcdcdc;
+  }
+  .info-extra strong {
+    color: #fff;
+    font-weight: 500;
   }
 
-  /* El topbar por encima de todo */
-  #topBar { z-index: 30; }
+  /* --- El título del topbar encima, sin interferir --- */
+  #topBar {
+    z-index: 30;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+  }
 
-  /* Escena acotada / enmarcada (sin tocar tu HTML) */
+  /* --- Model-viewer acotado con líneas duras (sin radios) --- */
   body.is-desktop model-viewer {
     position: fixed;
-    top: calc(var(--topbar-h) + 24px);
-    left: clamp(18px, 4vw, 48px);
-    right: calc(24px + clamp(360px, 28vw, 460px)); /* deja hueco al panel */
-    bottom: 24px;
-    width: auto;
-    height: auto;
-    border-radius: 16px;
+    top: var(--topbar-h);
+    left: 0;
+    bottom: 0;
+    right: clamp(380px, 28vw, 480px);
     background: transparent !important;
-    box-shadow:
-      0 20px 60px rgba(0,0,0,.35),
-      inset 0 0 0 1px rgba(255,255,255,.04);
+    box-shadow: none;
+    border-radius: 0;
   }
 
-  /* Oculta AR en desktop, mantiene Audio visible */
+  /* --- Fondo general con ligero viñeteado y contraste --- */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(900px 700px at 70% 40%, rgba(255, 200, 150, .08), transparent 80%),
+                radial-gradient(900px 700px at 30% 70%, rgba(80, 130, 255, .07), transparent 80%);
+    opacity: .4;
+    z-index: 0;
+    pointer-events: none;
+  }
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(1400px 900px at 50% -10%, transparent 60%, rgba(0,0,0,.3) 100%);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* --- FABs (audio visible, AR oculto) --- */
   body.is-desktop .ar-fab { display: none !important; }
   body.is-desktop .fab-row {
-    justify-content: flex-start; /* audio a la izquierda */
-    left: clamp(18px, 4vw, 48px);
+    justify-content: flex-start;
+    left: 36px;
     right: auto;
+    bottom: 36px;
     width: auto;
   }
 }
+
 
 /* Cheatsheet estilo */
 .kbd-help {
