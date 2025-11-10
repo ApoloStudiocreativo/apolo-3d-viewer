@@ -1055,28 +1055,32 @@
               }
 
               // === HDR unificado con fallback ===
-                const HDR_PRIMARY   = '/assets/hdr/studio_small_09_2k.hdr';    // el que quieres usar en todos
-                const SKYBOX_PRIMARY = '/assets/hdr/studio_small_09_blur.webp'; // si tienes blur, si no deja ''
+// Iluminación (HDR de alta calidad)
+const HDR_PRIMARY = '/assets/hdr/studio_small_09_2k.hdr';
+// Fondo desenfocado (LDR muy comprimido)
+const SKYBOX_PRIMARY = '/assets/hdr/studio_small_09_blur.webp';
 
-                const HDR_FALLBACK  = '/assets/hdr/museo-suave.hdr';            // tu antiguo
-                const SKYBOX_FALLBACK = '/assets/hdr/museo-suave-blur.webp';
+if (await exists(HDR_PRIMARY)) {
+  mv.environmentImage = HDR_PRIMARY;
+} else {
+  mv.environmentImage = 'neutral';
+}
 
-                try {
-                  if (await exists(HDR_PRIMARY)) {
-                    mv.environmentImage = HDR_PRIMARY;
-                    if (await exists(SKYBOX_PRIMARY)) mv.skyboxImage = SKYBOX_PRIMARY;
-                  } else if (await exists(HDR_FALLBACK)) {
-                    mv.environmentImage = HDR_FALLBACK;
-                    if (await exists(SKYBOX_FALLBACK)) mv.skyboxImage = SKYBOX_FALLBACK;
-                  } else {
-                    mv.environmentImage = 'neutral';
-                    mv.skyboxImage = '';
-                  }
-                  mv.exposure = '1';
-                  mv.shadowIntensity = '0.8';
-                  mv.shadowSoftness = '1.0';
-                  mv.environmentRotation = '10deg';
-                } catch {}
+if (await exists(SKYBOX_PRIMARY)) {
+  mv.skyboxImage = SKYBOX_PRIMARY;
+} else {
+  mv.skyboxImage = ''; // sin skybox → saldrá el fondo del CSS
+}
+
+// Opcional: afinado de look
+mv.exposure = '1.2';
+mv.shadowIntensity = '0.7';
+mv.shadowSoftness = '1.0';
+mv.environmentRotation = '10deg';
+
+// IMPORTANTE: no fijar mv.backgroundColor si quieres ver el skybox
+// mv.backgroundColor = '#0f1115'; // <-- dejar comentado
+
 
               // Iluminación por pieza (opcional)
               const lightSettings = {
