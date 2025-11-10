@@ -2,12 +2,11 @@
 export const config = { runtime: 'edge' };
 
 const ALLOWED_UA = [
-  /QuickLook/i,                       // iOS Quick Look
-  /GoogleApp|GSA/i,                   // Google App (Scene Viewer intents)
-  /SceneViewer|ARCore|com\.google/i,  // variaciones de Scene Viewer
-  /Android .* Google/i                // ciertos vendors
+  /QuickLook/i,
+  /GoogleApp|GSA/i,
+  /SceneViewer|ARCore|com\.google/i,
+  /Android .* Google/i
 ];
-
 
 export default async function handler(req) {
   const url = new URL(req.url);
@@ -27,19 +26,11 @@ export default async function handler(req) {
     return new Response('Forbidden', { status: 403 });
   }
 
-  // Proxy al archivo estático interno
+  // ✅ Redirige al asset real con un flag que evita volver a caer aquí
   const target = new URL(filePath, url.origin);
-  const res = await fetch(target.toString(), {
-    headers: { 'Accept': req.headers.get('accept') || '*/*' }
-  });
+  // conserva query existente y añade ok=1
+  if (target.search) target.search += '&ok=1';
+  else target.search = '?ok=1';
 
-  // Copiamos cabeceras y reforzamos
-  const headers = new Headers(res.headers);
-  headers.set('Cross-Origin-Resource-Policy', 'same-origin');
-  headers.set('X-Content-Type-Options', 'nosniff');
-  if (!headers.has('Cache-Control')) {
-    headers.set('Cache-Control', 'public, max-age=31536000, immutable');
-  }
-
-  return new Response(res.body, { status: res.status, headers });
+  return Response.redirect(target.toString(), 307);
 }

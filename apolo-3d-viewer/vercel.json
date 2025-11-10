@@ -42,9 +42,16 @@
     { "src": "^/splat/([a-z0-9-]+)/?$", "dest": "/?type=splat&figure=$1" },
     { "src": "^/glb/([a-z0-9-]+)/?$",   "dest": "/?type=glb&model=$1" },
 
-
-    { "src": "^/models/(.+\\.(?:glb|usdz))$", "dest": "/api/protect?f=/models/$1" },
-    { "src": "^/assets/audio/(.+\\.mp3)$",    "dest": "/api/protect?f=/assets/audio/$1" },
+    {
+      "src": "^/models/(.+\\.(?:glb|usdz))$",
+      "dest": "/api/protect?f=/models/$1",
+      "missing": [{ "type": "query", "key": "ok" }]
+    },
+    {
+      "src": "^/assets/audio/(.+\\.mp3)$",
+      "dest": "/api/protect?f=/assets/audio/$1",
+      "missing": [{ "type": "query", "key": "ok" }]
+    },
 
     {
       "src": "^/models/(.*)\\.usdz$",
