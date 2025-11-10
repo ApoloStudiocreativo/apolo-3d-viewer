@@ -913,3 +913,150 @@ model-viewer {
     right: clamp(320px, 28vw, 420px);
   }
 }
+
+/************ Desktop layout “curioso” ************/
+:root { --topbar-h: 56px; }
+
+/* Fondo con vignette + glow diagonal (muy sutil) */
+@media (min-width: 1025px) {
+  body::before,
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  /* Vignette */
+  body::before {
+    background:
+      radial-gradient(1000px 700px at 35% 45%, rgba(255, 180, 80, .10), transparent 60%),
+      radial-gradient(900px 600px at 80% 20%, rgba(80, 140, 255, .08), transparent 60%);
+    mix-blend-mode: screen;
+    opacity: .45;
+  }
+  /* Oscurecer bordes ligeramente */
+  body::after {
+    background: radial-gradient(1200px 800px at 50% -10%, transparent 40%, rgba(0,0,0,.35) 100%);
+  }
+}
+
+/* Cartela como panel lateral fijo (glass card) */
+@media (min-width: 1025px) {
+  /* Ocultamos el cierre en desktop (cartela siempre visible) */
+  .info-sheet__close { display: none !important; }
+
+  /* El panel pasa a la derecha y siempre visible */
+  #infoSheet {
+    position: fixed;
+    top: calc(var(--topbar-h) + 16px);
+    right: 24px;
+    bottom: 24px;
+    left: auto;
+    width: clamp(360px, 28vw, 460px);
+    max-height: none;
+    transform: none !important;
+    opacity: 1 !important;
+    background: rgba(14,16,20,0.78);
+    backdrop-filter: blur(14px) saturate(150%);
+    -webkit-backdrop-filter: blur(14px) saturate(150%);
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow:
+      0 20px 50px rgba(0,0,0,.45),
+      inset 0 1px 0 rgba(255,255,255,.06);
+    z-index: 12; /* por encima de la escena */
+    padding-bottom: 16px;
+  }
+
+  /* Contenido con header pegado y scroll "bonito" */
+  #infoSheet .info-sheet__content {
+    max-height: none;
+    height: calc(100% - 40px); /* deja espacio al drag/aire */
+    padding: 12px 18px 16px;
+    overflow: auto;
+    overscroll-behavior: contain;
+    mask-image: linear-gradient(to bottom, transparent, black 10px, black calc(100% - 10px), transparent);
+  }
+
+  /* Decor: barra finita a la izquierda del panel */
+  #infoSheet::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 10px;
+    bottom: 10px;
+    width: 3px;
+    border-radius: 3px;
+    background: linear-gradient(180deg, #40cbcb 0%, rgba(64,203,203,.1) 100%);
+    opacity: .85;
+  }
+
+  /* Tipos algo más grandes en desktop */
+  #infoTitle { font-size: clamp(20px, 2vw, 28px); }
+  .info-meta { font-size: 14px; opacity: .9; }
+  .info-desc { font-size: 16px; }
+  .info-extra { font-size: 14px; }
+
+  /* Agrupar “extra” en dos columnas si hay espacio */
+  .info-extra {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 18px;
+  }
+
+  /* El topbar por encima de todo */
+  #topBar { z-index: 30; }
+
+  /* Escena acotada / enmarcada (sin tocar tu HTML) */
+  body.is-desktop model-viewer {
+    position: fixed;
+    top: calc(var(--topbar-h) + 24px);
+    left: clamp(18px, 4vw, 48px);
+    right: calc(24px + clamp(360px, 28vw, 460px)); /* deja hueco al panel */
+    bottom: 24px;
+    width: auto;
+    height: auto;
+    border-radius: 16px;
+    background: transparent !important;
+    box-shadow:
+      0 20px 60px rgba(0,0,0,.35),
+      inset 0 0 0 1px rgba(255,255,255,.04);
+  }
+
+  /* Oculta AR en desktop, mantiene Audio visible */
+  body.is-desktop .ar-fab { display: none !important; }
+  body.is-desktop .fab-row {
+    justify-content: flex-start; /* audio a la izquierda */
+    left: clamp(18px, 4vw, 48px);
+    right: auto;
+    width: auto;
+  }
+}
+
+/* Cheatsheet estilo */
+.kbd-help {
+  position: fixed;
+  right: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  z-index: 40;
+  background: rgba(14,16,20,.82);
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font: 600 12px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: #e9eef7;
+  box-shadow: 0 12px 30px rgba(0,0,0,.35);
+}
+.kbd-help__row { display: flex; gap: 8px; align-items: baseline; white-space: nowrap; }
+.kbd-help kbd {
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.16);
+  border-bottom-color: rgba(0,0,0,.35);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 11px;
+}

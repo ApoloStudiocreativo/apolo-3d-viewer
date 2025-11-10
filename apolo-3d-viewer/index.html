@@ -82,6 +82,15 @@
   </button>
 </header>
 
+<!-- Ayuda de atajos (desktop) -->
+<div id="kbdHelp" class="kbd-help hidden" aria-hidden="true">
+  <div class="kbd-help__row"><kbd>Arrastrar</kbd> Rotar</div>
+  <div class="kbd-help__row"><kbd>Shift</kbd> + arrastrar — Pan</div>
+  <div class="kbd-help__row"><kbd>Rueda</kbd> — Zoom</div>
+  <div class="kbd-help__row"><kbd>H</kbd> — Mostrar/ocultar ayuda</div>
+</div>
+
+
 
     <!-- Mensaje si faltan parámetros -->
     <div id="msg" class="hidden"></div>
@@ -264,6 +273,30 @@
         const infoDesc = document.getElementById('infoDesc');
         const audioBtn = document.getElementById('audioBtn');
 
+        // === Desktop mode toggle ===
+        const mqDesk = window.matchMedia('(min-width: 1025px)');
+        function applyDesktopClass() {
+          document.body.classList.toggle('is-desktop', mqDesk.matches);
+          // En desktop: cartela siempre visible y sin botón cerrar
+          if (mqDesk.matches) {
+            // mostrar cartela si hay slug
+            try { sheet.classList.remove('hidden'); sheet.setAttribute('aria-hidden','false'); } catch {}
+          }
+        }
+        mqDesk.addEventListener?.('change', applyDesktopClass);
+        applyDesktopClass();
+
+        // === Cheatsheet: H para mostrar/ocultar (solo desktop) ===
+        const kbd = document.getElementById('kbdHelp');
+        window.addEventListener('keydown', (e) => {
+          if (!document.body.classList.contains('is-desktop')) return;
+          if (e.key.toLowerCase() === 'h') {
+            kbd.classList.toggle('hidden');
+            kbd.setAttribute('aria-hidden', kbd.classList.contains('hidden') ? 'true' : 'false');
+          }
+        });
+
+
         if (infoBtn) {
           infoBtn.setAttribute('aria-controls', 'infoSheet');
           infoBtn.setAttribute('aria-expanded', 'false');
@@ -405,6 +438,8 @@
         addHapticFeedback('#arBtn', [20]);
         addHapticFeedback('#audioBtn', [12, 8]);
         addHapticFeedback('#homeBtn', [12]);
+        addHapticFeedback('#homeBtn', [12]);
+
 
         console.debug('[haptics] vibrate supported?', supportsVibrate());
 
