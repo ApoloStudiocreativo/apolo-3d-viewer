@@ -101,7 +101,7 @@
       ar-modes="scene-viewer quick-look webxr"
       ar-scale="fixed"
       ar-placement="floor"
-      environment-image="/assets/hdr/studio_small_09_2k.hdr"
+      environment-image="neutral"
       shadow-intensity="1.2"
       shadow-softness="0.9"
       exposure="1"
@@ -1054,19 +1054,29 @@
                 if (cam.maxFov) mv.maxFieldOfView = cam.maxFov;
               }
 
-              // HDR suave
-              try {
-                await fetch('/assets/hdr/museo-suave.hdr', { cache: 'force-cache' }).catch(() => {});
-                mv.environmentImage = '/assets/hdr/museo-suave.hdr';
-                mv.exposure = '2';
-                mv.shadowIntensity = '0.7';
-                mv.shadowSoftness = '1.0';
-                mv.environmentRotation = '10deg';
-                mv.skyboxImage = '/assets/hdr/museo-suave-blur.webp';
-                mv.backgroundColor = '#0f1115';
-              } catch (e) {
-                console.warn('No se pudo aplicar el HDR, usando neutral', e);
-              }
+              // === HDR unificado con fallback ===
+                const HDR_PRIMARY   = '/assets/hdr/studio_small_09_2k.hdr';    // el que quieres usar en todos
+                const SKYBOX_PRIMARY = '/assets/hdr/studio_small_09_blur.webp'; // si tienes blur, si no deja ''
+
+                const HDR_FALLBACK  = '/assets/hdr/museo-suave.hdr';            // tu antiguo
+                const SKYBOX_FALLBACK = '/assets/hdr/museo-suave-blur.webp';
+
+                try {
+                  if (await exists(HDR_PRIMARY)) {
+                    mv.environmentImage = HDR_PRIMARY;
+                    if (await exists(SKYBOX_PRIMARY)) mv.skyboxImage = SKYBOX_PRIMARY;
+                  } else if (await exists(HDR_FALLBACK)) {
+                    mv.environmentImage = HDR_FALLBACK;
+                    if (await exists(SKYBOX_FALLBACK)) mv.skyboxImage = SKYBOX_FALLBACK;
+                  } else {
+                    mv.environmentImage = 'neutral';
+                    mv.skyboxImage = '';
+                  }
+                  mv.exposure = '1.6';
+                  mv.shadowIntensity = '0.8';
+                  mv.shadowSoftness = '1.0';
+                  mv.environmentRotation = '10deg';
+                } catch {}
 
               // Iluminación por pieza (opcional)
               const lightSettings = {
