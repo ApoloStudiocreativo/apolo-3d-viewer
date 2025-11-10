@@ -808,3 +808,69 @@ model-viewer {
   /* 8) El body no debe bloquear scroll del panel lateral */
   body.is-desktop.sheet-open { overflow: visible; }
 }
+
+/* ===== Versión ESCRITORIO (≥1024px) ===== */
+@media (min-width: 1024px) {
+
+  /* Mostrar la fila de FABs en escritorio para tener el AUDIO, pero ocultar AR */
+  .fab-row { 
+    display: flex !important;
+    justify-content: flex-start;   /* audio a la izquierda */
+    gap: 12px;
+  }
+  .fab-row .ar-fab,
+  .ar-fab {
+    display: none !important;      /* AR fuera en escritorio */
+  }
+
+  /* Cartela SIEMPRE visible en escritorio, aunque JS le ponga .hidden */
+  .info-sheet {
+    transform: translateY(0%) !important;
+    opacity: 1 !important;
+  }
+  /* Si JS añade .hidden, en escritorio la ignoramos visualmente */
+  .info-sheet.hidden {
+    display: block !important;
+    opacity: 1 !important;
+    transform: translateY(0%) !important;
+  }
+
+  /* Ocultar botón “Información” y la X de cerrar */
+  #infoBtn,
+  .info-sheet__close {
+    display: none !important;
+  }
+
+  /* La cartela fija como panel (puedes ajustar el ancho) */
+  .info-sheet {
+    position: fixed;
+    top: calc(56px + env(safe-area-inset-top, 0px));
+    bottom: 0;
+    right: 0;                       /* panel a la derecha; cámbialo a left:0 si la quieres a la izq */
+    left: auto;
+    width: clamp(320px, 28vw, 420px);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    backdrop-filter: blur(18px) saturate(140%);
+  }
+
+  /* El visor acotado dejando hueco para la cartela lateral */
+  model-viewer {
+    position: fixed;
+    top: calc(56px + env(safe-area-inset-top, 0px));
+    left: 0;
+    right: clamp(320px, 28vw, 420px); /* reserva el lateral de la cartela */
+    bottom: 0;
+    width: auto;
+    height: auto;
+    max-width: 1400px;              /* ajusta a gusto (p.ej. 1200px) */
+    margin: 0 auto;
+    background: transparent !important;
+  }
+
+  /* Si usas póster GLB/SPLAT, que respeten el lateral de info */
+  .glb-poster,
+  .splat-poster {
+    right: clamp(320px, 28vw, 420px);
+  }
+}

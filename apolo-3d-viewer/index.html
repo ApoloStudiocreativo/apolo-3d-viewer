@@ -916,6 +916,36 @@
         DESKTOP_MQ.addEventListener?.('change', applyDesktopMode);
         applyDesktopMode();
 
+        // 👉 Forzar reglas de escritorio desde JS (defensa extra por si algún handler intenta cerrar)
+  const IS_DESKTOP = window.matchMedia('(min-width: 1024px)').matches;
+  if (IS_DESKTOP) {
+    try {
+      // Forzar cartela abierta
+      const sheet = document.getElementById('infoSheet');
+      const infoBtn = document.getElementById('infoBtn');
+      const sheetClose = document.getElementById('infoClose');
+
+      if (sheet) {
+        sheet.classList.remove('hidden');
+        sheet.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('sheet-open');
+      }
+      // Ocultar controles de abrir/cerrar
+      if (infoBtn) infoBtn.style.display = 'none';
+      if (sheetClose) sheetClose.style.display = 'none';
+
+      // Neutralizar posibles cierres por teclado (Esc) u otros
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          e.stopImmediatePropagation();
+          e.preventDefault();
+        }
+      }, true);
+    } catch {}
+  }
+
+        
+
 
         // ---------------- Inicialización ----------------
         (async function init() {
