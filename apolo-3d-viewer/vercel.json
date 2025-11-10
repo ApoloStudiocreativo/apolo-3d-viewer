@@ -1,14 +1,11 @@
 {
   "version": 2,
-  "routes": [
-    { "src": "^/$", "dest": "/landing/index.html" },
 
-    { "src": "^/splat/([a-z0-9-]+)/?$", "dest": "/?type=splat&figure=$1" },
-    { "src": "^/glb/([a-z0-9-]+)/?$",   "dest": "/?type=glb&model=$1" },
-
-    { "handle": "filesystem" },
-
-    { "src": "^/([a-z0-9-]+)/?$", "dest": "/?type=glb&model=$1" }
+  "rewrites": [
+    { "source": "/",            "destination": "/landing/index.html" },
+    { "source": "/splat/:slug", "destination": "/?type=splat&figure=:slug" },
+    { "source": "/glb/:slug",   "destination": "/?type=glb&model=:slug" },
+    { "source": "/:slug",       "destination": "/?type=glb&model=:slug" }
   ],
 
   "headers": [
@@ -33,69 +30,9 @@
         { "key": "Permissions-Policy", "value": "accelerometer=(), camera=(), microphone=(), gyroscope=(), geolocation=()" },
         { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" }
       ]
-    },
-
-    {
-      "source": "/models/(.*)\\.usdz",
-      "headers": [
-        { "key": "Content-Type", "value": "model/vnd.usdz+zip" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/models/(.*)\\.glb",
-      "headers": [
-        { "key": "Content-Type", "value": "model/gltf-binary" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/assets/hdr/(.*)\\.hdr",
-      "headers": [
-        { "key": "Content-Type", "value": "image/vnd.radiance" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/assets/landing/(.*)\\.webp",
-      "headers": [
-        { "key": "Content-Type", "value": "image/webp" },
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/assets/posters/(.*)\\.webp",
-      "headers": [
-        { "key": "Content-Type", "value": "image/webp" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/assets/audio/(.*)\\.mp3",
-      "headers": [
-        { "key": "Content-Type", "value": "audio/mpeg" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
-        { "key": "Accept-Ranges", "value": "bytes" }
-      ]
-    },
-    {
-      "source": "/splat/(.*)",
-      "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
-    },
-    {
-      "source": "/manifest\\.webmanifest",
-      "headers": [
-        { "key": "Content-Type", "value": "application/manifest+json" },
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
-      ]
     }
-  ]
+  ],
+
+  "cleanUrls": true,
+  "trailingSlash": false
 }
