@@ -1,8 +1,6 @@
 {
   "version": 2,
   "routes": [
-    { "src": "^/$", "dest": "/landing/index.html" },
-
     {
       "src": "^/$",
       "headers": {
@@ -14,6 +12,9 @@
         "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload"
       }
     },
+
+    { "src": "^/$", "dest": "/landing/index.html" },
+
     {
       "src": "^/landing/index\\.html$",
       "headers": {
