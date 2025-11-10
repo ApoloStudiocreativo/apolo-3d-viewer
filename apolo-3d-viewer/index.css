@@ -506,6 +506,13 @@
    color: var(--text);
    overflow: hidden; /* la escena ocupa toda la pantalla */
  }
+
+ /* Evitar scroll en móviles y arrastre accidental de página */
+html, body {
+  touch-action: none;         /* bloquea gestures tipo scroll/pinch */
+  overscroll-behavior: none;  /* evita rebote de scroll */
+}
+
  
  /* Utilidades */
  .full { position: fixed; inset: 0; }
@@ -705,14 +712,13 @@ model-viewer {
 /* El body puede tener un color mientras carga, pero no debe tapar al skybox del <model-viewer> */
 body {
   /* Fondo degradado suave y moderno */
-background: radial-gradient(circle at 70% 0%, #112033, #0c1524 50%, #0a0e16 90%),
-            linear-gradient(180deg, #0b1220 0%, #0f1115 100%);
-            
+background: radial-gradient(circle at 80% 0%, #2b1a10, #140d08 50%, #0b0e14 90%),
+            linear-gradient(180deg, #19120b 0%, #0f1115 100%);
+
   background-attachment: fixed;
   background-size: cover;
   background-repeat: no-repeat;
 }
-
 
 model-viewer {
   background: transparent !important;
