@@ -511,15 +511,22 @@
  .full { position: fixed; inset: 0; }
  .hidden { display: none !important; }
  
- /* ====== Viewports de las escenas ====== */
- model-viewer,
- iframe#splat {
-   width: 100vw;
-   height: 100dvh;
-   display: block;
-   background: var(--bg);
- }
- iframe#splat { border: 0; }
+/* ====== Viewports de las escenas ====== */
+model-viewer {
+  width: 100vw;
+  height: 100dvh;
+  display: block;
+  background: transparent !important; /* el lienzo deja ver el degradado del body */
+}
+
+iframe#splat {
+  width: 100vw;
+  height: 100dvh;
+  display: block;
+  background: var(--bg); /* el SPLAT sí usa fondo sólido */
+  border: 0;
+}
+
  
  /* ====== Mensaje de ayuda/error ====== */
  #msg {

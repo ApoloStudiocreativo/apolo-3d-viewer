@@ -35,7 +35,6 @@
 
     <!-- HDR / skybox -->
     <link rel="preload" as="image" href="/assets/hdr/studio_small_09_2k.hdr" />
-    <link rel="preload" as="image" href="/assets/hdr/museo-suave-blur.webp" />
     <link rel="manifest" href="/manifest.webmanifest">
 
     <link rel="preconnect" href="https://ajax.googleapis.com" crossorigin>
@@ -1053,12 +1052,10 @@
                 if (cam.minFov) mv.minFieldOfView = cam.minFov;
                 if (cam.maxFov) mv.maxFieldOfView = cam.maxFov;
               }
-              // === HDR + SKYBOX con selección independiente y fallbacks ===
-const HDR_PRIMARY     = '/assets/hdr/studio_small_09_2k.hdr';
-const HDR_FALLBACK    = '/assets/hdr/museo-suave-blur.webp';
 
-const SKYBOX_PRIMARY  = '/assets/hdr/studio_small_09_blur.webp';
-const SKYBOX_FALLBACK = '/assets/hdr/museo-suave-blur.webp';
+              // === ENTORNO: usar HDR solo como luz; SIN skybox visible ===
+const HDR_PRIMARY  = '/assets/hdr/studio_small_09_2k.hdr';
+const HDR_FALLBACK = 'neutral'; // si falla, luz neutra
 
 async function firstExisting(urls) {
   for (const u of urls) {
@@ -1070,55 +1067,33 @@ async function firstExisting(urls) {
   return '';
 }
 
-async function applyEnvAndSkybox(mv, hdrUrl, skyboxUrl) {
-  if (hdrUrl) {
-    mv.setAttribute('environment-image', hdrUrl);
-    mv.environmentImage = hdrUrl;
-  } else {
-    mv.setAttribute('environment-image', 'neutral');
-    mv.environmentImage = 'neutral';
-  }
+// Aplica solo iluminación (environment-image). Elimina cualquier skybox.
+async function applyEnvironmentOnly(mv, hdrUrl) {
+  const env = hdrUrl || 'neutral';
+  mv.setAttribute('environment-image', env);
+  mv.environmentImage = env;
 
-  if (skyboxUrl) {
-    mv.setAttribute('skybox-image', skyboxUrl);
-    mv.skyboxImage = skyboxUrl;
-  } else {
-    mv.removeAttribute('skybox-image');
-    mv.skyboxImage = '';
-  }
+  // 🔒 Sin skybox visible
+  mv.removeAttribute('skybox-image');
+  mv.skyboxImage = '';
 
-  // No fijes backgroundColor si quieres ver el skybox
-  // mv.backgroundColor = '#0f1115';
-
-  // Ajustes de look
-  mv.exposure = '1.2';
-  mv.shadowIntensity = '0.7';
+  // Ajustes de look (ajusta a tu gusto)
+  mv.exposure = '1.25';
+  mv.shadowIntensity = '0.8';
   mv.shadowSoftness = '1.0';
-  mv.environmentRotation = '10deg';
+  // mv.environmentRotation = '10deg'; // opcional
 }
 
-// 🔎 Elegimos cada cosa por separado (primario → fallback)
-const hdrToUse = (await firstExisting([HDR_PRIMARY, HDR_FALLBACK])) || 'neutral';
-const skyToUse = await firstExisting([SKYBOX_PRIMARY, SKYBOX_FALLBACK]);
+// Elegimos un HDR válido (o neutro)
+const hdrToUse = (await firstExisting([HDR_PRIMARY])) || HDR_FALLBACK;
 
-await applyEnvAndSkybox(mv, hdrToUse, skyToUse);
-// 🎨 Mantener la luz del HDR pero ocultar su imagen de fondo
-mv.removeAttribute('skybox-image');
-mv.skyboxImage = ''; // elimina cualquier fondo HDR visible
+// Ilumina sin fondo HDR
+await applyEnvironmentOnly(mv, hdrToUse);
 
-// (opcional) refinar iluminación si quedó demasiado oscura al quitar skybox
-mv.exposure = '1.3';
-mv.shadowIntensity = '0.8';
-mv.shadowSoftness = '1.0';
+// Algunos navegadores “resetean” atributos tras ciertos eventos: lo reforzamos
+mv.addEventListener('load', () => applyEnvironmentOnly(mv, hdrToUse), { once: true });
 
 
-// Algunos navegadores resetean tras 'load'
-mv.addEventListener('load', () => {
-  applyEnvAndSkybox(mv, hdrToUse, skyToUse);
-}, { once: true });
-
-// Debug temporal (puedes borrar):
-console.debug('[env]', { hdrToUse, skyToUse });
 
               // Iluminación por pieza (opcional)
               const lightSettings = {
