@@ -93,7 +93,7 @@
    border-top-right-radius: 18px;
    box-shadow: 0 -10px 30px rgba(0, 0, 0, .45);
    padding-bottom: calc(18px + env(safe-area-inset-bottom));
-   z-index: 40;
+   z-index: 1201; /* por encima del #topBar (1000) */
    transition: transform .28s ease, opacity .28s ease;
    opacity: 0;
  }
