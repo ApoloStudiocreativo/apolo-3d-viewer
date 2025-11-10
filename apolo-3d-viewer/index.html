@@ -1102,6 +1102,15 @@ const hdrToUse = (await firstExisting([HDR_PRIMARY, HDR_FALLBACK])) || 'neutral'
 const skyToUse = await firstExisting([SKYBOX_PRIMARY, SKYBOX_FALLBACK]);
 
 await applyEnvAndSkybox(mv, hdrToUse, skyToUse);
+// 🎨 Mantener la luz del HDR pero ocultar su imagen de fondo
+mv.removeAttribute('skybox-image');
+mv.skyboxImage = ''; // elimina cualquier fondo HDR visible
+
+// (opcional) refinar iluminación si quedó demasiado oscura al quitar skybox
+mv.exposure = '1.3';
+mv.shadowIntensity = '0.8';
+mv.shadowSoftness = '1.0';
+
 
 // Algunos navegadores resetean tras 'load'
 mv.addEventListener('load', () => {

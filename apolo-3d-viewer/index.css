@@ -697,8 +697,19 @@ model-viewer {
 
 /* El body puede tener un color mientras carga, pero no debe tapar al skybox del <model-viewer> */
 body {
-  background: #0f1115; /* opcional durante la carga */
+  /* Fondo degradado suave y moderno */
+  background: radial-gradient(
+      circle at 75% 0%,
+      #1a1c22 0%,
+      #10131a 40%,
+      #0b0e14 80%
+    ),
+    linear-gradient(180deg, #0a0c12 0%, #0f1115 100%);
+  background-attachment: fixed;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
+
 
 model-viewer {
   background: transparent !important;
