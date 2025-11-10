@@ -10,8 +10,6 @@
         { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains; preload" }
       ]
     },
-
-    /* CSP para raíz, landing e index */
     {
       "source": "/",
       "headers": [
@@ -40,7 +38,7 @@
       ]
     },
 
-    /* Tipos y caché de assets */
+
     {
       "source": "/models/(.*).usdz",
       "headers": [
@@ -104,7 +102,6 @@
     { "source": "/splat/:figure", "destination": "/?type=splat&figure=:figure" },
     { "source": "/glb/:model", "destination": "/?type=glb&model=:model" },
 
-    /* Catch-all solo si NO existe archivo/carpeta física */
     {
       "source": "/:model",
       "destination": "/?type=glb&model=:model",
