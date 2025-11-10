@@ -2,11 +2,12 @@
 export const config = { runtime: 'edge' };
 
 const ALLOWED_UA = [
-  /QuickLook/i,                 // iOS Quick Look
-  /GoogleApp/i,                 // Google App (Scene Viewer intents)
-  /SceneViewer/i,               // algunos Android reportan esto
-  /Google\/(?!.*Chrome)/i       // variantes de Google App
+  /QuickLook/i,                       // iOS Quick Look
+  /GoogleApp|GSA/i,                   // Google App (Scene Viewer intents)
+  /SceneViewer|ARCore|com\.google/i,  // variaciones de Scene Viewer
+  /Android .* Google/i                // ciertos vendors
 ];
+
 
 export default async function handler(req) {
   const url = new URL(req.url);

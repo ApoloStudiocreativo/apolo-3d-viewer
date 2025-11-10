@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /models/
+Disallow: /assets/audio/
