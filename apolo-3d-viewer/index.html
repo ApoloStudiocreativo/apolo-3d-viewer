@@ -1053,59 +1053,63 @@
                 if (cam.minFov) mv.minFieldOfView = cam.minFov;
                 if (cam.maxFov) mv.maxFieldOfView = cam.maxFov;
               }
-
-// === HDR unificado con fallback (fondo visible) ===
+              // === HDR + SKYBOX con selección independiente y fallbacks ===
 const HDR_PRIMARY     = '/assets/hdr/studio_small_09_2k.hdr';
-const SKYBOX_PRIMARY  = '/assets/hdr/studio_small_09_blur.webp';
 const HDR_FALLBACK    = '/assets/hdr/museo-suave.hdr';
+
+const SKYBOX_PRIMARY  = '/assets/hdr/studio_small_09_blur.webp';
 const SKYBOX_FALLBACK = '/assets/hdr/museo-suave-blur.webp';
+
+async function firstExisting(urls) {
+  for (const u of urls) {
+    try {
+      const r = await fetch(u, { method: 'HEAD', cache: 'force-cache' });
+      if (r.ok) return u;
+    } catch {}
+  }
+  return '';
+}
 
 async function applyEnvAndSkybox(mv, hdrUrl, skyboxUrl) {
   if (hdrUrl) {
     mv.setAttribute('environment-image', hdrUrl);
     mv.environmentImage = hdrUrl;
+  } else {
+    mv.setAttribute('environment-image', 'neutral');
+    mv.environmentImage = 'neutral';
   }
+
   if (skyboxUrl) {
     mv.setAttribute('skybox-image', skyboxUrl);
     mv.skyboxImage = skyboxUrl;
+  } else {
+    mv.removeAttribute('skybox-image');
+    mv.skyboxImage = '';
   }
-  // No fijar backgroundColor si quieres ver el skybox
-  // mv.backgroundColor = '#0f1115'; // <- mantener comentado
+
+  // No fijes backgroundColor si quieres ver el skybox
+  // mv.backgroundColor = '#0f1115';
+
+  // Ajustes de look
   mv.exposure = '1.2';
   mv.shadowIntensity = '0.7';
   mv.shadowSoftness = '1.0';
   mv.environmentRotation = '10deg';
 }
 
-let hdrToUse = null, skyToUse = null;
-if (await exists(HDR_PRIMARY)) {
-  hdrToUse = HDR_PRIMARY;
-  skyToUse = (await exists(SKYBOX_PRIMARY)) ? SKYBOX_PRIMARY : '';
-} else if (await exists(HDR_FALLBACK)) {
-  hdrToUse = HDR_FALLBACK;
-  skyToUse = (await exists(SKYBOX_FALLBACK)) ? SKYBOX_FALLBACK : '';
-} else {
-  hdrToUse = 'neutral';
-  skyToUse = '';
-}
+// 🔎 Elegimos cada cosa por separado (primario → fallback)
+const hdrToUse = (await firstExisting([HDR_PRIMARY, HDR_FALLBACK])) || 'neutral';
+const skyToUse = await firstExisting([SKYBOX_PRIMARY, SKYBOX_FALLBACK]);
 
 await applyEnvAndSkybox(mv, hdrToUse, skyToUse);
 
-// Re-aplicar tras load (algunos navegadores resetean)
+// Algunos navegadores resetean tras 'load'
 mv.addEventListener('load', () => {
   applyEnvAndSkybox(mv, hdrToUse, skyToUse);
 }, { once: true });
 
-
-// Opcional: afinado de look
-mv.exposure = '1.2';
-mv.shadowIntensity = '0.7';
-mv.shadowSoftness = '1.0';
-mv.environmentRotation = '10deg';
-
-// IMPORTANTE: no fijar mv.backgroundColor si quieres ver el skybox
-// mv.backgroundColor = '#0f1115'; // <-- dejar comentado
-
+// Debug temporal (puedes borrar):
+console.debug('[env]', { hdrToUse, skyToUse });
 
               // Iluminación por pieza (opcional)
               const lightSettings = {
