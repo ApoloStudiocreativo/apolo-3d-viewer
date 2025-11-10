@@ -885,6 +885,38 @@
           }
         });
 
+        /* === Desktop mode: barra lateral fija + sin AR === */
+        const DESKTOP_MQ = window.matchMedia('(min-width: 1024px)');
+        function applyDesktopMode() {
+          const isDesktop = DESKTOP_MQ.matches && !/Android|iPhone|iPad/i.test(navigator.userAgent);
+          document.body.classList.toggle('is-desktop', isDesktop);
+
+          // En desktop: cartela siempre visible como lateral
+          const sheet = document.getElementById('infoSheet');
+          const topBar = document.getElementById('topBar');
+          if (isDesktop) {
+            // Asegura topbar y cartela visibles
+            topBar?.classList.remove('hidden');
+            sheet?.classList.remove('hidden');
+            sheet?.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('sheet-open');
+
+            // Oculta AR (aunque el CSS ya lo esconde)
+            const arBtn = document.getElementById('arBtn');
+            if (arBtn) {
+              arBtn.setAttribute('disabled', 'true');
+              arBtn.classList.add('is-disabled', 'hidden');
+            }
+          } else {
+            // Vuelve a comportamiento móvil (cartela controlada por el botón)
+            document.body.classList.remove('sheet-open');
+            // no forzamos hidden aquí: de eso se encarga tu lógica actual
+          }
+        }
+        DESKTOP_MQ.addEventListener?.('change', applyDesktopMode);
+        applyDesktopMode();
+
+
         // ---------------- Inicialización ----------------
         (async function init() {
           try {

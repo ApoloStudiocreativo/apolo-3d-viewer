@@ -723,3 +723,88 @@ background: radial-gradient(circle at 80% 0%, #2b1a10, #140d08 50%, #0b0e14 90%)
 model-viewer {
   background: transparent !important;
 }
+
+/**********************************************
+ * DESKTOP LAYOUT (>= 1024px)
+ **********************************************/
+@media (min-width: 1024px) {
+  /* 1) Ocultar FABs/AR en escritorio */
+  .fab-row,
+  .ar-fab {
+    display: none !important;
+  }
+
+  /* 2) Topbar visible y limpio (ya lo tienes, reforzamos) */
+  #topBar {
+    background: rgba(15, 17, 21, 0.55);
+    backdrop-filter: blur(8px);
+  }
+
+  /* 3) Info sheet como barra lateral fija (derecha) */
+  .info-sheet {
+    position: fixed;
+    top: calc(56px + env(safe-area-inset-top, 0px)); /* debajo del topbar */
+    right: 0;
+    bottom: 0;
+    left: auto;
+
+    width: clamp(320px, 28vw, 420px);
+    max-height: none;
+    transform: none !important;
+    opacity: 1 !important;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 0;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+
+    background: rgba(14,16,20,.72);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+  }
+
+  /* Drag bar no hace falta en lateral, lo ocultamos */
+  .info-sheet__drag { display: none; }
+
+  /* Contenido: que use todo el alto disponible y scrollee dentro */
+  .info-sheet__content {
+    height: calc(100dvh - 56px - 16px);
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+    overflow: auto;
+  }
+
+  /* 4) El botón de “Información” no es necesario en desktop */
+  #infoBtn { display: none !important; }
+
+  /* 5) “Acotar” el visor 3D y dejar hueco para la barra lateral */
+  model-viewer {
+    position: fixed;
+    top: calc(56px + env(safe-area-inset-top, 0px)); /* debajo del topbar */
+    left: 0;
+    right: clamp(320px, 28vw, 420px); /* deja hueco para el panel lateral */
+    bottom: 0;
+
+    width: auto;            /* calcula por los lados */
+    height: auto;
+    max-width: 1200px;      /* limita el ancho máximo del lienzo 3D */
+    margin: 0 auto;         /* centra el canvas si sobra espacio */
+    background: transparent !important;
+  }
+
+  /* 6) Posters (GLB/SPLAT): usa contain para que no “corte” en el lateral */
+  .glb-poster,
+  .splat-poster {
+    right: clamp(320px, 28vw, 420px); /* respeta el panel lateral */
+    background-size: contain;
+    background-position: center center;
+  }
+
+  /* 7) Mensajes/overlays: evita que tapen el panel lateral */
+  #msg,
+  .ar-loading,
+  .skeleton {
+    right: clamp(320px, 28vw, 420px);
+  }
+
+  /* 8) El body no debe bloquear scroll del panel lateral */
+  body.is-desktop.sheet-open { overflow: visible; }
+}
