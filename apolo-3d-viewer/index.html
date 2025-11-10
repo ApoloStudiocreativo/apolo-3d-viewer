@@ -296,6 +296,33 @@
         const usdzUrl = (name) => `/models/${name}/${name}.usdz`;
         const splatUrl = (name) => `/splat/${name}/index.html`;
 
+        // === Firma efímera de URLs (token 60s) ===
+        const signedCache = new Map();
+
+        async function signPath(path) {
+          // Devuelve URL absoluta firmada o lanza error
+          const r = await fetch(`/api/sign?f=${encodeURIComponent(path)}`, {
+            cache: 'no-store',
+            credentials: 'omit'
+          });
+          if (!r.ok) throw new Error('sign failed');
+          const { url } = await r.json();
+          return url;
+        }
+
+        async function signedOrPlain(path) {
+          try {
+            if (signedCache.has(path)) return signedCache.get(path);
+            const url = await signPath(path);
+            signedCache.set(path, url);
+            return url;
+          } catch {
+            // Fallback si algo falla (no bloquea la UX)
+            return path;
+          }
+        }
+
+
         async function exists(url) {
           try {
             const r = await fetch(url, {
@@ -459,6 +486,8 @@
           if (!audioBtn) return;
 
           const url = `/assets/audio/${id}.mp3`;
+          audio = new Audio(await signedOrPlain(url));
+
 
           // Mostrar SIEMPRE la fila y el botón (respetando tu CSS cuando se pueda)
           if (fabRow) {
@@ -562,7 +591,7 @@
             const link = document.getElementById('iosARLink');
             if (!link) return false;
             const ts = Date.now(); // cache-buster (cada click es "nuevo")
-            link.setAttribute('href', `/models/${slug}/${slug}.usdz#${ts}`);
+            link.setAttribute('href', preSigned?.usdz || usdzUrl(model));
             link.click(); // síncrono, en la misma pila del gesto
             return true;
           } catch {
@@ -865,6 +894,15 @@
 
               // Fuente GLB
               mv.src = glbUrl(model);
+              // Prefirmamos GLB y USDZ antes de mostrar AR (evita async en el click iOS)
+              const preSigned = {
+                glb: await signedOrPlain(glbUrl(model)),
+                usdz: await signedOrPlain(usdzUrl(model))
+              };
+
+              mv.src = preSigned.glb;          // <model-viewer> carga con token
+              mv.iosSrc = preSigned.usdz;      // Quick Look listo con token
+
 
                           const stopWatchdog = startProgressWatchdog(mv, {
               timeoutMs: isStandalone() ? 7000 : 10000,
@@ -1067,6 +1105,12 @@
                 // Elimina handlers previos si la página fue recargada desde memoria
                 arBtn.replaceWith(arBtn.cloneNode(true));
                 const newArBtn = document.getElementById('arBtn');
+
+                const fileSigned = preSigned?.glb || glbUrl(model);
+                const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(
+                  fileSigned
+                )}&mode=ar_preferred&title=${encodeURIComponent(model)}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+
 
                 newArBtn.classList.remove('hidden');
                 newArBtn.addEventListener('click', async () => {
