@@ -959,7 +959,6 @@ model-viewer {
     -webkit-backdrop-filter: blur(12px) saturate(130%);
     border-left: 1px solid rgba(255, 255, 255, 0.06);
     box-shadow: inset 1px 0 0 rgba(255,255,255,.04);
-    z-index: 12;
     transform: none !important;
     opacity: 1 !important;
   }
@@ -1015,7 +1014,6 @@ model-viewer {
 
   /* --- El título del topbar encima, sin interferir --- */
   #topBar {
-    z-index: 30;
     border-bottom: 1px solid rgba(255,255,255,.06);
     backdrop-filter: blur(12px) saturate(140%);
     -webkit-backdrop-filter: blur(12px) saturate(140%);
@@ -1434,7 +1432,7 @@ model-viewer {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 10px 14px; border-radius: 10px;
     font-weight: 700; font-size: 14px; text-decoration: none;
-    color: #0b1a24; background: #bfae6ff;
+    color: #0b1a24; background: #bfe6ff;
     border: 1px solid rgba(0,0,0,.08);
     box-shadow: 0 10px 20px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.35);
     transition: transform .12s ease, background .25s ease;
@@ -1461,5 +1459,77 @@ model-viewer {
     overflow: hidden;
     background-size: cover;
     background-position: center;
+  }
+}
+
+
+/* ==== Z-LAYERS UNIFICADOS ==== */
+:root{
+  --z-bg: 0;
+  --z-scene: 6;        /* model-viewer / splat */
+  --z-poster: 4;       /* posters por debajo de la cartela y topbar */
+  --z-topbar: 30;
+  --z-sheet: 40;
+  --z-fabs: 50;
+  --z-arloading: 60;
+  --z-skeleton: 1000;
+}
+
+#topBar{ z-index: var(--z-topbar) !important; }
+#infoSheet{ z-index: var(--z-sheet) !important; }
+.fab-row, .ar-fab, .audio-fab{ z-index: var(--z-fabs) !important; }
+.ar-loading{ z-index: var(--z-arloading) !important; }
+.skeleton{ z-index: var(--z-skeleton) !important; }
+
+/* Posters SIEMPRE por debajo del panel */
+.glb-poster, .splat-poster{ z-index: var(--z-poster) !important; }
+
+/* La escena explícitamente bajo la cartela pero encima del póster */
+model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
+
+/* ==== Escritorio: recorta póster/overlays desde el primer frame ==== */
+@media (min-width:1024px){
+  /* ancho del panel para el recorte inicial (antes/depués de cards-mode) */
+  :root{ --panel-w: clamp(360px, 28vw, 420px); --gap-x: 20px; --pad-x: 32px; --topbar-h: 72px; }
+
+  /* PÓSTER/OVERLAYS recortados al área del visor */
+  .glb-poster,
+  .splat-poster,
+  #msg,
+  .ar-loading,
+  .skeleton{
+    position: fixed;
+    left: var(--pad-x) !important;
+    right: calc(var(--panel-w) + var(--pad-x) + var(--gap-x)) !important;
+    top: calc(var(--topbar-h) + var(--pad-x)) !important;
+    bottom: var(--pad-x) !important;
+    border-radius: 14px;
+    background-position: center;
+    background-size: cover;
+  }
+}
+
+@media (min-width:1024px){
+  model-viewer{
+    position: fixed !important;
+    top: calc(var(--topbar-h) + var(--pad-x)) !important;
+    left: var(--pad-x) !important;
+    right: calc(var(--panel-w) + var(--pad-x) + var(--gap-x)) !important; /* ← reserva panel + gap */
+    bottom: var(--pad-x) !important;
+    width: auto !important;
+    height: auto !important;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  /* Panel lateral más estrecho y fijo */
+  #infoSheet{
+    position: fixed !important;
+    top: calc(var(--topbar-h)) !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: var(--panel-w) !important;
+    transform: none !important;
+    opacity: 1 !important;
   }
 }
