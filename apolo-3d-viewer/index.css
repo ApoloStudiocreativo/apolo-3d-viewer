@@ -2076,3 +2076,18 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     text-align: left;
   }
 }
+
+/* === Botones Audioguía + Ver en Web dentro del texto === */
+.info-sheet__content .info-footer {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.info-sheet__content .info-footer .audio-cta,
+.info-sheet__content .info-footer .visit-btn {
+  flex: 0 0 auto;
+  text-align: left;
+}
