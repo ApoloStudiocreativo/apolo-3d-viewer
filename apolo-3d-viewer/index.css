@@ -1622,3 +1622,67 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     border-radius: 14px !important;
   }
 }
+
+
+/* === HOTFIX DESKTOP ÚNICO: panel más estrecho + gap y recorte coherente === */
+@media (min-width:1024px){
+
+  /* 0) Variables de layout (puedes ajustar sin tocar más reglas) */
+  :root{
+    --topbar-h: 72px;                 /* ya la tienes definida */
+    --pad-x: 32px;                    /* padding lateral del lienzo */
+    --gap-x: 28px;                    /* separación VISOR ↔ PANEL */
+    --panel-w: 360px;                 /* ancho fijo de la cartela (ajustable) */
+  }
+
+  /* 1) Cartela: ancho real y fijada a la derecha, sin depender de otros bloques */
+  #infoSheet{
+    position: fixed !important;
+    top: var(--topbar-h) !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: auto !important;
+    width: var(--panel-w) !important;
+    transform: none !important;
+    opacity: 1 !important;
+    border-left: 1px solid rgba(255,255,255,.10) !important;
+    z-index: var(--z-sheet) !important;
+  }
+
+  /* 2) VISOR: misma caja SIEMPRE. Quitamos max-width/centrado heredados. */
+  model-viewer{
+    position: fixed !important;
+    top: calc(var(--topbar-h) + var(--pad-x)) !important;
+    left: var(--pad-x) !important;
+    right: calc(var(--panel-w) + var(--pad-x) + var(--gap-x)) !important;
+    bottom: var(--pad-x) !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    background: transparent !important;
+    z-index: var(--z-scene) !important;
+  }
+
+  /* 3) Póster GLB/SPLAT y overlays con el MISMO rectángulo del visor */
+  .glb-poster,
+  .splat-poster,
+  #msg,
+  .ar-loading,
+  .skeleton{
+    position: fixed !important;
+    left: var(--pad-x) !important;
+    right: calc(var(--panel-w) + var(--pad-x) + var(--gap-x)) !important;
+    top: calc(var(--topbar-h) + var(--pad-x)) !important;
+    bottom: var(--pad-x) !important;
+    border-radius: 14px !important;
+    background-position: center !important;
+    background-size: cover !important;
+    z-index: var(--z-poster) !important; /* por debajo de la cartela */
+  }
+
+  /* 4) Desactivar por si otros bloques de escritorio lo siguen imponiendo */
+  .fab-row .ar-fab, .ar-fab{ display:none !important; } /* en desktop */
+}
