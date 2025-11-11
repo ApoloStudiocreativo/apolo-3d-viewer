@@ -1095,7 +1095,9 @@ model-viewer {
 /* ===============================
    TOPBAR centrado con logo + título
    =============================== */
-
+/* ======================================
+   TOPBAR RESPONSIVE — LOGO / TÍTULO / BOTONES
+   ====================================== */
    #topBar {
     position: fixed;
     top: 0;
@@ -1113,15 +1115,15 @@ model-viewer {
     z-index: 40;
   }
   
-  /* ---- Centro absoluto ---- */
+  /* Logo + título bloque conjunto */
   .topbar-center {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     position: absolute;
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    display: flex;
-    align-items: center;
-    gap: 14px;
   }
   
   #brandLogo {
@@ -1145,7 +1147,7 @@ model-viewer {
     line-height: 1;
   }
   
-  /* ---- Botón inicio (izquierda) ---- */
+  /* Botón casa (solo móvil) */
   .home-btn {
     width: 38px;
     height: 38px;
@@ -1168,35 +1170,53 @@ model-viewer {
     background: rgba(255, 255, 255, 0.15);
   }
   
-  /* ---- Botón info (derecha, solo visible en móvil) ---- */
-  #infoBtn {
+  /* Botón “Galería” (solo escritorio) */
+  .gallery-btn {
+    display: none;
     background: none;
-    border: none;
+    border: 1px solid rgba(255,255,255,.2);
+    padding: 8px 14px;
     color: #fff;
+    border-radius: 6px;
+    font-weight: 600;
     font-size: 15px;
-    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease;
   }
-  #infoBtn:hover {
-    opacity: 0.8;
+  .gallery-btn:hover {
+    background: rgba(255,255,255,.1);
+    border-color: rgba(255,255,255,.3);
   }
   
-  /* ---- Ajustes para escritorio ---- */
+  /* =========================
+     DESKTOP — logo izquierda, sin título
+     ========================= */
   @media (min-width: 1025px) {
-    /* En desktop ocultamos el botón Info */
-    #infoBtn { display: none !important; }
+    /* mover logo a la izquierda */
+    .topbar-center {
+      position: static;
+      transform: none;
+      left: auto;
+      top: auto;
+    }
   
     #brandLogo {
       height: 32px;
     }
   
+    /* ocultar el texto del título */
     #pieceTitle {
-      font-size: 22px;
-      letter-spacing: 0.05em;
+      display: none;
     }
-  }
   
-  #brandLogo {
-    height: 32px;
-    width: auto;
+    /* ocultar el botón casa */
+    .home-btn {
+      display: none;
+    }
+  
+    /* mostrar el botón “Galería” */
+    .gallery-btn {
+      display: inline-flex;
+    }
   }
   
