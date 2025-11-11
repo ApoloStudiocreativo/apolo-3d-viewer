@@ -2184,3 +2184,10 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     text-align: left;
   }
 }
+
+/* === ESCRITORIO: ocultar los CTAs de la cartela (.info-footer) === */
+@media (min-width: 1025px) {
+  #infoSheet .info-footer {
+    display: none !important;
+  }
+}
