@@ -1987,3 +1987,25 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
 @media (min-width:1024px){
   .fab-row{ display:none !important; }
 }
+
+/* === Ajuste: botones alineados a la derecha en la cartela === */
+@media (min-width:1024px){
+  .info-footer{
+    display: flex;
+    justify-content: flex-end;   /* 🔹 alinea ambos a la derecha */
+    gap: 14px;                   /* 🔹 separación entre botones */
+    margin-top: 22px;
+    padding-right: 6px;          /* leve corrección óptica con el texto */
+  }
+
+  /* 🔹 Animación sutil al hacer hover para dar vida */
+  .audio-cta:hover, .visit-btn:hover{
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+  }
+
+  .audio-cta:active, .visit-btn:active{
+    transform: scale(.97);
+    filter: brightness(.95);
+  }
+}
