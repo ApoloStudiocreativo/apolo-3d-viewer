@@ -1810,3 +1810,77 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
   /* 4) En escritorio, AR oculto sí o sí (por si otra regla lo revive) */
   body.cards-mode .ar-fab, .ar-fab{ display:none !important; }
 }
+
+
+/* === DESKTOP CARDS — ancho panel, mismo alto, gap y fondo del visor distinto === */
+@media (min-width:1024px){
+  :root{
+    --topbar-h: 72px;        /* ya lo usas */
+    --pad-x: 32px;           /* margen exterior de tarjeta */
+    --gap-x: 28px;           /* separación VISOR ↔ PANEL */
+    --panel-w: 420px;        /* ⬅️ panel MÁS ANCHO (ajusta si quieres) */
+  }
+
+  /* 1) Cartela: MISMA altura/posición que el visor (arriba/abajo iguales) */
+  body.cards-mode #infoSheet{
+    position: fixed !important;
+    top: calc(var(--topbar-h) + var(--pad-x)) !important;
+    bottom: var(--pad-x) !important;
+    right: var(--pad-x) !important;  /* pequeño respiro del borde de la ventana */
+    left: auto !important;
+
+    width: var(--panel-w) !important;
+    transform: none !important;
+    opacity: 1 !important;
+
+    border-radius: 14px !important;
+    border-left: 1px solid rgba(255,255,255,.10) !important;
+    box-shadow: 0 14px 34px rgba(0,0,0,.36), inset 0 1px 0 rgba(255,255,255,.06) !important;
+    background:
+      linear-gradient(180deg, rgba(35,45,60,.45), rgba(25,30,40,.40)),
+      rgba(20,24,32,.58) !important;
+    backdrop-filter: blur(16px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+    z-index: var(--z-sheet) !important;
+  }
+
+  /* 2) VISOR: más estrecho y con MISMA altura/posición que la cartela */
+  body.cards-mode model-viewer{
+    position: fixed !important;
+    top: calc(var(--topbar-h) + var(--pad-x)) !important;
+    bottom: var(--pad-x) !important;
+    left: var(--pad-x) !important;
+    right: calc(var(--panel-w) + var(--gap-x) + var(--pad-x)) !important;
+
+    width: auto !important;
+    height: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+
+    border-radius: 14px !important;
+    overflow: hidden !important;
+
+    /* ⬅️ FONDO del área del VISOR distinto al fondo global */
+    background: #141c24 !important;   /* azul grisáceo oscuro (contrasta con el body) */
+
+    z-index: var(--z-scene) !important;
+    box-shadow: 0 14px 34px rgba(0,0,0,.34) !important;
+  }
+
+  /* 3) Posters/overlays recortados EXACTAMENTE al rectángulo del visor */
+  body.cards-mode .glb-poster,
+  body.cards-mode .splat-poster,
+  body.cards-mode #msg,
+  body.cards-mode .ar-loading,
+  body.cards-mode .skeleton{
+    position: fixed !important;
+    top: calc(var(--topbar-h) + var(--pad-x)) !important;
+    bottom: var(--pad-x) !important;
+    left: var(--pad-x) !important;
+    right: calc(var(--panel-w) + var(--gap-x) + var(--pad-x)) !important;
+    border-radius: 14px !important;
+    background-position: center !important;
+    background-size: cover !important;
+    z-index: var(--z-poster) !important;
+  }
+}
