@@ -1686,3 +1686,65 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
   /* 4) Desactivar por si otros bloques de escritorio lo siguen imponiendo */
   .fab-row .ar-fab, .ar-fab{ display:none !important; } /* en desktop */
 }
+
+/* === HOTFIX DESKTOP ÚNICO: panel más estrecho + gap + rectángulo coherente === */
+@media (min-width:1024px){
+
+  :root{
+    --topbar-h: 72px;   /* ya existente */
+    --pad-x: 32px;      /* margen interior del lienzo */
+    --gap-x: 28px;      /* separación VISOR ↔ PANEL */
+    --panel-w: 360px;   /* ancho fijo de la cartela (ajústalo si quieres) */
+  }
+
+  /* Cartela fija a la derecha (estrecha) */
+  #infoSheet{
+    position: fixed !important;
+    top: var(--topbar-h) !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: auto !important;
+    width: var(--panel-w) !important;
+    transform: none !important;
+    opacity: 1 !important;
+    border-left: 1px solid rgba(255,255,255,.10) !important;
+    z-index: var(--z-sheet) !important;
+  }
+
+  /* Visor: anula max-width/centrado y recorta por panel+gap */
+  model-viewer{
+    position: fixed !important;
+    top: calc(var(--topbar-h) + var(--pad-x)) !important;
+    left: var(--pad-x) !important;
+    right: calc(var(--panel-w) + var(--pad-x) + var(--gap-x)) !important;
+    bottom: var(--pad-x) !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    background: transparent !important;
+    z-index: var(--z-scene) !important;
+  }
+
+  /* Pósters/overlays con el MISMO rectángulo del visor */
+  .glb-poster,
+  .splat-poster,
+  #msg,
+  .ar-loading,
+  .skeleton{
+    position: fixed !important;
+    left: var(--pad-x) !important;
+    right: calc(var(--panel-w) + var(--pad-x) + var(--gap-x)) !important;
+    top: calc(var(--topbar-h) + var(--pad-x)) !important;
+    bottom: var(--pad-x) !important;
+    border-radius: 14px !important;
+    background-position: center !important;
+    background-size: cover !important;
+    z-index: var(--z-poster) !important; /* debajo del panel */
+  }
+
+  /* AR fuera en desktop (por si alguna regla lo re-activa) */
+  .fab-row .ar-fab, .ar-fab{ display:none !important; }
+}
