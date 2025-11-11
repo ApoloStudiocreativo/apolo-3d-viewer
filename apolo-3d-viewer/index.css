@@ -2057,3 +2057,22 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     margin-left: 0 !important;
   }
 }
+
+/* === Alinear botones Audioguía y Ver en Web solo en escritorio === */
+@media (min-width: 1025px) {
+  .info-footer {
+    display: flex;
+    justify-content: flex-start; /* los alinea a la izquierda */
+    align-items: center;
+    gap: 10px;
+    margin-top: 16px;
+    padding-left: 18px;  /* mismo margen que el texto */
+    padding-right: 18px;
+  }
+
+  .info-footer .audio-cta,
+  .info-footer .visit-btn {
+    flex: 0 0 auto;
+    text-align: left;
+  }
+}
