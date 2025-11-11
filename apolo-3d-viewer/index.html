@@ -61,26 +61,26 @@
     <!-- =========================
          Topbar
          ========================= -->
-<header id="topBar" class="hidden">
-  <a
-    id="homeBtn"
-    class="home-btn"
-    href="https://museovirtualsantana.es/"
-    aria-label="Ir al directorio de museosantana.es"
-  >
-    <!-- Icono CASA en círculo -->
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M3 11.5l9-7 9 7V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-8.5z" fill="currentColor"/>
-    </svg>
-    <span class="sr-only">Inicio</span>
-  </a>
-
-  <h1 id="pieceTitle"></h1>
-
-  <button id="infoBtn" class="info-btn" type="button" aria-label="Mostrar información">
-    Información
-  </button>
-</header>
+         <header id="topBar">
+          <!-- Botón inicio (izquierda) -->
+          <a class="home-btn" href="https://museosantana.es" aria-label="Volver al directorio"></a>
+        
+          <!-- Contenido centrado: logo + título -->
+          <div class="topbar-center">
+            <img
+              id="brandLogo"
+              src="/assets/brand/logo-museo.svg"
+              alt="Museo Virtual San Joaquín y Santa Ana"
+            />
+            <h1 id="pieceTitle">Cristo Yacente</h1>
+          </div>
+        
+          <!-- (Derecha) Botón de info (solo visible en móvil) -->
+          <button id="infoBtn" class="info-btn" type="button" aria-label="Mostrar información">
+            Información
+          </button>
+        </header>
+        
 
 <!-- Ayuda de atajos (desktop) -->
 <div id="kbdHelp" class="kbd-help hidden" aria-hidden="true">
