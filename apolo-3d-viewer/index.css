@@ -892,3 +892,24 @@ iframe#splat.is-visible {
 .ar-loading{ z-index: var(--z-arloading) !important; }
 .skeleton{ z-index: var(--z-skeleton) !important; }
 .glb-poster, .splat-poster{ z-index: var(--z-poster) !important; }
+
+/* === FIX SEGURO: alinear botones del footer con el texto de la cartela === */
+@media (min-width:1024px){
+  /* Si el texto empieza a 28px, igualamos el footer */
+  body.cards-mode #infoSheet .info-footer{
+    display: flex !important;
+    justify-content: flex-start !important;  /* ← izquierda */
+    align-items: center !important;
+    gap: 14px !important;
+    text-align: left !important;
+    padding-left: 28px !important;           /* ← igual al padding de los textos */
+    padding-right: 28px !important;
+    margin-top: 22px !important;
+    width: 100% !important;
+  }
+
+  /* Asegurar que ningún hijo lo empuja a la derecha */
+  body.cards-mode #infoSheet .info-footer > *{
+    margin-left: 0 !important;
+  }
+}
