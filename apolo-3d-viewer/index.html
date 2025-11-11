@@ -19,7 +19,9 @@
     <!-- Tipografía para títulos -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght=600&display=swap" rel="stylesheet"></noscript>
-    
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&display=swap" rel="stylesheet"></noscript>
+
 
     <!-- CSS principal -->
     <link rel="stylesheet" href="/index.css" />
@@ -230,6 +232,9 @@
         <h2 id="infoTitle">Obra</h2>
         <p class="info-meta" id="infoMeta"></p>
         <p class="info-desc" id="infoDesc"></p>
+        <div class="info-footer">
+    <a class="visit-btn" href="https://museosanjoaquinysantaana.es/" target="_blank" rel="noopener">Visita la web</a>
+  </div>
       </div>
     </div>
 
@@ -857,6 +862,9 @@
         function renderInfo(s) {
           const d = infoData[s] || {};
           const nice = (x) => (x || s || '').replace(/-/g, ' ').trim();
+          const infoTypologyEl = document.getElementById('infoTypology');
+          if (infoTypologyEl) infoTypologyEl.textContent = d.typology || '';
+
 
           if (topBar && s) {
             topBar.classList.remove('hidden');
@@ -947,33 +955,28 @@
         });
 
         /* === Desktop mode: barra lateral fija + sin AR === */
-        const DESKTOP_MQ = window.matchMedia('(min-width: 1024px)');
-        function applyDesktopMode() {
-          const isDesktop = DESKTOP_MQ.matches && !/Android|iPhone|iPad/i.test(navigator.userAgent);
-          document.body.classList.toggle('is-desktop', isDesktop);
+function applyDesktopMode() {
+  const isDesktop = window.matchMedia('(min-width: 1024px)').matches && !/Android|iPhone|iPad/i.test(navigator.userAgent);
+  document.body.classList.toggle('is-desktop', isDesktop);
+  document.body.classList.toggle('cards-mode', isDesktop); // <-- activa layout 60/40 en escritorio
 
-          // En desktop: cartela siempre visible como lateral
-          const sheet = document.getElementById('infoSheet');
-          const topBar = document.getElementById('topBar');
-          if (isDesktop) {
-            // Asegura topbar y cartela visibles
-            topBar?.classList.remove('hidden');
-            sheet?.classList.remove('hidden');
-            sheet?.setAttribute('aria-hidden', 'false');
-            document.body.classList.add('sheet-open');
+  const sheet = document.getElementById('infoSheet');
+  const topBar = document.getElementById('topBar');
+  if (isDesktop) {
+    topBar?.classList.remove('hidden');
+    sheet?.classList.remove('hidden');
+    sheet?.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('sheet-open');
 
-            // Oculta AR (aunque el CSS ya lo esconde)
-            const arBtn = document.getElementById('arBtn');
-            if (arBtn) {
-              arBtn.setAttribute('disabled', 'true');
-              arBtn.classList.add('is-disabled', 'hidden');
-            }
-          } else {
-            // Vuelve a comportamiento móvil (cartela controlada por el botón)
-            document.body.classList.remove('sheet-open');
-            // no forzamos hidden aquí: de eso se encarga tu lógica actual
-          }
-        }
+    const arBtn = document.getElementById('arBtn');
+    if (arBtn) {
+      arBtn.setAttribute('disabled', 'true');
+      arBtn.classList.add('is-disabled', 'hidden');
+    }
+  } else {
+    document.body.classList.remove('sheet-open');
+  }
+}
         DESKTOP_MQ.addEventListener?.('change', applyDesktopMode);
         applyDesktopMode();
 

@@ -1272,3 +1272,194 @@ model-viewer {
   .back-btn{ display:none !important; }
   #brandLogo{ display:block; }
 }
+
+/* ===========================
+   ESCRITORIO — MODO TARJETAS
+   =========================== */
+@media (min-width:1024px){
+  :root{ --topbar-h:72px; }
+
+  /* --- Topbar: más alto, logo centrado, botón Galería a la izquierda --- */
+  body.cards-mode #topBar{
+    height: var(--topbar-h) !important;
+    padding: 0 24px !important;
+    background: rgba(12,16,21,.88) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  /* ocultamos elementos que no van en desktop */
+  body.cards-mode #pieceTitle,
+  body.cards-mode .back-btn,
+  body.cards-mode #infoBtn{ display:none !important; }
+
+  /* Logo CENTRADO absoluto dentro del topbar */
+  body.cards-mode #topBar{ position: fixed; }
+  body.cards-mode #brandLogo{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    height: 32px;
+    display: block !important;
+    opacity: .98;
+  }
+  body.cards-mode #brandMark{ display:none !important; }
+
+  /* Botón “Galería” a la IZQUIERDA estilo chip filled + icono */
+  body.cards-mode .gallery-btn{
+    position: absolute;
+    left: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex !important;
+    gap: 10px;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 14px;
+    border: 1px solid rgba(180, 230, 255, .25);
+    background: linear-gradient(180deg, rgba(66, 135, 245,.16), rgba(50, 110, 220,.14));
+    box-shadow: 0 8px 20px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.10);
+    color: #eaf6ff;
+    text-decoration: none;
+    transition: transform .12s ease, background .25s ease, border-color .25s ease;
+  }
+  body.cards-mode .gallery-btn:hover{
+    background: linear-gradient(180deg, rgba(66, 135, 245,.22), rgba(50, 110, 220,.2));
+    border-color: rgba(180, 230, 255, .35);
+  }
+  body.cards-mode .gallery-btn:active{ transform: translateY(1px); }
+
+  /* Icono (grid/galería) via pseudo con SVG inline */
+  body.cards-mode .gallery-btn::before{
+    content:"";
+    width:18px; height:18px; display:inline-block;
+    background: no-repeat center/contain
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='7' height='7' rx='1.5'/><rect x='14' y='3' width='7' height='7' rx='1.5'/><rect x='3' y='14' width='7' height='7' rx='1.5'/><rect x='14' y='14' width='7' height='7' rx='1.5'/></svg>");
+    opacity:.95;
+  }
+
+  /* --- Eliminamos el layout fijo anterior en desktop y aplicamos tarjetas 60/40 --- */
+  /* Área útil bajo el topbar con margen superior (gap 32) y padding lateral 32 */
+  body.cards-mode{
+    overflow: hidden; /* la página no scrollea; solo la cartela */
+  }
+
+  /* MODEL-VIEWER como tarjeta (60%) */
+  body.cards-mode model-viewer{
+    position: absolute !important;
+    top: calc(var(--topbar-h) + 32px) !important;
+    left: 32px !important;
+    width: calc(60% - 10px) !important;  /* gap entre tarjetas = 20px */
+    height: calc(100dvh - var(--topbar-h) - 32px - 32px) !important;
+    border-radius: 14px !important;
+    background: #1a212b !important;  /* fondo plano oscuro */
+    box-shadow: 0 12px 28px rgba(0,0,0,.32) !important;
+    overflow: hidden !important;
+  }
+
+  /* Cartela como tarjeta (40%) con glass + degradado, scroll interno */
+  body.cards-mode #infoSheet{
+    position: absolute !important;
+    top: calc(var(--topbar-h) + 32px) !important;
+    right: 32px !important;
+    left: auto !important;
+    bottom: 32px !important;
+    width: calc(40% - 10px) !important;
+    border-radius: 14px !important;
+    transform: none !important;
+    opacity: 1 !important;
+    background:
+      linear-gradient(180deg, rgba(35,45,60,.45), rgba(25,30,40,.40)),
+      rgba(20,24,32,.55) !important;
+    border: 1px solid rgba(255,255,255,.10) !important;
+    box-shadow: 0 14px 34px rgba(0,0,0,.36), inset 0 1px 0 rgba(255,255,255,.06) !important;
+    backdrop-filter: blur(16px) saturate(140%) !important;
+    -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+  }
+  body.cards-mode #infoSheet .info-sheet__drag,
+  body.cards-mode #infoSheet .info-sheet__close{ display:none !important; }
+
+  /* Contenido scrolleable solo dentro de la cartela */
+  body.cards-mode #infoSheet .info-sheet__content{
+    height: 100% !important;
+    padding: 28px 28px 22px !important;
+    overflow: auto !important;
+  }
+
+  /* --- Tipografías mezcla Lora + Poppins --- */
+  body.cards-mode #infoTitle{
+    font-family: "Lora", serif !important;
+    font-weight: 600 !important;
+    font-size: clamp(22px, 1.8vw, 30px) !important;
+    letter-spacing: .02em; margin: 0 0 .35em 0;
+    color: #f5f6f8;
+  }
+  body.cards-mode .info-sub{ /* tipología como subtítulo */
+    font-family: "Lora", serif;
+    font-weight: 500;
+    font-size: 16px;
+    color: #cfe4ff;
+    opacity: .95;
+    margin: -2px 0 10px 0;
+  }
+  body.cards-mode .info-meta{
+    font-family: "Poppins", system-ui, sans-serif !important;
+    color: #aeb7c3 !important;
+    font-size: 14px !important;
+    margin-bottom: 18px !important;
+  }
+  body.cards-mode .info-desc{
+    font-family: "Poppins", system-ui, sans-serif !important;
+    color: #e6ebf3 !important;
+    line-height: 1.6 !important;
+    font-size: 15px !important;
+  }
+  body.cards-mode .info-extra{
+    margin-top: 18px !important;
+    font-family: "Poppins", system-ui, sans-serif !important;
+    color: #d7deea !important;
+    font-size: 14px !important;
+    display: grid; row-gap: 8px;
+  }
+  body.cards-mode .info-extra strong{ color:#fff; font-weight:600; }
+
+  /* Footer de cartela + CTA a la derecha, no full width */
+  body.cards-mode .info-footer{
+    display: flex; justify-content: flex-end; margin-top: 18px;
+  }
+  body.cards-mode .visit-btn{
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 14px; border-radius: 10px;
+    font-weight: 700; font-size: 14px; text-decoration: none;
+    color: #0b1a24; background: #bfe6ff;
+    border: 1px solid rgba(0,0,0,.08);
+    box-shadow: 0 10px 20px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.35);
+    transition: transform .12s ease, background .25s ease;
+  }
+  body.cards-mode .visit-btn:hover{ background:#d0eeff; }
+  body.cards-mode .visit-btn:active{ transform: translateY(1px); }
+
+  /* Oculta FABs en escritorio (por si acaso) */
+  body.cards-mode .fab-row, 
+  body.cards-mode .ar-fab{ display:none !important; }
+
+  /* Posters y overlays: que no tapen tarjetas ni topbar */
+  body.cards-mode .glb-poster,
+  body.cards-mode .splat-poster,
+  body.cards-mode #msg,
+  body.cards-mode .ar-loading,
+  body.cards-mode .skeleton{
+    inset: auto; /* anulamos full screen */
+    position: absolute;
+    left: 32px; right: calc(40% + 42px); /* 32 + (gap 20 + borde) aprox */
+    top: calc(var(--topbar-h) + 32px);
+    bottom: 32px;
+    border-radius: 14px;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+  }
+}
