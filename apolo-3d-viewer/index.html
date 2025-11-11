@@ -40,10 +40,7 @@
     <link rel="manifest" href="/manifest.webmanifest">
 
     <link rel="preconnect" href="https://ajax.googleapis.com" crossorigin>
-    <link rel="modulepreload" href="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js" crossorigin>
-
-
-
+  
     <!-- model-viewer (GLB) -->
     <script type="module" src="/vendor/model-viewer-4.0.0.min.js"></script>
 
@@ -230,6 +227,7 @@
       <button id="infoClose" class="info-sheet__close" aria-label="Cerrar">✕</button>
       <div class="info-sheet__content">
         <h2 id="infoTitle">Obra</h2>
+        <p id="infoTypology" class="info-sub"></p>
         <p class="info-meta" id="infoMeta"></p>
         <p class="info-desc" id="infoDesc"></p>
         <div class="info-footer">
@@ -452,8 +450,6 @@
         addHapticFeedback('#arBtn', [20]);
         addHapticFeedback('#audioBtn', [12, 8]);
         addHapticFeedback('#homeBtn', [12]);
-        addHapticFeedback('#homeBtn', [12]);
-
 
         console.debug('[haptics] vibrate supported?', supportsVibrate());
 
@@ -554,6 +550,7 @@
           audio = new Audio(await signedOrPlain(url));
 
 
+
           // Mostrar SIEMPRE la fila y el botón (respetando tu CSS cuando se pueda)
           if (fabRow) {
             fabRow.classList.remove('hidden');
@@ -651,18 +648,18 @@
           }
         }
 
-        function openQuickLookSync(slug) {
-          try {
-            const link = document.getElementById('iosARLink');
-            if (!link) return false;
-            const ts = Date.now(); // cache-buster (cada click es "nuevo")
-            link.setAttribute('href', preSigned?.usdz || usdzUrl(model));
-            link.click(); // síncrono, en la misma pila del gesto
-            return true;
-          } catch {
-            return false;
-          }
-        }
+function openQuickLookSync(slug) {
+  try {
+    const link = document.getElementById('iosARLink');
+    if (!link) return false;
+    link.setAttribute('href', usdzUrl(slug));
+    link.click();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 
         // Overlay “Abriendo AR….”
         function showARLoading() {
@@ -977,8 +974,9 @@ function applyDesktopMode() {
     document.body.classList.remove('sheet-open');
   }
 }
-        DESKTOP_MQ.addEventListener?.('change', applyDesktopMode);
-        applyDesktopMode();
+mqDesk.addEventListener?.('change', applyDesktopMode);
+applyDesktopMode();
+
 
         // 👉 Forzar reglas de escritorio desde JS (defensa extra por si algún handler intenta cerrar)
   const IS_DESKTOP = window.matchMedia('(min-width: 1024px)').matches;
@@ -1240,7 +1238,6 @@ mv.addEventListener('load', () => applyEnvironmentOnly(mv, hdrToUse), { once: tr
               }
 
               // iOS Quick Look
-              mv.iosSrc = usdzUrl(model);
               mv.classList.remove('hidden');
 
               // Oculta botón AR nativo

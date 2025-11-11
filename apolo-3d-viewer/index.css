@@ -1434,7 +1434,7 @@ model-viewer {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 10px 14px; border-radius: 10px;
     font-weight: 700; font-size: 14px; text-decoration: none;
-    color: #0b1a24; background: #bfe6ff;
+    color: #0b1a24; background: #bfae6ff;
     border: 1px solid rgba(0,0,0,.08);
     box-shadow: 0 10px 20px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.35);
     transition: transform .12s ease, background .25s ease;
