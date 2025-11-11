@@ -1574,3 +1574,51 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     z-index: var(--z-poster) !important; /* debajo del panel */
   }
 }
+
+/* === Ajuste de escritorio: cartela más estrecha + gap claro con el visor === */
+@media (min-width:1024px){
+  /* 1) Nuevo ancho del panel + separación entre panel y visor */
+  :root{
+    --panel-w: clamp(300px, 24vw, 360px); /* antes ~clamp(360–480px) */
+    --gap-x: 28px;                        /* separa más el visor del panel */
+    /* --pad-x ya existe (32px), lo dejamos igual */
+  }
+
+  /* 2) Forzar el ancho real de la cartela (por si hay reglas duplicadas) */
+  #infoSheet{
+    width: var(--panel-w) !important;
+    right: 0 !important;
+    left: auto !important;
+    /* opcional: línea sutil para que el gap se lea mejor */
+    border-left: 1px solid rgba(255,255,255,.10) !important;
+  }
+
+  /* 3) El visor ya usa right: calc(var(--panel-w)+var(--pad-x)+var(--gap-x))
+        en tu CSS de escritorio; forzamos esa caja única por si otro bloque lo pisa */
+  model-viewer{
+    position: fixed !important;
+    top: calc(var(--topbar-h) + var(--pad-x)) !important;
+    left: var(--pad-x) !important;
+    right: calc(var(--panel-w) + var(--pad-x) + var(--gap-x)) !important;
+    bottom: var(--pad-x) !important;
+    max-width: none !important;
+    margin: 0 !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    background: transparent !important;
+    z-index: var(--z-scene) !important;
+  }
+
+  /* 4) Pósters y overlays recortados al MISMO rectángulo del visor (coherencia visual) */
+  .glb-poster,
+  .splat-poster,
+  #msg,
+  .ar-loading,
+  .skeleton{
+    left: var(--pad-x) !important;
+    right: calc(var(--panel-w) + var(--pad-x) + var(--gap-x)) !important;
+    top: calc(var(--topbar-h) + var(--pad-x)) !important;
+    bottom: var(--pad-x) !important;
+    border-radius: 14px !important;
+  }
+}
