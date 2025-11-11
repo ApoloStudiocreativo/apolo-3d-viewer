@@ -1387,6 +1387,19 @@ model-viewer {
     overflow: auto !important;
   }
 
+  /* === FIX: eliminar scroll interno de la cartela en escritorio === */
+@media (min-width:1024px){
+  body.cards-mode #infoSheet{
+    overflow: visible !important;
+  }
+  body.cards-mode #infoSheet .info-sheet__content{
+    overflow: visible !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+}
+
+
   /* --- Tipografías mezcla Lora + Poppins --- */
   body.cards-mode #infoTitle{
     font-family: "Lora", serif !important;
