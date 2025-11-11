@@ -231,6 +231,26 @@
         <p class="info-meta" id="infoMeta"></p>
         <p class="info-desc" id="infoDesc"></p>
         <div class="info-footer">
+        <div class="info-footer">
+  <!-- ⬇️ NUEVO: CTA Audioguía (idéntico icono que en móvil) -->
+  <button id="audioGuideBtn" class="audio-cta" type="button" aria-pressed="false">
+    <!-- altavoz/parado -->
+    <svg class="icon-play" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 9v6h3l5 4V5L7 9H4z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M15 10.5a3.5 3.5 0 010 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M17.5 8a6 6 0 010 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+    <!-- pausa/reproduciendo -->
+    <svg class="icon-pause" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="6" y="5" width="4" height="14" rx="1.2" stroke="currentColor" stroke-width="1.8" />
+      <rect x="14" y="5" width="4" height="14" rx="1.2" stroke="currentColor" stroke-width="1.8" />
+    </svg>
+    Audioguía
+  </button>
+
+  <a class="visit-btn" href="https://museosanjoaquinysantaana.es/" target="_blank" rel="noopener">Visita la web</a>
+</div>
+  
     <a class="visit-btn" href="https://museosanjoaquinysantaana.es/" target="_blank" rel="noopener">Visita la web</a>
   </div>
       </div>
@@ -284,6 +304,8 @@
         const infoMeta = document.getElementById('infoMeta');
         const infoDesc = document.getElementById('infoDesc');
         const audioBtn = document.getElementById('audioBtn');
+        const audioGuideBtn = document.getElementById('audioGuideBtn');
+
 
         // === Desktop mode toggle ===
         const mqDesk = window.matchMedia('(min-width: 1025px)');
@@ -544,6 +566,13 @@
           audioCleanup = () => {};
           audio = null;
 
+          if (audioGuideBtn) {
+  audioGuideBtn.classList.remove('hidden','is-playing');
+  audioGuideBtn.removeAttribute('disabled');
+  audioGuideBtn.setAttribute('aria-pressed','false');
+}
+
+
           if (!audioBtn) return;
 
           const url = `/assets/audio/${id}.mp3`;
@@ -569,6 +598,34 @@
           audio.preload = 'none';
 
           const onClick = async () => {
+            const onClick = async () => {
+  if (!audio) return;
+  if (audio.paused) {
+    try {
+      await audio.play();
+      audioBtn.classList.add('is-playing');
+      audioGuideBtn?.classList.add('is-playing');
+      audioBtn.dataset.state = 'playing';
+      audioBtn.setAttribute('aria-pressed','true');
+      audioGuideBtn?.setAttribute('aria-pressed','true');
+      audioBtn.setAttribute('aria-label','Pausar audio');
+      audioGuideBtn?.setAttribute('aria-label','Pausar audio');
+      if (navigator.vibrate) navigator.vibrate(10);
+    } catch (e) {
+      showToast('Pulsa de nuevo para habilitar el audio');
+    }
+  } else {
+    audio.pause();
+    audioBtn.classList.remove('is-playing');
+    audioGuideBtn?.classList.remove('is-playing');
+    audioBtn.dataset.state = 'idle';
+    audioBtn.setAttribute('aria-pressed','false');
+    audioGuideBtn?.setAttribute('aria-pressed','false');
+    audioBtn.setAttribute('aria-label','Reproducir audio');
+    audioGuideBtn?.setAttribute('aria-label','Reproducir audioguía');
+  }
+};
+
             if (!audio) return;
             if (audio.paused) {
               try {
@@ -611,6 +668,8 @@
           };
 
           audioBtn.addEventListener('click', onClick);
+          audioGuideBtn?.addEventListener('click', onClick);
+
           document.addEventListener('visibilitychange', onVisibility);
           audio.addEventListener('error', onError);
 
@@ -621,6 +680,7 @@
             } catch {}
             audio = null;
             audioBtn.removeEventListener('click', onClick);
+            audioGuideBtn?.removeEventListener('click', onClick);
             document.removeEventListener('visibilitychange', onVisibility);
             try {
               audio.removeEventListener('error', onError);
@@ -879,8 +939,10 @@ function openQuickLookSync(slug) {
           if (d.year) extras.push(`<div><strong>Fecha:</strong> ${d.year}</div>`);
           if (d.author) extras.push(`<div><strong>Autor:</strong> ${d.author}</div>`);
 
-          const extrasHtml = extras.length ? `<div class="info-extra">${extras.join('')}</div>` : '';
-          infoDesc.innerHTML = [desc, extrasHtml].filter(Boolean).join('');
+const extrasHtml = extras.length ? `<div class="info-extra">${extras.join('')}</div>` : '';
+const descBox = desc ? `<div class="info-descbox">${desc}</div>` : '';
+infoDesc.innerHTML = [extrasHtml, descBox].filter(Boolean).join('');
+
 
           // Actualizar <title> del documento
           try {

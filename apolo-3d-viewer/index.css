@@ -1884,3 +1884,93 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     z-index: var(--z-poster) !important;
   }
 }
+
+
+/* === Cartela: jerarquía y espacios como el mock === */
+@media (min-width:1024px){
+  body.cards-mode #infoSheet .info-sheet__content{
+    padding: 28px 28px 22px !important;
+  }
+
+  /* Título y subtítulo bien arriba */
+  body.cards-mode #infoTitle{
+    margin-top: 4px !important;
+    margin-bottom: 10px !important;
+  }
+  body.cards-mode .info-sub{
+    margin-top: 0 !important;
+    margin-bottom: 10px !important;
+  }
+  body.cards-mode .info-meta{
+    margin-bottom: 18px !important;
+  }
+
+  /* Características (tipología/material/...) centradas en el bloque medio */
+  .info-extra{
+    background: rgba(0,0,0,.22);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 8px 0 14px 0;
+  }
+
+  /* Descripción en “caja” oscura, pegada a las características */
+  .info-descbox{
+    background: rgba(0,0,0,.28);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 8px;
+    padding: 14px 16px;
+    line-height: 1.6;
+  }
+
+  /* Footer: botones alineados a la izquierda con gap */
+  .info-footer{
+    display: flex;
+    gap: 14px;
+    margin-top: 18px;
+    justify-content: flex-start;
+  }
+}
+
+/* === Botón Audioguía (estética del FAB rojo, versión CTA) === */
+.audio-cta{
+  height: 46px;
+  padding: 0 14px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(255, 0, 0, .7);
+  color: #fff;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,80,80,.55), rgba(150,0,0,.45)),
+    linear-gradient(135deg, rgba(255,0,0,.55), rgba(90,0,0,.42));
+  backdrop-filter: blur(14px) saturate(200%);
+  -webkit-backdrop-filter: blur(14px) saturate(200%);
+  box-shadow:
+    0 0 12px rgba(255, 0, 0, .45),
+    0 6px 22px rgba(255, 0, 0, .30),
+    inset 0 2px 6px rgba(255,255,255,.18);
+  font-weight: 800;
+  letter-spacing: .2px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform .12s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease;
+}
+.audio-cta:active{ transform: scale(.98); }
+.audio-cta .icon-pause{ display:none; width:20px; height:20px; }
+.audio-cta .icon-play{ display:block; width:20px; height:20px; }
+.audio-cta.is-playing{
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,100,100,.66), rgba(200,0,0,.48)),
+    linear-gradient(135deg, rgba(255,20,20,.70), rgba(140,0,0,.50));
+  border-color: rgba(255,40,40,.9);
+  animation: pulse-glow 1.8s ease-in-out infinite;
+}
+.audio-cta.is-playing .icon-play{ display:none; }
+.audio-cta.is-playing .icon-pause{ display:block; }
+
+/* Desktop: escondemos la fila de FABs si estuviera visible */
+@media (min-width:1024px){
+  .fab-row{ display:none !important; }
+}
