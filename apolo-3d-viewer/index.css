@@ -2091,3 +2091,39 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
   flex: 0 0 auto;
   text-align: left;
 }
+
+/* === Cartela (solo escritorio): CTAs alineados con el texto === */
+@media (min-width: 1025px) {
+  /* Asegura el padding coherente con el texto */
+  #infoSheet .info-sheet__content {
+    padding-left: 18px;   /* ya lo usas en móvil; en desktop puedes tener 40–42px en otra variante */
+    padding-right: 18px;
+  }
+
+  /* Fila de botones: a la IZQUIERDA y con el mismo inicio visual que el texto */
+  #infoSheet .info-sheet__content .info-footer {
+    display: flex;
+    justify-content: flex-start;   /* ← izquierda */
+    align-items: center;
+    gap: 10px;
+    margin-top: 18px;
+    text-align: left;
+  }
+
+  /* Botones sin crecimiento extraño */
+  #infoSheet .info-sheet__content .info-footer .audio-cta,
+  #infoSheet .info-sheet__content .info-footer .visit-btn {
+    flex: 0 0 auto;
+  }
+}
+
+@media (min-width: 1025px) {
+  /* Si alguna regla anterior puso .info-footer a la derecha, re-alínealo aquí */
+  #infoSheet .info-footer {
+    justify-content: flex-start !important;
+    text-align: left !important;
+    padding-left: 18px !important;  /* o 40–42px si usas el padding desktop amplio */
+    padding-right: 18px !important;
+    margin-top: 18px !important;
+  }
+}

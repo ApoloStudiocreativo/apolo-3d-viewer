@@ -225,15 +225,23 @@
     <div id="infoSheet" class="info-sheet hidden" aria-hidden="true">
       <div class="info-sheet__drag"></div>
       <button id="infoClose" class="info-sheet__close" aria-label="Cerrar">✕</button>
-      <div class="info-sheet__content">
-        <h2 id="infoTitle">Obra</h2>
-        <p id="infoTypology" class="info-sub"></p>
-        <p class="info-meta" id="infoMeta"></p>
-        <p class="info-desc" id="infoDesc"></p>
-        <div class="info-footer">
-          <button id="audioGuideBtn" class="audio-cta">Audioguía</button>
-          <a class="visit-btn" href="..." target="_blank" rel="noopener">Ver en web</a>
-        </div>
+    <div class="info-sheet__content">
+      <h2 id="infoTitle">Obra</h2>
+      <p class="info-meta" id="infoMeta"></p>
+      <p class="info-desc" id="infoDesc"></p>
+
+      <!-- Contenedor de CTAs (solo estructura) -->
+      <div class="info-footer">
+        <button id="audioGuideBtn" class="audio-cta" type="button" aria-pressed="false">
+          <!-- iconos… -->
+          Audioguía
+        </button>
+        <a class="visit-btn" href="https://museosanjoaquinysantaana.es/" target="_blank" rel="noopener">
+          Visita la web
+        </a>
+      </div>
+    </div>
+
   <!-- ⬇️ NUEVO: CTA Audioguía (idéntico icono que en móvil) -->
   <button id="audioGuideBtn" class="audio-cta" type="button" aria-pressed="false">
     <!-- altavoz/parado -->
