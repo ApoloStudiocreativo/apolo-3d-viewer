@@ -2027,3 +2027,33 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     margin-left: auto !important;
   }
 }
+
+/* === CARTELA (desktop) — botones alineados al INICIO del texto === */
+@media (min-width:1024px){
+  /* usa la misma X que el contenido (28px en tu CSS) */
+  body.cards-mode{ --sheet-pad-x: 28px; }
+
+  /* asegura el padding del contenido (por si cambia arriba) */
+  body.cards-mode #infoSheet .info-sheet__content{
+    padding-left: var(--sheet-pad-x) !important;
+    padding-right: var(--sheet-pad-x) !important;
+  }
+
+  /* footer: a la IZQUIERDA y exactamente con el mismo inicio */
+  body.cards-mode #infoSheet .info-footer{
+    display: flex !important;
+    width: 100% !important;
+    justify-content: flex-start !important;  /* ← izquierda */
+    text-align: left !important;
+    gap: 14px !important;
+
+    padding-left: var(--sheet-pad-x) !important;   /* alinea con texto */
+    padding-right: var(--sheet-pad-x) !important;  /* simétrico */
+    margin-top: 22px !important;
+  }
+
+  /* quita el empuje que tenías para pegarlos a la derecha */
+  body.cards-mode #infoSheet .info-footer > *{
+    margin-left: 0 !important;
+  }
+}
