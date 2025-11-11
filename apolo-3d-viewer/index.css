@@ -1302,200 +1302,63 @@ model-viewer {
   /* Tu layout de escritorio previo sigue igual */
 }
 
-/* ===== Topbar MÓVIL (≤1023px) ===== */
-@media (max-width: 1023px) {
-  /* Aumentamos altura + respiración */
+/* === TOPBAR — MÓVIL (≤1023px) ========================================== */
+/* Layout: [← flecha]   [ TÍTULO CENTRADO PERFECTO ]   [ Información ]    */
+@media (max-width:1023px){
   #topBar{
-    height: 66px; /* +10px */
-    padding: 0 10px;
-    display: grid !important;
-    grid-template-columns: 1fr auto 1fr; /* izquierda – centro – derecha */
-    align-items: center;
-    gap: 8px;
-  }
-
-  /* IZQUIERDA: isotipo visible, logo grande oculto */
-  .brand-left{
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    justify-self: start;
-  }
-  #brandMark{ display:block; height: 30px; width:auto; }  /* más alto */
-  #brandLogo{ display:none !important; }                  /* solo desktop */
-
-  /* CENTRO: título perfectamente centrado y truncado si hace falta */
-  #pieceTitle{
-    display: block !important;
-    grid-column: 2;               /* columna central */
-    justify-self: center;         /* centrado óptico */
-    margin: 0;
-    font-size: 18px;              /* un poco mayor para compensar altura */
-    line-height: 1;
-    text-transform: uppercase;
-    white-space: nowrap;
-    max-width: 64vw;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  /* DERECHA: Info + Casa juntos y alineados a la derecha */
-  .topbar-actions{
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;                     /* pegados entre sí */
-    justify-self: end;
-  }
-  #infoBtn{
-    min-width: auto;
-    height: 32px;
-    padding: 0 10px;
-    font-size: 13px;
-    border-radius: 10px;
-  }
-  .home-btn{
-    display: inline-flex !important;
-    width: 36px; height: 36px;
-  }
-
-  /* Ocultar elementos de escritorio en móvil */
-  .gallery-btn{ display:none !important; }
-}
-
-/* ===== Escritorio (≥1024px) sigue igual que ahora ===== */
-@media (min-width: 1024px){
-  #brandMark{ display:none !important; }
-  #brandLogo{ display:block; height:32px; }
-  #pieceTitle{ display:none !important; }
-  .home-btn{ display:none !important; }
-  .gallery-btn{ display:inline-flex; }
-}
-
-/* ===== TOPBAR MÓVIL: [←] [Isotipo] [Título centrado] [Info.] ===== */
-/* ===== MÓVIL: flecha izquierda, SIN isotipo, título centrado perfecto, "Información" a la derecha ===== */
-@media (max-width: 1023px) {
-  /* topbar 10px más alta y preparada para centrar absoluto */
-  #topBar {
-    position: relative;   /* necesario para centrar absoluto del título */
-    height: 66px;
-    padding: 0 12px;      /* un poco de aire a ambos lados */
-    display: flex;        /* flecha izquierda + botón dcha */
+    position: fixed;               /* ya lo tienes fixed, lo reafirmamos */
+    inset: env(safe-area-inset-top,0) 0 auto 0;
+    height: 66px;                  /* +10px de altura */
+    padding: 0 12px;
+    display: flex !important;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
+    z-index: 1000;
   }
 
-  /* Ocultar isotipo en móvil */
-  #brandMark { display: none !important; }
+  /* Izquierda: grupo con flecha (y ocultamos isotipo en móvil) */
+  .left-group{ display:inline-flex; align-items:center; gap:10px; flex:0 0 auto; }
+  #brandMark{ display:none !important; }  /* sin isotipo en móvil */
+  #brandLogo{ display:none !important; }  /* logo completo solo desktop */
 
-  /* Grupo izquierdo: solo la flecha */
-  .left-group { display: inline-flex; align-items: center; gap: 10px; }
-  .back-btn   { width: 34px; height: 34px; border-radius: 50%;
-                display: inline-flex; align-items:center; justify-content:center;
-                background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); color:#fff; }
-
-  /* Título SIEMPRE centrado geométricamente, independientemente del ancho de los laterales */
-  #pieceTitle {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%,-50%);
-    margin: 0;
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: .03em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    max-width: 70vw;            /* evita solapes en títulos largos */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    pointer-events: none;       /* no bloquea taps sobre los laterales */
+  .back-btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:36px; height:36px; border-radius:50%;
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.12);
+    color:#fff; text-decoration:none;
+    z-index:2;                                /* por encima del título */
   }
 
-  /* Botón de información (texto completo) alineado a la derecha */
-  #infoBtn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 34px;
-    padding: 0 14px;
-    font-size: 13px;
-    border-radius: 10px;
-    min-width: auto;            /* permite el texto más largo */
-  }
-
-  /* Elementos solo de escritorio fuera en móvil */
-  .gallery-btn, #brandLogo { display: none !important; }
-}
-
-/* Escritorio (se mantiene tu comportamiento actual) */
-@media (min-width: 1024px) {
-  #pieceTitle { display: none !important; }  /* sin título en topbar */
-}
-
-/* === FIX FINAL MÓVIL: [←]/casita izquierda · TÍTULO CENTRO · "Información" derecha === */
-@media (max-width:1023px){
-
-  /* Topbar en 3 columnas: izquierda | centro | derecha */
-  #topBar{
-    display: grid !important;
-    grid-template-columns: auto 1fr auto;
-    align-items: center;
-    justify-content: stretch;
-    height: 66px;            /* +10px */
-    padding: 0 10px;
-    gap: 8px;
-    position: relative;
-  }
-
-  /* Centro: usamos el wrapper existente y anulamos el centrado absoluto previo */
-  .topbar-center{
-    position: static !important;
-    left: auto !important;
-    top: auto !important;
-    transform: none !important;
-    justify-self: center;     /* centra geométricamente */
-    display: block !important;
-  }
-
-  /* Título perfectamente centrado y sin posicionamiento absoluto */
-  #pieceTitle{
-    position: static !important;
-    margin: 0;
-    font-size: 18px;
-    text-transform: uppercase;
-    white-space: nowrap;
-    max-width: 64vw;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    pointer-events: none;     /* no bloquea taps de los lados */
-  }
-
-  /* Isotipo/logo fuera en móvil para que no empuje el título */
-  #brandLogo{ display:none !important; }
-
-  /* Izquierda: botón de volver/casa */
-  .home-btn{
-    display: inline-flex !important;
-    justify-self: start;
-    width: 36px; height: 36px;
-  }
-
-  /* Derecha: botón de información donde siempre */
+  /* Derecha: botón Información */
   #infoBtn{
-    display: inline-flex !important;
-    justify-self: end;
-    min-width: auto;
-    height: 34px;
-    padding: 0 12px;
-    font-size: 13px;
-    border-radius: 10px;
+    display:inline-flex !important;
+    align-items:center; justify-content:center;
+    height:34px; padding:0 16px; font-size:13px; border-radius:10px;
+    min-width:auto; z-index:2;                 /* no lo tape el título */
   }
+
+  /* Centro: TÍTULO centrado geométricamente SIEMPRE */
+  #pieceTitle{
+    position:absolute !important;
+    left:50%; top:50%; transform:translate(-50%,-50%);
+    margin:0; line-height:1;
+    font-family:"Poppins", system-ui, sans-serif;
+    font-size:18px; font-weight:700; text-transform:uppercase;
+    white-space:nowrap; max-width:70vw; overflow:hidden; text-overflow:ellipsis;
+    pointer-events:none;                        /* no bloquea taps laterales */
+  }
+
+  /* Ocultar el botón Galería en móvil */
+  .gallery-btn{ display:none !important; }
 }
 
-/* Escritorio se mantiene como ya lo tienes */
+/* === ESCRITORIO (≥1024px) — se mantiene como lo tenías ================ */
 @media (min-width:1024px){
   #pieceTitle{ display:none !important; }
   #infoBtn{ display:none !important; }
-  .home-btn{ display:none !important; }
+  .back-btn{ display:none !important; }
+  #brandLogo{ display:block; }
+  #brandMark{ display:none !important; }
 }
