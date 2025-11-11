@@ -2057,3 +2057,33 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     margin-left: 0 !important;
   }
 }
+
+/* === FIX DEFINITIVO: footer alineado con el inicio del texto === */
+@media (min-width:1024px){
+  /* mismo padding lateral que el contenido (ajusta si cambias el del contenido) */
+  .cards-mode{ --sheet-pad-x: 28px; }
+
+  /* si el footer está fuera del content, dale el mismo padding para alinear */
+  .cards-mode #infoSheet .info-footer{
+    padding-left: var(--sheet-pad-x) !important;
+    padding-right: var(--sheet-pad-x) !important;
+  }
+  /* y asegura el padding del contenido también */
+  .cards-mode #infoSheet .info-sheet__content{
+    padding-left: var(--sheet-pad-x) !important;
+    padding-right: var(--sheet-pad-x) !important;
+  }
+
+  /* ALINEACIÓN: izquierda, anulando cualquier empuje previo */
+  .cards-mode .info-footer{
+    display: flex !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    gap: 14px !important;
+    margin-top: 22px !important;
+    text-align: left !important;
+  }
+  .cards-mode #infoSheet .info-footer > *{
+    margin-left: 0 !important;        /* ← cancela el “primer hijo con auto” */
+  }
+}
