@@ -1463,7 +1463,7 @@ model-viewer {
 }
 
 
-/* ==== Z-LAYERS UNIFICADOS ==== */
+/* ==== Z-LAYERS UNIFICADOS EXACTO ==== */
 :root{
   --z-bg: 0;
   --z-scene: 6;        /* model-viewer / splat */
