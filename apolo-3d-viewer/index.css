@@ -2127,3 +2127,21 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     margin-top: 18px !important;
   }
 }
+
+/* === Cartela (solo escritorio): CTAs alineados a la izquierda === */
+@media (min-width: 1025px) {
+  #infoSheet .info-sheet__content .info-footer {
+    display: flex;
+    justify-content: flex-start !important; /* ← izquierda */
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
+    text-align: left !important;
+  }
+
+  /* por si alguna regla anterior los empujaba a la derecha */
+  #infoSheet .info-footer {
+    justify-content: flex-start !important;
+    text-align: left !important;
+  }
+}
