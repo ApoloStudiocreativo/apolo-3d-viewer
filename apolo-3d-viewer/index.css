@@ -2145,3 +2145,42 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     text-align: left !important;
   }
 }
+
+/* === FIX ESCRITORIO (≥1025px) — CTAs a la IZQUIERDA en la cartela === */
+@media (min-width: 1025px) {
+  /* 1) Alineación consistente con el texto de la cartela */
+  #infoSheet .info-sheet__content .info-footer {
+    display: flex !important;
+    justify-content: flex-start !important; /* ← izquierda */
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
+    text-align: left !important;
+    padding: 0; /* el padding lo pone el content */
+  }
+
+  /* 2) Anular empujes heredados que los mandaban a la derecha */
+  #infoSheet .info-footer > *:first-child {
+    margin-left: 0 !important;
+  }
+
+  /* 3) Si la variante "cards-mode" estaba forzando derecha, la anulamos */
+  body.cards-mode #infoSheet .info-footer {
+    justify-content: flex-start !important; /* ← izquierda */
+    text-align: left !important;
+    /* alinear el inicio exactamente con el texto en cards-mode */
+    padding-left: var(--sheet-pad-x, 28px) !important;
+    padding-right: var(--sheet-pad-x, 28px) !important;
+    margin-top: 22px !important;
+    width: 100% !important;
+    gap: 14px !important;
+  }
+
+  /* 4) Evitar crecimientos raros de los botones */
+  #infoSheet .info-footer .audio-cta,
+  #infoSheet .info-footer .visit-btn {
+    flex: 0 0 auto;
+    margin: 0 !important;
+    text-align: left;
+  }
+}
