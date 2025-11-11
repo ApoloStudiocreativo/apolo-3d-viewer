@@ -1195,3 +1195,8 @@ model-viewer {
     }
   }
   
+  #brandLogo {
+    height: 32px;
+    width: auto;
+  }
+  
