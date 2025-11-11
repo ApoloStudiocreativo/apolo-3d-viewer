@@ -62,29 +62,32 @@
          Topbar
          ========================= -->
          <header id="topBar">
-          <!-- IZQUIERDA: isotipo -->
-          <div class="brand-left">
+          <!-- IZQUIERDA: Flecha + Isotipo -->
+          <div class="left-group">
+            <a class="back-btn" href="https://museosantana.es" aria-label="Volver atrás">
+              <!-- Flecha minimalista -->
+              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"></polyline>
+              </svg>
+            </a>
+        
+            <!-- Isotipo (solo móvil) -->
             <img id="brandMark" src="/assets/brand/isotipo.svg" alt="Museo Virtual" />
-            <!-- Logo completo solo se usa en escritorio (se mantiene para desktop) -->
+        
+            <!-- Logotipo completo (solo escritorio) -->
             <img id="brandLogo" src="/assets/brand/logo-museo.svg" alt="Museo Virtual San Joaquín y Santa Ana" />
           </div>
         
-          <!-- CENTRO: título de la obra -->
+          <!-- CENTRO: Título de la obra -->
           <h1 id="pieceTitle">Cristo Yacente</h1>
         
-          <!-- DERECHA: acciones móviles -->
-          <div class="topbar-actions">
-            <button id="infoBtn" class="info-btn" type="button" aria-controls="infoSheet" aria-expanded="false">
-              Info.
-            </button>
-            <a class="home-btn" href="https://museovirtualsantana.es" aria-label="Volver al directorio"></a>
-          </div>
-        
-          <!-- Solo ESCRITORIO -->
-          <a class="gallery-btn" href="https://museovirtualsantana.es" target="_blank" rel="noopener">
-            Galería
-          </a>
+          <!-- DERECHA: Botón Info (móvil) / Galería (escritorio) -->
+          <button id="infoBtn" class="info-btn" type="button" aria-controls="infoSheet" aria-expanded="false">
+            Info.
+          </button>
+          <a class="gallery-btn" href="https://museovirtualsantana.es" target="_blank" rel="noopener">Galería</a>
         </header>
+        
         
         
 
