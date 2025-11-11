@@ -1301,3 +1301,73 @@ model-viewer {
 
   /* Tu layout de escritorio previo sigue igual */
 }
+
+/* ===== Topbar MÓVIL (≤1023px) ===== */
+@media (max-width: 1023px) {
+  /* Aumentamos altura + respiración */
+  #topBar{
+    height: 66px; /* +10px */
+    padding: 0 10px;
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr; /* izquierda – centro – derecha */
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* IZQUIERDA: isotipo visible, logo grande oculto */
+  .brand-left{
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    justify-self: start;
+  }
+  #brandMark{ display:block; height: 30px; width:auto; }  /* más alto */
+  #brandLogo{ display:none !important; }                  /* solo desktop */
+
+  /* CENTRO: título perfectamente centrado y truncado si hace falta */
+  #pieceTitle{
+    display: block !important;
+    grid-column: 2;               /* columna central */
+    justify-self: center;         /* centrado óptico */
+    margin: 0;
+    font-size: 18px;              /* un poco mayor para compensar altura */
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+    max-width: 64vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* DERECHA: Info + Casa juntos y alineados a la derecha */
+  .topbar-actions{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;                     /* pegados entre sí */
+    justify-self: end;
+  }
+  #infoBtn{
+    min-width: auto;
+    height: 32px;
+    padding: 0 10px;
+    font-size: 13px;
+    border-radius: 10px;
+  }
+  .home-btn{
+    display: inline-flex !important;
+    width: 36px; height: 36px;
+  }
+
+  /* Ocultar elementos de escritorio en móvil */
+  .gallery-btn{ display:none !important; }
+}
+
+/* ===== Escritorio (≥1024px) sigue igual que ahora ===== */
+@media (min-width: 1024px){
+  #brandMark{ display:none !important; }
+  #brandLogo{ display:block; height:32px; }
+  #pieceTitle{ display:none !important; }
+  .home-btn{ display:none !important; }
+  .gallery-btn{ display:inline-flex; }
+}
+
