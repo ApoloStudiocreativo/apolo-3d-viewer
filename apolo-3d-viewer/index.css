@@ -1362,3 +1362,68 @@ model-viewer {
   #brandLogo{ display:block; }
   #brandMark{ display:none !important; }
 }
+
+/* === AJUSTE FINAL TOPBAR MÓVIL — VERSIÓN DEFINITIVA === */
+/* Centrado óptico + equilibrio de espacios + chip ajustado */
+@media (max-width:1023px){
+
+  /* --- Estructura general --- */
+  #topBar{
+    padding-right: 110px; /* reserva para el botón info */
+  }
+
+  /* --- Flecha izquierda: área táctil cómoda --- */
+  .back-btn{
+    width: 38px;
+    height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #fff;
+    transition: background 0.2s ease;
+  }
+  .back-btn:hover{
+    background: rgba(255,255,255,0.15);
+  }
+
+  /* --- Botón Información (ligeramente más compacto y equilibrado) --- */
+  #infoBtn{
+    padding: 0 12px;
+    height: 32px;
+    border-radius: 10px;
+    align-self: center;
+    transform: translateY(1px);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  /* --- Título centrado perfecto + ajuste óptico tipográfico --- */
+  #pieceTitle{
+    position: absolute !important;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    font-family: "Poppins", system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    font-size: 18px;
+    color: #fff;
+    text-transform: uppercase;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: calc(100vw - 110px - 56px); /* evita colisión con los laterales */
+    pointer-events: none;
+  }
+
+  /* --- Mejoras táctiles generales --- */
+  #topBar button,
+  #topBar a {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
