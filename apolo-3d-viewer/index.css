@@ -2009,3 +2009,21 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     filter: brightness(.95);
   }
 }
+/* === Cartela (desktop): alinear botones 100% a la derecha === */
+@media (min-width:1024px){
+  body.cards-mode #infoSheet .info-footer{
+    display: flex !important;
+    width: 100% !important;
+    align-items: center !important;
+    justify-content: flex-end !important; /* alineación a la derecha */
+    gap: 14px !important;
+    margin-top: 22px !important;
+    padding-right: 6px !important;
+    text-align: right !important;        /* por si alguna regla de texto lo pisa */
+  }
+
+  /* Empuja el grupo al borde derecho incluso si se cambia justify-content */
+  body.cards-mode #infoSheet .info-footer > *:first-child{
+    margin-left: auto !important;
+  }
+}
