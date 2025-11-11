@@ -1533,3 +1533,44 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     opacity: 1 !important;
   }
 }
+
+/* === FIX: rectángulo único para el lienzo en escritorio === */
+@media (min-width:1024px){
+  /* 1) Anular el max-width y el centrado heredados */
+  model-viewer{
+    max-width: none !important;
+    margin: 0 !important;
+  }
+
+  /* 2) Usar SIEMPRE el mismo rectángulo del visor (coincide con posters/overlays) */
+  model-viewer{
+    position: fixed !important;
+    top: calc(var(--topbar-h) + var(--pad-x)) !important;
+    left: var(--pad-x) !important;
+    right: calc(var(--panel-w) + var(--pad-x) + var(--gap-x)) !important;
+    bottom: var(--pad-x) !important;
+    width: auto !important;
+    height: auto !important;
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    background: transparent !important;
+    z-index: var(--z-scene) !important; /* por si alguna regla lo cambia */
+  }
+
+  /* 3) Asegurar que los pósters/overlays usan el MISMO rectángulo */
+  .glb-poster,
+  .splat-poster,
+  #msg,
+  .ar-loading,
+  .skeleton{
+    position: fixed !important;
+    left: var(--pad-x) !important;
+    right: calc(var(--panel-w) + var(--pad-x) + var(--gap-x)) !important;
+    top: calc(var(--topbar-h) + var(--pad-x)) !important;
+    bottom: var(--pad-x) !important;
+    border-radius: 14px !important;
+    background-position: center !important;
+    background-size: cover !important;
+    z-index: var(--z-poster) !important; /* debajo del panel */
+  }
+}
