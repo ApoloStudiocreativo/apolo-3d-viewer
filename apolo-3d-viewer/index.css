@@ -1372,78 +1372,63 @@ model-viewer {
 }
 
 /* ===== TOPBAR MÓVIL: [←] [Isotipo] [Título centrado] [Info.] ===== */
+/* ===== MÓVIL: flecha izquierda, SIN isotipo, título centrado perfecto, "Información" a la derecha ===== */
 @media (max-width: 1023px) {
+  /* topbar 10px más alta y preparada para centrar absoluto */
   #topBar {
-    height: 66px;                 /* +10px de altura */
-    display: grid !important;
-    grid-template-columns: auto 1fr auto;  /* izquierda | centro | derecha */
+    position: relative;   /* necesario para centrar absoluto del título */
+    height: 66px;
+    padding: 0 12px;      /* un poco de aire a ambos lados */
+    display: flex;        /* flecha izquierda + botón dcha */
     align-items: center;
-    padding: 0 10px;
-    position: sticky;
-    top: 0;
-    z-index: 40;
-    gap: 6px;
+    justify-content: space-between;
+    gap: 8px;
   }
 
-  /* Grupo izquierdo: flecha + isotipo */
-  .left-group {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
+  /* Ocultar isotipo en móvil */
+  #brandMark { display: none !important; }
+
+  /* Grupo izquierdo: solo la flecha */
+  .left-group { display: inline-flex; align-items: center; gap: 10px; }
+  .back-btn   { width: 34px; height: 34px; border-radius: 50%;
+                display: inline-flex; align-items:center; justify-content:center;
+                background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); color:#fff; }
+
+  /* Título SIEMPRE centrado geométricamente, independientemente del ancho de los laterales */
+  #pieceTitle {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    max-width: 70vw;            /* evita solapes en títulos largos */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;       /* no bloquea taps sobre los laterales */
   }
 
-  .back-btn {
+  /* Botón de información (texto completo) alineado a la derecha */
+  #infoBtn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
     height: 34px;
-    border-radius: 50%;
-    background: rgba(255,255,255,.08);
-    border: 1px solid rgba(255,255,255,.12);
-    color: #fff;
-    transition: background .2s ease, border-color .2s ease;
-  }
-  .back-btn:hover { background: rgba(255,255,255,.14); }
-
-  /* Isotipo visible en móvil; logo completo oculto */
-  #brandMark { display: block; height: 30px; width: auto; }
-  #brandLogo { display: none !important; }
-
-  /* Título perfectamente centrado */
-  #pieceTitle {
-    justify-self: center;
-    text-align: center;
-    font-size: 18px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .03em;
-    margin: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  /* Botón “Info.” pegado a la derecha */
-  #infoBtn {
-    justify-self: end;
-    min-width: auto;
-    height: 32px;
-    padding: 0 12px;
+    padding: 0 14px;
     font-size: 13px;
     border-radius: 10px;
+    min-width: auto;            /* permite el texto más largo */
   }
 
-  /* Ocultar elementos solo de escritorio */
-  .gallery-btn { display: none !important; }
+  /* Elementos solo de escritorio fuera en móvil */
+  .gallery-btn, #brandLogo { display: none !important; }
 }
 
-/* ===== Escritorio (sin cambios respecto a tu setup actual) ===== */
+/* Escritorio (se mantiene tu comportamiento actual) */
 @media (min-width: 1024px) {
-  #brandMark { display: none !important; }     /* isotipo fuera */
-  #brandLogo { display: block; height: 32px; }  /* logo completo */
-  #pieceTitle { display: none !important; }     /* título oculto en topbar */
-  .back-btn, #infoBtn { display: none !important; } /* flecha e info solo móvil */
-  .gallery-btn { display: inline-flex; }
+  #pieceTitle { display: none !important; }  /* sin título en topbar */
 }
