@@ -62,24 +62,24 @@
          Topbar
          ========================= -->
          <header id="topBar">
-          <!-- Botón Inicio (solo móvil) -->
-          <a class="home-btn" href="https://museosantana.es" aria-label="Volver al directorio"></a>
-        
-          <!-- Logo centrado en móvil / alineado a la izquierda en desktop -->
-          <div class="topbar-center">
-            <img
-              id="brandLogo"
-              src="/assets/brand/logo-museo.svg"
-              alt="Museo Virtual San Joaquín y Santa Ana"
-            />
+          <!-- Bloque IZQUIERDA (solo móvil: isotipo + título) / Escritorio: logo completo -->
+          <div class="brand-left">
+            <!-- Isotipo (solo móvil) -->
+            <img id="brandMark" src="/assets/brand/isotipo.svg" alt="Museo Virtual" />
+            <!-- Logo completo (solo escritorio) -->
+            <img id="brandLogo" src="/assets/brand/logo-museo.svg" alt="Museo Virtual San Joaquín y Santa Ana" />
             <h1 id="pieceTitle">Cristo Yacente</h1>
           </div>
-
+        
+          <!-- Centro: botón Información (móvil) -->
           <button id="infoBtn" class="info-btn" type="button" aria-controls="infoSheet" aria-expanded="false">
             Información
           </button>
         
-          <!-- Botón Galería (solo escritorio) -->
+          <!-- Derecha: Home SOLO móvil -->
+          <a class="home-btn" href="https://museosantana.es" aria-label="Volver al directorio"></a>
+        
+          <!-- Solo ESCRITORIO -->
           <a class="gallery-btn" href="https://museovirtualsantana.es" target="_blank" rel="noopener">
             Galería
           </a>
