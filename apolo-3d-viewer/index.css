@@ -1220,3 +1220,18 @@ model-viewer {
     }
   }
   
+  /* A) Ocultar SOLO en ESCRITORIO el título del topbar */
+@media (min-width: 1024px) {
+  #pieceTitle { display: none !important; }
+}
+
+/* B) Mostrar el botón "Información" en móvil y ocultarlo en escritorio */
+@media (min-width: 1024px) {
+  #infoBtn { display: none !important; }
+}
+/* (en móvil hereda tu .info-btn y se ve a la derecha del topbar) */
+
+/* C) La casita SOLO en móvil (ya la tenías, refuerzo por si acaso) */
+@media (min-width: 1024px) {
+  .home-btn { display: none !important; }
+}
