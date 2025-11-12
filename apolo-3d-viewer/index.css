@@ -1432,3 +1432,70 @@ model-viewer {
 @media (min-width: 1024px) {
   #pieceTitle { display: none !important; }  /* sin título en topbar */
 }
+
+/* === FIX FINAL MÓVIL: [←]/casita izquierda · TÍTULO CENTRO · "Información" derecha === */
+@media (max-width:1023px){
+
+  /* Topbar en 3 columnas: izquierda | centro | derecha */
+  #topBar{
+    display: grid !important;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    justify-content: stretch;
+    height: 66px;            /* +10px */
+    padding: 0 10px;
+    gap: 8px;
+    position: relative;
+  }
+
+  /* Centro: usamos el wrapper existente y anulamos el centrado absoluto previo */
+  .topbar-center{
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    justify-self: center;     /* centra geométricamente */
+    display: block !important;
+  }
+
+  /* Título perfectamente centrado y sin posicionamiento absoluto */
+  #pieceTitle{
+    position: static !important;
+    margin: 0;
+    font-size: 18px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    max-width: 64vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    pointer-events: none;     /* no bloquea taps de los lados */
+  }
+
+  /* Isotipo/logo fuera en móvil para que no empuje el título */
+  #brandLogo{ display:none !important; }
+
+  /* Izquierda: botón de volver/casa */
+  .home-btn{
+    display: inline-flex !important;
+    justify-self: start;
+    width: 36px; height: 36px;
+  }
+
+  /* Derecha: botón de información donde siempre */
+  #infoBtn{
+    display: inline-flex !important;
+    justify-self: end;
+    min-width: auto;
+    height: 34px;
+    padding: 0 12px;
+    font-size: 13px;
+    border-radius: 10px;
+  }
+}
+
+/* Escritorio se mantiene como ya lo tienes */
+@media (min-width:1024px){
+  #pieceTitle{ display:none !important; }
+  #infoBtn{ display:none !important; }
+  .home-btn{ display:none !important; }
+}
