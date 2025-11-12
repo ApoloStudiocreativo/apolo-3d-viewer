@@ -2134,3 +2134,25 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
   }
 }
 
+/* === Uniformar botones del footer en escritorio === */
+@media (min-width: 1024px) {
+  #infoSheet .info-footer .audio-cta,
+  #infoSheet .info-footer .visit-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px; /* iguala altura */
+    min-width: 140px; /* opcional: para que no quede demasiado corto */
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 0 20px; /* iguala relleno interno */
+    box-sizing: border-box;
+  }
+
+  /* Asegura que el texto esté centrado verticalmente */
+  #infoSheet .info-footer .visit-btn {
+    line-height: 1; 
+  }
+}
+
+
