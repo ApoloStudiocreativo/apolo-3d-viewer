@@ -122,36 +122,43 @@
     <!-- =========================
          Vista GLB
          ========================= -->
-    <model-viewer
-      id="mv"
-      class="hidden"
-      poster="/models/placeholder.webp"
-      alt="Modelo 3D"
-      camera-controls
-      touch-action="pan-y"
-      ar
-      ar-modes="scene-viewer quick-look webxr"
-      ar-scale="fixed"
-      ar-placement="floor"
-      environment-image="neutral"
-      shadow-intensity="1.2"
-      shadow-softness="0.9"
-      exposure="1"
-      camera-orbit="0deg 70deg 1.5m"
-      field-of-view="30deg"
-    >
-    </model-viewer>
-
-    <!-- =========================
-         Vista SPLAT
-         ========================= -->
-    <iframe
-      id="splat"
-      class="hidden"
-      loading="lazy"
-      allow="autoplay; fullscreen; xr-spatial-tracking; camera; microphone; gyroscope; accelerometer"
-    >
-    </iframe>
+<!-- =========================
+     Contenedor del visor (GLB/SPLAT)
+     ========================= -->
+     <div id="stage" class="stage">
+      <!-- =========================
+           Vista GLB
+           ========================= -->
+      <model-viewer
+        id="mv"
+        class="hidden"
+        poster="/models/placeholder.webp"
+        alt="Modelo 3D"
+        camera-controls
+        touch-action="pan-y"
+        ar
+        ar-modes="scene-viewer quick-look webxr"
+        ar-scale="fixed"
+        ar-placement="floor"
+        environment-image="neutral"
+        shadow-intensity="1.2"
+        shadow-softness="0.9"
+        exposure="1"
+        camera-orbit="0deg 70deg 1.5m"
+        field-of-view="30deg"
+      ></model-viewer>
+    
+      <!-- =========================
+           Vista SPLAT
+           ========================= -->
+      <iframe
+        id="splat"
+        class="hidden"
+        loading="lazy"
+        allow="autoplay; fullscreen; xr-spatial-tracking; camera; microphone; gyroscope; accelerometer"
+      ></iframe>
+    </div>
+    
 
     <!-- Poster temporal antes del SPLAT -->
     <div id="splatPoster" class="splat-poster hidden" aria-hidden="true"></div>
