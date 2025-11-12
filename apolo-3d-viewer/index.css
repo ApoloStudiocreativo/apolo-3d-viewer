@@ -2321,5 +2321,18 @@ iframe#splat {
   }
 }
 
+/* === MOVIL: fondo propio para el visor GLB === */
+@media (max-width: 1023px) {
+  model-viewer {
+    /* Ejemplo: un fondo liso oscuro diferente al body */
+    background: #0a0c10 !important;
+
+    /* O, si prefieres un degradado suave (personalízalo) */
+    /* background: linear-gradient(180deg, #0a0c10 0%, #151821 100%) !important; */
+
+    background-attachment: local !important;
+  }
+}
+
 
 }
