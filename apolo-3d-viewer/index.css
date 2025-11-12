@@ -2022,6 +2022,10 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     text-align: right !important;        /* por si alguna regla de texto lo pisa */
   }
 
+  /* Empuja el grupo al borde derecho incluso si se cambia justify-content */
+  body.cards-mode #infoSheet .info-footer > *:first-child{
+    margin-left: auto !important;
+  }
 }
 
 /* === CARTELA (desktop) — botones alineados al INICIO del texto === */
@@ -2083,119 +2087,3 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     margin-left: 0 !important;        /* ← cancela el “primer hijo con auto” */
   }
 }
-
-/* ==== Cartela escritorio: footer a la IZQUIERDA y alineado con el texto ==== */
-@media (min-width: 1024px) {
-  /* Asegura el mismo padding lateral que el contenido de la cartela */
-  #infoSheet .info-sheet__content {
-    padding-left: 28px;
-    padding-right: 28px;
-  }
-
-  /* Footer: a la izquierda, sin empujes raros */
-  #infoSheet .info-footer {
-    display: flex !important;
-    justify-content: flex-start !important;
-    align-items: center;
-    gap: 12px;
-    margin-top: 18px !important;
-    text-align: left !important;
-    padding-left: 28px !important;   /* alinea el inicio con el texto */
-    padding-right: 28px !important;
-  }
-
-  /* Cancela cualquier “truco” previo tipo margin-left:auto */
-  #infoSheet .info-footer > * {
-    margin-left: 0 !important;
-  }
-}
-
-/* === Cartela escritorio: alinear botones con el texto === */
-@media (min-width: 1024px) {
-  #infoSheet .info-footer {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 12px;
-
-    /* iguala los paddings de la descripción */
-    padding-left: 2rem;   /* ajusta si tu texto empieza más a la derecha */
-    padding-right: 2rem;
-
-    /* elimina margen o centrado heredado */
-    width: 100%;
-    box-sizing: border-box;
-    text-align: left;
-  }
-
-  /* asegúrate de que los hijos no se autoempujen */
-  #infoSheet .info-footer > * {
-    margin: 0 !important;
-  }
-}
-
-/* === Uniformar botones del footer en escritorio === */
-@media (min-width: 1024px) {
-  #infoSheet .info-footer .audio-cta,
-  #infoSheet .info-footer .visit-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 48px; /* iguala altura */
-    min-width: 140px; /* opcional: para que no quede demasiado corto */
-    font-weight: 600;
-    border-radius: 10px;
-    padding: 0 20px; /* iguala relleno interno */
-    box-sizing: border-box;
-  }
-
-  /* Asegura que el texto esté centrado verticalmente */
-  #infoSheet .info-footer .visit-btn {
-    line-height: 1; 
-  }
-}
-
-/* === Encapsulado del visor 3D (GLB o SPLAT) === */
-#stage {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: 18px;  /* ajusta si tus tarjetas tienen esquinas redondeadas */
-  overflow: hidden;     /* evita que el contenido del iframe se salga */
-}
-
-/* GLB y SPLAT ocupan el mismo marco */
-#stage > model-viewer,
-#stage > iframe#splat {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
-
-/* Oculta los elementos marcados como hidden */
-#stage > .hidden {
-  display: none !important;
-}
-
-/* === ESCRITORIO: encajar el SPLAT en el mismo marco que el GLB === */
-@media (min-width: 1024px) {
-  iframe#splat {
-    position: fixed !important;
-    top: calc(56px + env(safe-area-inset-top, 0px)) !important; /* debajo del topbar */
-    left: 0 !important;
-    right: clamp(320px, 28vw, 420px) !important; /* deja hueco a la cartela */
-    bottom: 0 !important;
-
-    width: auto !important;   /* anula el 100vw global */
-    height: auto !important;  /* anula el 100dvh global */
-    max-width: 1400px !important; /* igual que el GLB, ajusta si quieres */
-    margin: 0 auto !important;
-    border: 0 !important;
-    background: transparent !important;
-    z-index: 1; /* por debajo de la UI */
-  }
-}
-
-#stage { border-radius: 14px; overflow: hidden; }

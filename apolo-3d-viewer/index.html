@@ -122,37 +122,36 @@
     <!-- =========================
          Vista GLB
          ========================= -->
-<!-- =========================
-     Contenedor del visor 3D
-     ========================= -->
-     <div id="stage" class="stage">
-      <model-viewer
-        id="mv"
-        class="hidden"
-        poster="/models/placeholder.webp"
-        alt="Modelo 3D"
-        camera-controls
-        touch-action="pan-y"
-        ar
-        ar-modes="scene-viewer quick-look webxr"
-        ar-scale="fixed"
-        ar-placement="floor"
-        environment-image="neutral"
-        shadow-intensity="1.2"
-        shadow-softness="0.9"
-        exposure="1"
-        camera-orbit="0deg 70deg 1.5m"
-        field-of-view="30deg"
-      ></model-viewer>
-    
-      <iframe
-        id="splat"
-        class="hidden"
-        loading="lazy"
-        allow="autoplay; fullscreen; xr-spatial-tracking; camera; microphone; gyroscope; accelerometer"
-      ></iframe>
-    </div>
-    
+    <model-viewer
+      id="mv"
+      class="hidden"
+      poster="/models/placeholder.webp"
+      alt="Modelo 3D"
+      camera-controls
+      touch-action="pan-y"
+      ar
+      ar-modes="scene-viewer quick-look webxr"
+      ar-scale="fixed"
+      ar-placement="floor"
+      environment-image="neutral"
+      shadow-intensity="1.2"
+      shadow-softness="0.9"
+      exposure="1"
+      camera-orbit="0deg 70deg 1.5m"
+      field-of-view="30deg"
+    >
+    </model-viewer>
+
+    <!-- =========================
+         Vista SPLAT
+         ========================= -->
+    <iframe
+      id="splat"
+      class="hidden"
+      loading="lazy"
+      allow="autoplay; fullscreen; xr-spatial-tracking; camera; microphone; gyroscope; accelerometer"
+    >
+    </iframe>
 
     <!-- Poster temporal antes del SPLAT -->
     <div id="splatPoster" class="splat-poster hidden" aria-hidden="true"></div>
@@ -232,26 +231,27 @@
         <p id="infoTypology" class="info-sub"></p>
         <p class="info-meta" id="infoMeta"></p>
         <p class="info-desc" id="infoDesc"></p>
-        </div>
         <div class="info-footer">
-          <!-- CTA Audioguía -->
-          <button id="audioGuideBtn" class="audio-cta" type="button" aria-pressed="false">
-            <svg class="icon-play" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M4 9v6h3l5 4V5L7 9H4z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path>
-              <path d="M15 10.5a3.5 3.5 0 010 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
-              <path d="M17.5 8a6 6 0 010 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
-            </svg>
-            <svg class="icon-pause" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <rect x="6" y="5" width="4" height="14" rx="1.2" stroke="currentColor" stroke-width="1.8"></rect>
-              <rect x="14" y="5" width="4" height="14" rx="1.2" stroke="currentColor" stroke-width="1.8"></rect>
-            </svg>
-            Audioguía
-          </button>
-        
-            <a class="visit-btn" href="https://museosanjoaquinysantaana.es/" target="_blank" rel="noopener">
-              Visita la web
-            </a>
-          </div>  
+        <div class="info-footer">
+  <!-- ⬇️ NUEVO: CTA Audioguía (idéntico icono que en móvil) -->
+  <button id="audioGuideBtn" class="audio-cta" type="button" aria-pressed="false">
+    <!-- altavoz/parado -->
+    <svg class="icon-play" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M4 9v6h3l5 4V5L7 9H4z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M15 10.5a3.5 3.5 0 010 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M17.5 8a6 6 0 010 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+    <!-- pausa/reproduciendo -->
+    <svg class="icon-pause" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="6" y="5" width="4" height="14" rx="1.2" stroke="currentColor" stroke-width="1.8" />
+      <rect x="14" y="5" width="4" height="14" rx="1.2" stroke="currentColor" stroke-width="1.8" />
+    </svg>
+    Audioguía
+  </button>
+
+  <a class="visit-btn" href="https://museosanjoaquinysantaana.es/" target="_blank" rel="noopener">Visita la web</a>
+</div>
+
       </div>
     </div>
 
