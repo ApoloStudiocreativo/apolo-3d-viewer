@@ -558,18 +558,18 @@ html, body {
  .hidden { display: none !important; }
  
 /* ====== Viewports de las escenas ====== */
-body:not(.cards-mode) model-viewer {
+model-viewer {
   width: 100vw;
   height: 100dvh;
   display: block;
-  background: #000000ad !important;
+  background: transparent !important; /* el lienzo deja ver el degradado del body */
 }
 
-body:not(.cards-mode) iframe#splat {
+iframe#splat {
   width: 100vw;
   height: 100dvh;
   display: block;
-  background: var(--bg);
+  background: var(--bg); /* el SPLAT sí usa fondo sólido */
   border: 0;
 }
 
@@ -751,7 +751,7 @@ model-viewer {
 /* El body puede tener un color mientras carga, pero no debe tapar al skybox del <model-viewer> */
 body {
   /* Fondo degradado suave y moderno */
-background: radial-gradient(circle at 80% 0%, #4f13fc, #0068ff 50%, #000758 90%),
+background: radial-gradient(circle at 80% 0%, #2b1a10, #140d08 50%, #0b0e14 90%),
             linear-gradient(180deg, #19120b 0%, #0f1115 100%);
 
   background-attachment: fixed;
@@ -1241,9 +1241,9 @@ model-viewer {
     font-family: "Poppins", system-ui, sans-serif;
     font-weight: 700;
     font-size: 18px;
-    text-transform: none;
-    white-space: normal;
-    overflow: visible;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
     text-overflow: ellipsis;
     max-width: 62vw;               /* evita colisionar con el botón derecho */
   }
@@ -2155,184 +2155,47 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
   }
 }
 
-/******** Encapsulado del visor en ESCRITORIO ********/
-@media (min-width: 1024px) {
-  /* Marco fijo que deja hueco a la cartela derecha */
-  #stage {
-    position: fixed;
-    top: calc(56px + env(safe-area-inset-top, 0px));
-    left: 0;
-    right: clamp(320px, 28vw, 420px);
-    bottom: 0;
-    border-radius: 14px;  /* opcional: iguala a tu tarjeta */
-    overflow: hidden;     /* recorta canvas y Splat */
-    z-index: 1;
-  }
-
-  /* Dentro del marco, GLB y SPLAT ocupan 100% del área */
-  #stage > model-viewer,
-  #stage > iframe#splat {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    border: 0;
-    background: transparent !important;
-  }
-
-  /* Anula cualquier posicionamiento directo previo de escena en desktop */
-  model-viewer,
-  iframe#splat {
-    position: static !important;
-    width: auto !important;
-    height: auto !important;
-  }
+/* === Encapsulado del visor 3D (GLB o SPLAT) === */
+#stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 18px;  /* ajusta si tus tarjetas tienen esquinas redondeadas */
+  overflow: hidden;     /* evita que el contenido del iframe se salga */
 }
 
-/* === FINAL OVERRIDES · ESCRITORIO (≥1024px) === */
+/* GLB y SPLAT ocupan el mismo marco */
+#stage > model-viewer,
+#stage > iframe#splat {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Oculta los elementos marcados como hidden */
+#stage > .hidden {
+  display: none !important;
+}
+
+/* === ESCRITORIO: encajar el SPLAT en el mismo marco que el GLB === */
 @media (min-width: 1024px) {
-
-  /* 0) Desactiva cualquier “pantalla completa” o posicionamiento previo en escenas */
-  model-viewer,
   iframe#splat {
-    position: static !important;
-    width: auto !important;
-    height: auto !important;
-    inset: auto !important;
-    margin: 0 !important;
-    border: 0 !important;
-    opacity: 1; /* evita que se quede con opacity:0 si faltaba .is-visible */
-  }
-
-  /* 1) El marco del visor (columna izquierda) — único elemento en fixed */
-  #stage {
     position: fixed !important;
     top: calc(56px + env(safe-area-inset-top, 0px)) !important; /* debajo del topbar */
     left: 0 !important;
-    right: clamp(320px, 28vw, 420px) !important;                 /* ancho de tu cartela */
+    right: clamp(320px, 28vw, 420px) !important; /* deja hueco a la cartela */
     bottom: 0 !important;
 
-    border-radius: 14px;
-    overflow: hidden;                                            /* recorta el canvas/Splat */
-    z-index: 1;
-    /* opcional: fondo de seguridad mientras carga */
-    background: transparent;
-  }
-
-  /* 2) GLB y SPLAT rellenan el marco al 100% */
-  #stage > model-viewer,
-  #stage > iframe#splat {
-    position: absolute !important;
-    inset: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    max-width: none !important;
+    width: auto !important;   /* anula el 100vw global */
+    height: auto !important;  /* anula el 100dvh global */
+    max-width: 1400px !important; /* igual que el GLB, ajusta si quieres */
+    margin: 0 auto !important;
+    border: 0 !important;
     background: transparent !important;
-  }
-
-  /* 3) Alinear overlays/pósters al hueco de la cartela */
-  .glb-poster,
-  .splat-poster,
-  #msg,
-  .ar-loading,
-  .skeleton {
-    right: clamp(320px, 28vw, 420px) !important;
-  }
-
-  /* === ESCRITORIO: #stage con el MISMO marco de antes === */
-@media (min-width: 1024px) {
-  :root{
-    /* Ajusta estos 3 valores si en tu layout eran otros */
-    --topbar-h: 56px;          /* alto de la barra superior */
-    --pad-x: 24px;             /* padding interior del área izquierda */
-    --gap-x: 16px;             /* separación entre escena y cartela */
-    --panel-w: clamp(320px, 28vw, 420px); /* ancho de cartela derecha */
-  }
-
-  #stage {
-    position: fixed !important;
-    inset: calc(var(--topbar-h) + var(--pad-x))   /* top  */
-           calc(var(--panel-w) + var(--pad-x) + var(--gap-x)) /* right = cartela + padding + gap */
-           var(--pad-x)                            /* bottom */
-           var(--pad-x) !important;                /* left  */
-
-    border-radius: 14px;
-    overflow: hidden;
-    z-index: 1;
-    background: transparent;
-  }
-
-  /* La escena llena el marco, EXACTO */
-  #stage > model-viewer,
-  #stage > iframe#splat {
-    position: absolute !important;
-    inset: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-  }
-
-  /* Overlays alineados al mismo hueco */
-  .glb-poster, .skeleton, #msg, .ar-loading {
-    right: calc(var(--panel-w) + var(--pad-x) + var(--gap-x)) !important;
-    top: calc(var(--topbar-h) + var(--pad-x)) !important;
-    bottom: var(--pad-x) !important;
+    z-index: 1; /* por debajo de la UI */
   }
 }
 
-/* === ESCRITORIO: fondo propio para el <model-viewer> (independiente del body) === */
-@media (min-width: 1024px) {
-  /* Elige 1 de las dos opciones ↓ */
-
-  /* Opción A: color liso (coincide con #0f1115 del tema) */
-  model-viewer {
-    background: #ff0000 !important;
-  }
-
-  /* (Opcional) Que el SPLAT tenga el mismo fondo que el GLB en desktop */
-iframe#splat {
-  background: #0f1115 !important; /* o el mismo gradient que arriba */
-}
-
-
-  /* Opción B: degradado específico del visor (ejemplo neutro) */
-  /* 
-  model-viewer {
-    background:
-      radial-gradient(1200px 800px at 70% 20%, #141922, transparent 60%),
-      linear-gradient(180deg, #0f1115 0%, #12151b 100%) !important;
-  }
-  */
-}
-
-/* === FINAL OVERRIDE — Fondo del GLB SOLO en escritorio === */
-@media (min-width: 1024px) {
-  /* Usamos un selector más específico que las reglas anteriores */
-  body.cards-mode #stage > model-viewer {
-    /* Opción A: color liso */
-    /* background: #0f1115 !important; */
-
-    /* Opción B: degradado propio del visor (ejemplo) */
-    background:
-      radial-gradient(1200px 800px at 70% 20%, #141922 0%, transparent 60%),
-      linear-gradient(180deg, #0f1115 0%, #12151b 100%) !important;
-
-    background-attachment: local !important; /* evita “fijarlo” al body */
-  }
-}
-
-/* === MOVIL: fondo propio para el visor GLB === */
-@media (max-width: 1023px) {
-  model-viewer {
-    /* Ejemplo: un fondo liso oscuro diferente al body */
-    background: #0a0c10 !important;
-
-    /* O, si prefieres un degradado suave (personalízalo) */
-    /* background: linear-gradient(180deg, #0a0c10 0%, #151821 100%) !important; */
-
-    background-attachment: local !important;
-  }
-}
-
-
-}
+#stage { border-radius: 14px; overflow: hidden; }
