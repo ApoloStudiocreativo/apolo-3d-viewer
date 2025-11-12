@@ -2155,4 +2155,27 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
   }
 }
 
+/* === Encapsulado del visor 3D (GLB o SPLAT) === */
+#stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 18px;  /* ajusta si tus tarjetas tienen esquinas redondeadas */
+  overflow: hidden;     /* evita que el contenido del iframe se salga */
+}
+
+/* GLB y SPLAT ocupan el mismo marco */
+#stage > model-viewer,
+#stage > iframe#splat {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Oculta los elementos marcados como hidden */
+#stage > .hidden {
+  display: none !important;
+}
 
