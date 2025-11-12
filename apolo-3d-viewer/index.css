@@ -2334,5 +2334,26 @@ iframe#splat {
   }
 }
 
+/* ===== SOLO MÓVIL/TABLET ===== */
+@media (max-width: 1024px) {
+  /* 1) Cartela SIEMPRE por encima de los FABs en móvil */
+  .info-sheet {
+    z-index: 12010 !important; /* por si acaso, más alto que cualquier overlay */
+  }
+
+  /* Mientras la cartela esté abierta, oculta la fila de FABs en móvil */
+  body.sheet-open .fab-row {
+    display: none !important;
+  }
+
+  /* 2) Ocultar botones "Audioguía" y "Visita la web" dentro de la cartela en móvil */
+  #infoSheet .info-footer,
+  #infoSheet .info-footer .audio-cta,
+  #infoSheet .info-footer .visit-btn {
+    display: none !important;
+  }
+}
+
+
 
 }
