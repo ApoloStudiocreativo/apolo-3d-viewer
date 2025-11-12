@@ -562,7 +562,7 @@ body:not(.cards-mode) model-viewer {
   width: 100vw;
   height: 100dvh;
   display: block;
-  background: transparent !important;
+  background: #000000ad !important;
 }
 
 body:not(.cards-mode) iframe#splat {
