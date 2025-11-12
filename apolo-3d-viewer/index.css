@@ -1495,7 +1495,7 @@ model-viewer {
     z-index: 12010 !important; /* por encima de fab-row, AR y cualquier overlay */
   }
   .fab-row, .ar-fab, .audio-fab {
-    z-index: 20 !important;     /* por debajo de la cartela */
+    z-index: 50 !important;     /* por debajo de la cartela */
   }
 
   /* --- OPCIONAL UX: ocultar FABs cuando la cartela está abierta --- */
