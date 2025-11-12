@@ -2189,3 +2189,54 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     height: auto !important;
   }
 }
+
+/* === FINAL OVERRIDES · ESCRITORIO (≥1024px) === */
+@media (min-width: 1024px) {
+
+  /* 0) Desactiva cualquier “pantalla completa” o posicionamiento previo en escenas */
+  model-viewer,
+  iframe#splat {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    inset: auto !important;
+    margin: 0 !important;
+    border: 0 !important;
+    opacity: 1; /* evita que se quede con opacity:0 si faltaba .is-visible */
+  }
+
+  /* 1) El marco del visor (columna izquierda) — único elemento en fixed */
+  #stage {
+    position: fixed !important;
+    top: calc(56px + env(safe-area-inset-top, 0px)) !important; /* debajo del topbar */
+    left: 0 !important;
+    right: clamp(320px, 28vw, 420px) !important;                 /* ancho de tu cartela */
+    bottom: 0 !important;
+
+    border-radius: 14px;
+    overflow: hidden;                                            /* recorta el canvas/Splat */
+    z-index: 1;
+    /* opcional: fondo de seguridad mientras carga */
+    background: transparent;
+  }
+
+  /* 2) GLB y SPLAT rellenan el marco al 100% */
+  #stage > model-viewer,
+  #stage > iframe#splat {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    background: transparent !important;
+  }
+
+  /* 3) Alinear overlays/pósters al hueco de la cartela */
+  .glb-poster,
+  .splat-poster,
+  #msg,
+  .ar-loading,
+  .skeleton {
+    right: clamp(320px, 28vw, 420px) !important;
+  }
+}
