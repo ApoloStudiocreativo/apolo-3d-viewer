@@ -2286,7 +2286,7 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
 
   /* Opción A: color liso (coincide con #0f1115 del tema) */
   model-viewer {
-    background: #0f1115 !important;
+    background: #ff0000 !important;
   }
 
   /* (Opcional) Que el SPLAT tenga el mismo fondo que el GLB en desktop */
