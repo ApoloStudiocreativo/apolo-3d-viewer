@@ -957,11 +957,11 @@ infoDesc.innerHTML = [extrasHtml, descBox].filter(Boolean).join('');
         }
 
         // Panel/cartela UI
-        function openSheet() {
-          renderInfo(slug);
-          sheet.classList.remove('hidden');
-          sheet.setAttribute('aria-hidden', 'false');
-          document.body.classList.add('sheet-open');
+        function openSheet(){
+  fillSheet();
+  sheet.classList.remove('hidden');
+  sheet.setAttribute('aria-hidden','false');
+  document.body.classList.add('sheet-open');   // ✳️ al abrir cartela
 
           if (infoBtn) {
             infoBtn.setAttribute('aria-expanded', 'true');
@@ -975,10 +975,10 @@ infoDesc.innerHTML = [extrasHtml, descBox].filter(Boolean).join('');
           }
         }
 
-        function closeSheet() {
-          sheet.classList.add('hidden');
-          sheet.setAttribute('aria-hidden', 'true');
-          document.body.classList.remove('sheet-open');
+        function closeSheet(){
+  sheet.classList.add('hidden');
+  sheet.setAttribute('aria-hidden','true');
+  document.body.classList.remove('sheet-open'); // ✳️ al cerrar cartela
 
           if (infoBtn) {
             infoBtn.setAttribute('aria-expanded', 'false');
