@@ -2199,3 +2199,48 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
 }
 
 #stage { border-radius: 14px; overflow: hidden; }
+
+/* === ESCRITORIO · Marco único del visor y escenas dentro === */
+@media (min-width: 1024px) {
+
+  /* 1) El marco del visor (columna izquierda) */
+  #stage {
+    position: fixed !important;
+    top: calc(56px + env(safe-area-inset-top, 0px)) !important;  /* debajo del topbar */
+    left: 0 !important;
+    right: clamp(320px, 28vw, 420px) !important;                  /* deja hueco para la cartela */
+    bottom: 0 !important;
+
+    border-radius: 14px;
+    overflow: hidden;                                            /* recorta el canvas */
+    z-index: 1;
+  }
+
+  /* 2) Anula el "pantalla completa" global de escena en escritorio */
+  #stage > model-viewer,
+  #stage > iframe#splat {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;      /* en vez de 100vw */
+    height: 100% !important;     /* en vez de 100dvh */
+    max-width: none !important;
+    margin: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  /* 3) Anula cualquier posicionamiento FIXED previo de model-viewer o iframe */
+  model-viewer,
+  iframe#splat {
+    position: static !important;
+  }
+
+  /* 4) Posters y overlays respetan el lateral de la cartela */
+  .glb-poster,
+  .splat-poster,
+  #msg,
+  .ar-loading,
+  .skeleton {
+    right: clamp(320px, 28vw, 420px) !important;
+  }
+}
