@@ -1241,9 +1241,9 @@ model-viewer {
     font-family: "Poppins", system-ui, sans-serif;
     font-weight: 700;
     font-size: 18px;
-    text-transform: uppercase;
-    white-space: nowrap;
-    overflow: hidden;
+    text-transform: lowercase;
+    white-space: normal;
+    overflow: visible;
     text-overflow: ellipsis;
     max-width: 62vw;               /* evita colisionar con el botón derecho */
   }
