@@ -2410,6 +2410,37 @@ body:not(.cards-mode) #infoSheet .info-footer .visit-btn {
   display: none !important;
 }
 
+/* ============ SOLO MÓVIL/TABLET (no cards-mode) ============ */
+@media (max-width: 1024px) {
+
+  /* 1) Cartela por delante de los FABs */
+  body:not(.cards-mode) #infoSheet.info-sheet {
+    position: fixed !important;
+    z-index: 12010 !important; /* > z-index de FABs, posters y topbar */
+  }
+
+  /* 2) Con la cartela abierta, oculta FABs móviles por completo */
+  body:not(.cards-mode).sheet-open .fab-row,
+  body:not(.cards-mode).sheet-open .ar-fab,
+  body:not(.cards-mode).sheet-open .audio-fab {
+    display: none !important;
+  }
+
+  /* Defensa: aunque estén visibles, mantén su z por debajo de la cartela */
+  body:not(.cards-mode) .fab-row,
+  body:not(.cards-mode) .ar-fab,
+  body:not(.cards-mode) .audio-fab {
+    z-index: 20 !important; /* la cartela va a 12010 arriba */
+  }
+
+  /* 3) En cartela móvil, quitar por completo los CTAs internos */
+  body:not(.cards-mode) #infoSheet .info-footer,
+  body:not(.cards-mode) #infoSheet .info-footer .audio-cta,
+  body:not(.cards-mode) #infoSheet .info-footer .visit-btn {
+    display: none !important;
+  }
+}
+
 
 
 }
