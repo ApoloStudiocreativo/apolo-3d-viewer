@@ -2354,6 +2354,34 @@ iframe#splat {
   }
 }
 
+/* ===== SOLO MÓVIL/TABLET: cartela por delante y sin CTAs internos ===== */
+@media (max-width: 1024px) {
+
+  /* 1) La cartela SIEMPRE por encima (nuevo stacking context) */
+  .info-sheet {
+    position: fixed !important;
+    z-index: 999999 !important;   /* más alto que cualquier FAB u overlay */
+    will-change: transform;       /* evita glitches de stacking */
+  }
+  .info-sheet__content { position: relative; z-index: 1; }
+
+  /* 2) Cuando la cartela está abierta, ocultar FABs para que no tapen ni capten taps */
+  body.sheet-open .fab-row,
+  body.sheet-open .ar-fab,
+  body.sheet-open .audio-fab {
+    display: none !important;
+  }
+  /* (defensa extra) si por lo que sea no se ocultan, baja su z-index */
+  body.sheet-open .fab-row { z-index: 1 !important; }
+
+  /* 3) En cartelas móviles, quitar por completo los botones internos */
+  #infoSheet .info-footer,
+  #infoSheet .info-footer .audio-cta,
+  #infoSheet .info-footer .visit-btn {
+    display: none !important;
+  }
+}
+
 
 
 }
