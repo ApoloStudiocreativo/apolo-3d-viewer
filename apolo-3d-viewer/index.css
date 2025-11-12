@@ -187,12 +187,6 @@
   white-space: nowrap; border: 0;
 }
 
-
-
-
-
-
-
  #topBar h1 { font-size: 18px; font-weight: 700; margin: 0; line-height: 1; display: flex; align-items: center; }
  #topBar * { pointer-events: auto; }
  #topBar.hidden { opacity: 0; }
@@ -238,21 +232,58 @@
  /* Fix header mobile: que el botón ⓘ no se “aplaste” */
  #topBar { z-index: 1000; padding-top: env(safe-area-inset-top); }
  
- /* Tipografía personalizada para títulos de obras */
- #pieceTitle {
-   font-family: 'Poppins', serif;
-   font-weight: 600;
-   letter-spacing: 0;
-   font-size: 18px;
-   color: var(--text);
-   margin: 0;
-   text-shadow: 0 2px 6px rgba(0, 0, 0, .4);
- }
- @media (min-width: 768px) {
-   #pieceTitle { font-size: 20px; }
- }
- 
- 
+/* Tipografía personalizada para títulos de obras */
+#pieceTitle {
+  font-family: 'Poppins', serif;
+  font-weight: 600;
+  letter-spacing: 0;
+  font-size: 18px;
+  color: var(--text);
+  margin: 0;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, .4);
+}
+@media (min-width: 768px) {
+  #pieceTitle { font-size: 20px; }
+}
+
+/* --- Alineación correcta del título dentro del topbar --- */
+.left-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0; /* permite truncar texto */
+}
+
+#pieceTitle {
+  font-family: 'Poppins', serif;
+  font-weight: 600;
+  font-size: 18px;
+  color: var(--text);
+  margin: 0;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, .4);
+  line-height: 1.2;
+  text-transform: none; /* respeta may/min */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* máximo dos líneas */
+  -webkit-box-orient: vertical;
+  word-break: break-word;
+}
+
+@media (min-width: 768px) {
+  #pieceTitle {
+    font-size: 20px;
+    -webkit-line-clamp: 1; /* en desktop solo una línea */
+  }
+}
+
  /******************************
   * F) Safe areas globales
   ******************************/
