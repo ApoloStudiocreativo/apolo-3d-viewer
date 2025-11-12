@@ -2022,10 +2022,6 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     text-align: right !important;        /* por si alguna regla de texto lo pisa */
   }
 
-  /* Empuja el grupo al borde derecho incluso si se cambia justify-content */
-  body.cards-mode #infoSheet .info-footer > *:first-child{
-    margin-left: auto !important;
-  }
 }
 
 /* === CARTELA (desktop) — botones alineados al INICIO del texto === */
@@ -2127,7 +2123,6 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     padding-right: 2rem;
 
     /* elimina margen o centrado heredado */
-    margin: 0;
     width: 100%;
     box-sizing: border-box;
     text-align: left;
