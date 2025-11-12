@@ -2280,10 +2280,30 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
   }
 }
 
+/* === ESCRITORIO: fondo propio para el <model-viewer> (independiente del body) === */
+@media (min-width: 1024px) {
+  /* Elige 1 de las dos opciones ↓ */
+
+  /* Opción A: color liso (coincide con #0f1115 del tema) */
+  model-viewer {
+    background: #0f1115 !important;
+  }
+
+  /* (Opcional) Que el SPLAT tenga el mismo fondo que el GLB en desktop */
+iframe#splat {
+  background: #0f1115 !important; /* o el mismo gradient que arriba */
+}
 
 
-
-
+  /* Opción B: degradado específico del visor (ejemplo neutro) */
+  /* 
+  model-viewer {
+    background:
+      radial-gradient(1200px 800px at 70% 20%, #141922, transparent 60%),
+      linear-gradient(180deg, #0f1115 0%, #12151b 100%) !important;
+  }
+  */
+}
 
 
 }
