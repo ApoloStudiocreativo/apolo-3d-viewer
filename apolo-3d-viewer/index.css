@@ -2113,3 +2113,29 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     margin-left: 0 !important;
   }
 }
+
+/* === Cartela escritorio: alinear botones con el texto === */
+@media (min-width: 1024px) {
+  #infoSheet .info-footer {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 12px;
+
+    /* iguala los paddings de la descripción */
+    padding-left: 2rem;   /* ajusta si tu texto empieza más a la derecha */
+    padding-right: 2rem;
+
+    /* elimina margen o centrado heredado */
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+  }
+
+  /* asegúrate de que los hijos no se autoempujen */
+  #infoSheet .info-footer > * {
+    margin: 0 !important;
+  }
+}
+
