@@ -261,6 +261,34 @@
       </div>
     </div>
 
+    <script>
+      (function () {
+        const infoBtn   = document.getElementById('infoBtn');
+        const sheet     = document.getElementById('infoSheet');
+        const sheetClose= document.getElementById('infoClose');
+    
+        function openSheet() {
+          sheet.classList.remove('hidden');
+          sheet.setAttribute('aria-hidden','false');
+          document.body.classList.add('sheet-open');
+        }
+        function closeSheet() {
+          sheet.classList.add('hidden');
+          sheet.setAttribute('aria-hidden','true');
+          document.body.classList.remove('sheet-open');
+        }
+        function toggleSheet() {
+          sheet.classList.contains('hidden') ? openSheet() : closeSheet();
+        }
+    
+        // Listeners robustos (no revientan si algo falta)
+        infoBtn?.addEventListener('click', toggleSheet);
+        sheetClose?.addEventListener('click', closeSheet);
+        sheet?.addEventListener('click', (e)=>{ if (e.target === sheet) closeSheet(); });
+      })();
+    </script>
+    
+
     <!-- Link AR iOS oculto -->
     <a id="iosARLink" rel="ar" style="display:none" aria-hidden="true"></a>
 
