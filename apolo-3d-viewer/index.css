@@ -2263,7 +2263,7 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     background: transparent;
   }
 
-  /* La escena llena el marco */
+  /* La escena llena el marco, EXACTO */
   #stage > model-viewer,
   #stage > iframe#splat {
     position: absolute !important;
