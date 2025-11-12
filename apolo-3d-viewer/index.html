@@ -261,34 +261,6 @@
       </div>
     </div>
 
-    <script>
-      (function () {
-        const infoBtn   = document.getElementById('infoBtn');
-        const sheet     = document.getElementById('infoSheet');
-        const sheetClose= document.getElementById('infoClose');
-    
-        function openSheet() {
-          sheet.classList.remove('hidden');
-          sheet.setAttribute('aria-hidden','false');
-          document.body.classList.add('sheet-open');
-        }
-        function closeSheet() {
-          sheet.classList.add('hidden');
-          sheet.setAttribute('aria-hidden','true');
-          document.body.classList.remove('sheet-open');
-        }
-        function toggleSheet() {
-          sheet.classList.contains('hidden') ? openSheet() : closeSheet();
-        }
-    
-        // Listeners robustos (no revientan si algo falta)
-        infoBtn?.addEventListener('click', toggleSheet);
-        sheetClose?.addEventListener('click', closeSheet);
-        sheet?.addEventListener('click', (e)=>{ if (e.target === sheet) closeSheet(); });
-      })();
-    </script>
-    
-
     <!-- Link AR iOS oculto -->
     <a id="iosARLink" rel="ar" style="display:none" aria-hidden="true"></a>
 
@@ -985,11 +957,11 @@ infoDesc.innerHTML = [extrasHtml, descBox].filter(Boolean).join('');
         }
 
         // Panel/cartela UI
-        function openSheet(){
-  fillSheet();
-  sheet.classList.remove('hidden');
-  sheet.setAttribute('aria-hidden','false');
-  document.body.classList.add('sheet-open');   // ✳️ al abrir cartela
+        function openSheet() {
+          renderInfo(slug);
+          sheet.classList.remove('hidden');
+          sheet.setAttribute('aria-hidden', 'false');
+          document.body.classList.add('sheet-open');
 
           if (infoBtn) {
             infoBtn.setAttribute('aria-expanded', 'true');
@@ -1003,10 +975,10 @@ infoDesc.innerHTML = [extrasHtml, descBox].filter(Boolean).join('');
           }
         }
 
-        function closeSheet(){
-  sheet.classList.add('hidden');
-  sheet.setAttribute('aria-hidden','true');
-  document.body.classList.remove('sheet-open'); // ✳️ al cerrar cartela
+        function closeSheet() {
+          sheet.classList.add('hidden');
+          sheet.setAttribute('aria-hidden', 'true');
+          document.body.classList.remove('sheet-open');
 
           if (infoBtn) {
             infoBtn.setAttribute('aria-expanded', 'false');
@@ -1825,45 +1797,6 @@ mv.addEventListener('load', () => applyEnvironmentOnly(mv, hdrToUse), { once: tr
           capture: true
         });
       })();
-/* --- Normalizador de cartela: usa SIEMPRE la última instancia del DOM --- */
-(function () {
-  const sheets = Array.from(document.querySelectorAll('#infoSheet'));
-  if (!sheets.length) return;
-
-  const sheet = sheets.at(-1);                                // última cartela
-  const infoBtn = document.getElementById('infoBtn');
-  const sheetClose = sheet.querySelector('#infoClose');
-
-  function openSheet() {
-    sheet.classList.remove('hidden');
-    sheet.setAttribute('aria-hidden', 'false');
-    document.body.classList.add('sheet-open');
-    infoBtn?.setAttribute('aria-expanded', 'true');
-  }
-  function closeSheet() {
-    sheet.classList.add('hidden');
-    sheet.setAttribute('aria-hidden', 'true');
-    document.body.classList.remove('sheet-open');
-    infoBtn?.setAttribute('aria-expanded', 'false');
-  }
-  function toggleSheet() {
-    sheet.classList.contains('hidden') ? openSheet() : closeSheet();
-  }
-
-  // Limpia listeners anteriores y reata solo a la última cartela
-  infoBtn?.addEventListener('click', toggleSheet, { passive: true });
-  sheetClose?.addEventListener('click', closeSheet, { passive: true });
-  sheet.addEventListener('click', (e) => { if (e.target === sheet) closeSheet(); }, { passive: true });
-})();
-</script>
-
-
-
-
-
-
-
-
     </script>
   </body>
 </html>
