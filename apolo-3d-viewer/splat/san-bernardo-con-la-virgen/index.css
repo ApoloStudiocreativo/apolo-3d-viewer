@@ -342,3 +342,22 @@ button {
   color: #E0DCDD;
   background-color: #282828;
 }
+
+/* === Integración Museo (solo escritorio) === */
+@media (min-width: 1024px) {
+  html, body, pc-app {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    background: transparent !important;
+  }
+
+  #ui {
+    position: absolute !important;
+    inset: 0 !important;
+  }
+}
