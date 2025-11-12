@@ -2440,6 +2440,39 @@ body:not(.cards-mode) #infoSheet .info-footer .visit-btn {
     display: none !important;
   }
 }
+/* ===== FIX SOLO MÓVIL/TABLET (no .is-desktop) ===== */
+
+/* 1) La cartela SIEMPRE por delante de los FABs en móvil */
+body:not(.is-desktop) #infoSheet.info-sheet {
+  position: fixed !important;         /* saca la cartela al viewport */
+  z-index: 999999 !important;         /* más alto que cualquier FAB/overlay */
+  transform: none !important;         /* evita stacking-contexts indeseados */
+  will-change: transform;             /* suaviza la animación si la hay */
+}
+
+/* 2) Al abrir la cartela en móvil, los FABs desaparecen por completo
+      (para que no tapen ni capten toques) */
+body:not(.is-desktop).sheet-open .fab-row,
+body:not(.is-desktop).sheet-open .ar-fab,
+body:not(.is-desktop).sheet-open .audio-fab {
+  display: none !important;
+}
+
+/* Defensa extra: aunque estuvieran visibles, quedan por debajo de la cartela */
+body:not(.is-desktop) .fab-row,
+body:not(.is-desktop) .ar-fab,
+body:not(.is-desktop) .audio-fab {
+  z-index: 20 !important;
+  pointer-events: auto;
+}
+
+/* 3) En cartelas MÓVILES, ocultar completamente los CTAs internos */
+body:not(.is-desktop) #infoSheet .info-footer,
+body:not(.is-desktop) #infoSheet .info-footer .audio-cta,
+body:not(.is-desktop) #infoSheet .info-footer .visit-btn {
+  display: none !important;
+}
+
 
 
 
