@@ -2334,16 +2334,5 @@ iframe#splat {
   }
 }
 
-/* === MÓVIL/TABLET: evitar flash del fondo en GLB === */
-@media (max-width: 1023px) {
-  /* El marco también usa el mismo fondo mientras pinta */
-  #stage { background: #000000ad !important; }
-}
-
-@media (max-width: 1023px) {
-  /* El póster no deja ver el degradado del body por debajo */
-  .glb-poster { background-color: #000000ad !important; }
-}
-
 
 }
