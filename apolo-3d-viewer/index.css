@@ -2239,4 +2239,51 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
   .skeleton {
     right: clamp(320px, 28vw, 420px) !important;
   }
+
+  /* === ESCRITORIO: #stage con el MISMO marco de antes === */
+@media (min-width: 1024px) {
+  :root{
+    /* Ajusta estos 3 valores si en tu layout eran otros */
+    --topbar-h: 56px;          /* alto de la barra superior */
+    --pad-x: 24px;             /* padding interior del área izquierda */
+    --gap-x: 16px;             /* separación entre escena y cartela */
+    --panel-w: clamp(320px, 28vw, 420px); /* ancho de cartela derecha */
+  }
+
+  #stage {
+    position: fixed !important;
+    inset: calc(var(--topbar-h) + var(--pad-x))   /* top  */
+           calc(var(--panel-w) + var(--pad-x) + var(--gap-x)) /* right = cartela + padding + gap */
+           var(--pad-x)                            /* bottom */
+           var(--pad-x) !important;                /* left  */
+
+    border-radius: 14px;
+    overflow: hidden;
+    z-index: 1;
+    background: transparent;
+  }
+
+  /* La escena llena el marco */
+  #stage > model-viewer,
+  #stage > iframe#splat {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Overlays alineados al mismo hueco */
+  .glb-poster, .skeleton, #msg, .ar-loading {
+    right: calc(var(--panel-w) + var(--pad-x) + var(--gap-x)) !important;
+    top: calc(var(--topbar-h) + var(--pad-x)) !important;
+    bottom: var(--pad-x) !important;
+  }
+}
+
+
+
+
+
+
+
 }
