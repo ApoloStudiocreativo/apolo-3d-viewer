@@ -2087,3 +2087,29 @@ model-viewer, iframe#splat{ z-index: var(--z-scene) !important; }
     margin-left: 0 !important;        /* ← cancela el “primer hijo con auto” */
   }
 }
+
+/* ==== Cartela escritorio: footer a la IZQUIERDA y alineado con el texto ==== */
+@media (min-width: 1024px) {
+  /* Asegura el mismo padding lateral que el contenido de la cartela */
+  #infoSheet .info-sheet__content {
+    padding-left: 28px;
+    padding-right: 28px;
+  }
+
+  /* Footer: a la izquierda, sin empujes raros */
+  #infoSheet .info-footer {
+    display: flex !important;
+    justify-content: flex-start !important;
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px !important;
+    text-align: left !important;
+    padding-left: 28px !important;   /* alinea el inicio con el texto */
+    padding-right: 28px !important;
+  }
+
+  /* Cancela cualquier “truco” previo tipo margin-left:auto */
+  #infoSheet .info-footer > * {
+    margin-left: 0 !important;
+  }
+}
