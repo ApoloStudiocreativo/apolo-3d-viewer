@@ -2305,5 +2305,21 @@ iframe#splat {
   */
 }
 
+/* === FINAL OVERRIDE — Fondo del GLB SOLO en escritorio === */
+@media (min-width: 1024px) {
+  /* Usamos un selector más específico que las reglas anteriores */
+  body.cards-mode #stage > model-viewer {
+    /* Opción A: color liso */
+    /* background: #0f1115 !important; */
+
+    /* Opción B: degradado propio del visor (ejemplo) */
+    background:
+      radial-gradient(1200px 800px at 70% 20%, #141922 0%, transparent 60%),
+      linear-gradient(180deg, #0f1115 0%, #12151b 100%) !important;
+
+    background-attachment: local !important; /* evita “fijarlo” al body */
+  }
+}
+
 
 }
