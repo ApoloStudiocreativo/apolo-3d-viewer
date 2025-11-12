@@ -751,7 +751,7 @@ model-viewer {
 /* El body puede tener un color mientras carga, pero no debe tapar al skybox del <model-viewer> */
 body {
   /* Fondo degradado suave y moderno */
-background: radial-gradient(circle at 80% 0%, #2b1a10, #140d08 50%, #0b0e14 90%),
+background: radial-gradient(circle at 80% 0%, #4f13fc, #0068ff 50%, #000758 90%),
             linear-gradient(180deg, #19120b 0%, #0f1115 100%);
 
   background-attachment: fixed;
