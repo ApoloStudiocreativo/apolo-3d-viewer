@@ -1057,257 +1057,163 @@ model-viewer {
   background: transparent !important;
 }
 
-/**********************************************
- * DESKTOP LAYOUT (>= 1024px)
- **********************************************/
+/* =========================================================
+   💻 DESKTOP LAYOUT (≥1024px)
+   Estructura limpia y unificada
+   ========================================================= */
 @media (min-width: 1024px) {
 
-  /* 1) Ocultar FABs/AR en escritorio */
-  .fab-row,
-  .ar-fab {
-    display: none !important;
-  }
-
-  /* 2) Topbar visible y limpio (ya lo tienes, reforzamos) */
-  #topBar {
-    background: rgba(15, 17, 21, 0.55);
-    backdrop-filter: blur(8px);
-  }
-
-  /* 3) Info sheet como barra lateral fija (derecha) */
-  .info-sheet {
-    position: fixed;
-    top: calc(56px + env(safe-area-inset-top, 0px));
-    /* debajo del topbar */
-    right: 0;
-    bottom: 0;
-    left: auto;
-
-    width: clamp(320px, 28vw, 420px);
-    max-height: none;
-    transform: none !important;
-    opacity: 1 !important;
-    border-top-left-radius: 16px;
-    border-top-right-radius: 0;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-
-    background: rgba(14, 16, 20, .72);
-    backdrop-filter: blur(18px) saturate(140%);
-    -webkit-backdrop-filter: blur(18px) saturate(140%);
-  }
-
-  /* Drag bar no hace falta en lateral, lo ocultamos */
-  .info-sheet__drag {
-    display: none;
-  }
-
-  /* Contenido: que use todo el alto disponible y scrollee dentro */
-  .info-sheet__content {
-    height: calc(100dvh - 56px - 16px);
-    padding-bottom: calc(20px + env(safe-area-inset-bottom));
-    overflow: auto;
-  }
-
-  /* 4) El botón de “Información” no es necesario en desktop */
-  #infoBtn {
-    display: none !important;
-  }
-
-  /* 5) “Acotar” el visor 3D y dejar hueco para la barra lateral */
-  model-viewer {
-    position: fixed;
-    top: calc(56px + env(safe-area-inset-top, 0px));
-    /* debajo del topbar */
-    left: 0;
-    right: clamp(320px, 28vw, 420px);
-    /* deja hueco para el panel lateral */
-    bottom: 0;
-
-    width: auto;
-    /* calcula por los lados */
-    height: auto;
-    max-width: 1200px;
-    /* limita el ancho máximo del lienzo 3D */
-    margin: 0 auto;
-    /* centra el canvas si sobra espacio */
-    background: transparent !important;
-  }
-
-  /* 6) Posters (GLB/SPLAT): usa contain para que no “corte” en el lateral */
-  .glb-poster,
-  .splat-poster {
-    right: clamp(320px, 28vw, 420px);
-    /* respeta el panel lateral */
-    background-size: contain;
-    background-position: center center;
-  }
-
-  /* 7) Mensajes/overlays: evita que tapen el panel lateral */
-  #msg,
-  .ar-loading,
-  .skeleton {
-    right: clamp(320px, 28vw, 420px);
-  }
-
-  /* 8) El body no debe bloquear scroll del panel lateral */
-  body.is-desktop.sheet-open {
-    overflow: visible;
-  }
-}
-
-/* ===== Versión ESCRITORIO (≥1024px) ===== */
-@media (min-width: 1024px) {
-
-  /* Mostrar la fila de FABs en escritorio para tener el AUDIO, pero ocultar AR */
+  /* 1️⃣ FABs: mostrar solo audio, ocultar AR */
   .fab-row {
     display: flex !important;
     justify-content: flex-start;
-    /* audio a la izquierda */
     gap: 12px;
+    left: 36px;
+    bottom: 36px;
+    width: auto;
   }
 
   .fab-row .ar-fab,
   .ar-fab {
     display: none !important;
-    /* AR fuera en escritorio */
   }
 
-  /* Cartela SIEMPRE visible en escritorio, aunque JS le ponga .hidden */
+  /* 2️⃣ Topbar */
+  #topBar {
+    background: rgba(15, 17, 21, 0.55);
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+    z-index: 30;
+  }
+
+  /* Logo visible, título oculto */
+  #brandLogo {
+    display: block;
+    height: 32px;
+  }
+
+  #brandMark,
+  #pieceTitle {
+    display: none !important;
+  }
+
+  /* Botón info oculto, galería visible */
+  #infoBtn {
+    display: none !important;
+  }
+
+  .gallery-btn {
+    display: inline-flex;
+  }
+
+  /* 3️⃣ Info-sheet como panel lateral derecho */
+
   .info-sheet {
-    transform: translateY(0%) !important;
-    opacity: 1 !important;
-  }
-
-  /* Si JS añade .hidden, en escritorio la ignoramos visualmente */
-  .info-sheet.hidden {
-    display: block !important;
-    opacity: 1 !important;
-    transform: translateY(0%) !important;
-  }
-
-  /* Ocultar botón “Información” y la X de cerrar */
-  #infoBtn,
-  .info-sheet__close {
-    display: none !important;
-  }
-
-  /* La cartela fija como panel (puedes ajustar el ancho) */
-  .info-sheet {
     position: fixed;
-    top: calc(56px + env(safe-area-inset-top, 0px));
-    bottom: 0;
-    right: 0;
-    /* panel a la derecha; cámbialo a left:0 si la quieres a la izq */
-    left: auto;
-    width: clamp(320px, 28vw, 420px);
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    backdrop-filter: blur(18px) saturate(140%);
-  }
-
-  /* El visor acotado dejando hueco para la cartela lateral */
-  model-viewer {
-    position: fixed;
-    top: calc(56px + env(safe-area-inset-top, 0px));
-    left: 0;
-    right: clamp(320px, 28vw, 420px);
-    /* reserva el lateral de la cartela */
-    bottom: 0;
-    width: auto;
-    height: auto;
-    max-width: 1400px;
-    /* ajusta a gusto (p.ej. 1200px) */
-    margin: 0 auto;
-    background: transparent !important;
-  }
-
-  /* Si usas póster GLB/SPLAT, que respeten el lateral de info */
-  .glb-poster,
-  .splat-poster {
-    right: clamp(320px, 28vw, 420px);
-  }
-}
-
-/************ Desktop layout “curioso” ************/
-:root {
-  --topbar-h: 56px;
-}
-
-/* Fondo con vignette + glow diagonal (muy sutil) */
-@media (min-width: 1025px) {
-
-  body::before,
-  body::after {
-    content: "";
-    position: fixed;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  /* Vignette */
-  body::before {
-    background:
-      radial-gradient(1000px 700px at 35% 45%, rgba(255, 180, 80, .10), transparent 60%),
-      radial-gradient(900px 600px at 80% 20%, rgba(80, 140, 255, .08), transparent 60%);
-    mix-blend-mode: screen;
-    opacity: .45;
-  }
-
-  /* Oscurecer bordes ligeramente */
-  body::after {
-    background: radial-gradient(1200px 800px at 50% -10%, transparent 40%, rgba(0, 0, 0, .35) 100%);
-  }
-}
-
-@media (min-width: 1025px) {
-
-  /* --- Reset de elementos innecesarios --- */
-  .info-sheet__close {
-    display: none !important;
-  }
-
-  .info-sheet__drag {
-    display: none !important;
-  }
-
-  /* --- Panel lateral limpio, sin bordes redondeados --- */
-  #infoSheet {
-    position: fixed;
-    top: var(--topbar-h);
+    top: 56px;
+    /* altura real del topbar */
     right: 0;
     bottom: 0;
-    left: auto;
     width: clamp(380px, 28vw, 480px);
     background: rgba(10, 10, 12, 0.92);
     backdrop-filter: blur(12px) saturate(130%);
     -webkit-backdrop-filter: blur(12px) saturate(130%);
     border-left: 1px solid rgba(255, 255, 255, 0.06);
     box-shadow: inset 1px 0 0 rgba(255, 255, 255, .04);
-    z-index: 12;
+    z-index: 30;
+    /* por encima del visor, debajo del topbar */
+    display: flex;
+    flex-direction: column;
+    height: calc(100dvh - 56px);
+    /* ocupa todo el alto restante */
     transform: none !important;
     opacity: 1 !important;
   }
 
-  #infoSheet .info-sheet__content {
-    padding: 40px 42px 48px;
-    height: 100%;
+
+
+  .info-sheet__drag,
+  .info-sheet__close {
+    display: none !important;
+  }
+
+  .info-sheet__content {
+    flex: 1;
     overflow-y: auto;
+    padding: 36px 42px 48px;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, .15) transparent;
   }
 
-  #infoSheet .info-sheet__content::-webkit-scrollbar {
+  .info-sheet__content::-webkit-scrollbar {
     width: 6px;
   }
 
-  #infoSheet .info-sheet__content::-webkit-scrollbar-thumb {
+  .info-sheet__content::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, .15);
-    border-radius: 0;
   }
 
-  /* --- Tipografía y jerarquía --- */
+  /* 4️⃣ Model-viewer: ajustado al panel lateral */
+  /* El visor ocupa todo el alto, dejando espacio lateral para la cartela */
+  model-viewer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: clamp(380px, 28vw, 480px);
+    /* deja hueco a la derecha */
+    width: auto;
+    height: 100dvh;
+    /* ✅ ocupa TODO el alto del viewport */
+    background: transparent !important;
+    border-radius: 0;
+    box-shadow: none;
+    z-index: 0;
+    /* debajo del topbar y la cartela */
+  }
+
+  /* Cartela lateral: ocupa toda la altura */
+  .info-sheet {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: auto;
+    width: clamp(380px, 28vw, 480px);
+    height: 100dvh;
+    /* ✅ ocupa TODO el alto de la ventana */
+    background: rgba(10, 10, 12, 0.92);
+    backdrop-filter: blur(12px) saturate(130%);
+    -webkit-backdrop-filter: blur(12px) saturate(130%);
+    border-left: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: inset 1px 0 0 rgba(255, 255, 255, .04);
+    z-index: 30;
+    /* por encima del visor */
+    display: flex;
+    flex-direction: column;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  /* Contenido interno: scrolla dentro del panel */
+  .info-sheet__content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 40px 42px 48px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, .15) transparent;
+  }
+
+
+  /* 5️⃣ Posters (GLB/SPLAT) */
+  .glb-poster,
+  .splat-poster {
+    right: clamp(380px, 28vw, 480px);
+    background-size: contain;
+  }
+
+  /* 6️⃣ Tipografía de cartela */
   #infoTitle {
     font-family: "Poppins", system-ui, sans-serif;
     font-weight: 600;
@@ -1333,7 +1239,6 @@ model-viewer {
 
   .info-extra {
     display: grid;
-    grid-template-columns: 1fr;
     row-gap: 10px;
     margin-top: 1.8em;
     font-size: 14px;
@@ -1345,340 +1250,97 @@ model-viewer {
     font-weight: 500;
   }
 
-  /* --- El título del topbar encima, sin interferir --- */
-  #topBar {
-    z-index: 30;
-    border-bottom: 1px solid rgba(255, 255, 255, .06);
-    backdrop-filter: blur(12px) saturate(140%);
-    -webkit-backdrop-filter: blur(12px) saturate(140%);
-  }
-
-  /* --- Model-viewer acotado con líneas duras (sin radios) --- */
-  body.is-desktop model-viewer {
-    position: fixed;
-    top: var(--topbar-h);
-    left: 0;
-    bottom: 0;
-    right: clamp(380px, 28vw, 480px);
-    background: transparent !important;
-    box-shadow: none;
-    border-radius: 0;
-  }
-
-  /* --- Fondo general con ligero viñeteado y contraste --- */
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(900px 700px at 70% 40%, rgba(255, 200, 150, .08), transparent 80%),
-      radial-gradient(900px 700px at 30% 70%, rgba(80, 130, 255, .07), transparent 80%);
-    opacity: .4;
-    z-index: 0;
-    pointer-events: none;
-  }
-
+  /* 7️⃣ Fondo con vignette elegante */
+  body::before,
   body::after {
     content: "";
     position: fixed;
     inset: 0;
-    background: radial-gradient(1400px 900px at 50% -10%, transparent 60%, rgba(0, 0, 0, .3) 100%);
-    z-index: 0;
     pointer-events: none;
+    z-index: 0;
   }
 
-  /* --- FABs (audio visible, AR oculto) --- */
-  body.is-desktop .ar-fab {
-    display: none !important;
+  body::before {
+    background:
+      radial-gradient(900px 700px at 70% 40%, rgba(255, 200, 150, .08), transparent 80%),
+      radial-gradient(900px 700px at 30% 70%, rgba(80, 130, 255, .07), transparent 80%);
+    opacity: .4;
   }
 
-  body.is-desktop .fab-row {
-    justify-content: flex-start;
-    left: 36px;
-    right: auto;
-    bottom: 36px;
-    width: auto;
-  }
-}
-
-
-/* Cheatsheet estilo */
-.kbd-help {
-  position: fixed;
-  right: 24px;
-  bottom: calc(24px + env(safe-area-inset-bottom));
-  z-index: 40;
-  background: rgba(14, 16, 20, .82);
-  backdrop-filter: blur(10px) saturate(140%);
-  -webkit-backdrop-filter: blur(10px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, .08);
-  border-radius: 12px;
-  padding: 10px 12px;
-  font: 600 12px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  color: #e9eef7;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, .35);
-}
-
-.kbd-help__row {
-  display: flex;
-  gap: 8px;
-  align-items: baseline;
-  white-space: nowrap;
-}
-
-.kbd-help kbd {
-  background: rgba(255, 255, 255, .1);
-  border: 1px solid rgba(255, 255, 255, .16);
-  border-bottom-color: rgba(0, 0, 0, .35);
-  padding: 2px 6px;
-  border-radius: 6px;
-  font-weight: 700;
-  font-size: 11px;
-}
-
-/* ===============================
-   TOPBAR centrado con logo + título
-   =============================== */
-/* ======================================
-   TOPBAR RESPONSIVE — LOGO / TÍTULO / BOTONES
-   ====================================== */
-#topBar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: rgba(12, 16, 21, 0.9);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, .06);
-  padding: 0 20px;
-  z-index: 40;
-}
-
-/* Logo + título bloque conjunto */
-.topbar-center {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-}
-
-#brandLogo {
-  height: 28px;
-  width: auto;
-  opacity: 0.95;
-  transition: opacity 0.2s ease;
-}
-
-#brandLogo:hover {
-  opacity: 1;
-}
-
-#pieceTitle {
-  font-family: "Poppins", system-ui, sans-serif;
-  font-weight: 600;
-  font-size: 20px;
-  color: #f5f6f8;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  margin: 0;
-  line-height: 1;
-}
-
-/* Botón casa (solo móvil) */
-.home-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #fff;
-  text-decoration: none;
-  transition: background 0.2s ease;
-}
-
-.home-btn::before {
-  content: "🏠";
-  font-size: 18px;
-  line-height: 1;
-}
-
-.home-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-/* Botón “Galería” (solo escritorio) */
-.gallery-btn {
-  display: none;
-  background: none;
-  border: 1px solid rgba(255, 255, 255, .2);
-  padding: 8px 14px;
-  color: #fff;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 15px;
-  text-decoration: none;
-  transition: background 0.2s ease, border-color 0.2s ease;
-}
-
-.gallery-btn:hover {
-  background: rgba(255, 255, 255, .1);
-  border-color: rgba(255, 255, 255, .3);
-}
-
-/* =========================
-     DESKTOP — logo izquierda, sin título
-     ========================= */
-@media (min-width: 1025px) {
-
-  /* mover logo a la izquierda */
-  .topbar-center {
-    position: static;
-    transform: none;
-    left: auto;
-    top: auto;
+  body::after {
+    background: radial-gradient(1400px 900px at 50% -10%, transparent 60%, rgba(0, 0, 0, .3) 100%);
   }
 
-  #brandLogo {
-    height: 32px;
-  }
-
-  /* ocultar el texto del título */
-  #pieceTitle {
-    display: none;
-  }
-
-  /* ocultar el botón casa */
-  .home-btn {
-    display: none;
-  }
-
-  /* mostrar el botón “Galería” */
-  .gallery-btn {
-    display: inline-flex;
-  }
-}
-
-/* A) Ocultar SOLO en ESCRITORIO el título del topbar */
-@media (min-width: 1024px) {
-  #pieceTitle {
-    display: none !important;
-  }
-}
-
-/* B) Mostrar el botón "Información" en móvil y ocultarlo en escritorio */
-@media (min-width: 1024px) {
-  #infoBtn {
-    display: none !important;
-  }
-}
-
-/* (en móvil hereda tu .info-btn y se ve a la derecha del topbar) */
-
-/* C) La casita SOLO en móvil (ya la tenías, refuerzo por si acaso) */
-@media (min-width: 1024px) {
-  .home-btn {
-    display: none !important;
-  }
-}
-
-/* ===== Escritorio (≥1024px) sigue igual que ahora ===== */
-@media (min-width: 1024px) {
+  /* 8️⃣ Ocultar elementos móviles innecesarios */
+  .home-btn,
   #brandMark {
     display: none !important;
   }
-
-  #brandLogo {
-    display: block;
-    height: 32px;
-  }
-
-  #pieceTitle {
-    display: none !important;
-  }
-
-  .home-btn {
-    display: none !important;
-  }
-
-  .gallery-btn {
-    display: inline-flex;
-  }
 }
 
-/* ===== TOPBAR MÓVIL: [←] [Isotipo] [Título centrado] [Info.] ===== */
-/* ===== MÓVIL: flecha izquierda, SIN isotipo, título centrado perfecto, "Información" a la derecha ===== */
-/***********************************************
- * MÓVIL (≤1023px)
- * Flecha izquierda + título al lado + botón info a la derecha
- * (Sin isotipo en móviles)
- ***********************************************/
-@media (max-width:1023px) {
+/* =========================================================
+   📱 MOBILE LAYOUT (≤1023px)
+   Topbar + título + botones
+   ========================================================= */
+@media (max-width: 1023px) {
 
-  /* --- Estructura base del topbar --- */
-  /* --- Estructura base del topbar --- */
+  /* --- TOPBAR general --- */
   #topBar {
-    display: flex !important;
+    display: grid !important;
+    grid-template-columns: auto 1fr auto;
+    /* ← izquierda | centro | derecha → */
     align-items: center;
-    justify-content: flex-start;
-    /* ✅ antes era space-between */
+    justify-content: stretch;
     height: 66px;
-    padding: 0 12px 0 8px;
-    /* ✅ reduce margen lateral derecho */
-    background: rgba(15, 17, 21, 0.85);
+    padding: 0 10px;
+    gap: 8px;
+    position: relative;
+    background: rgba(12, 16, 21, 0.9);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    gap: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+    z-index: 40;
   }
 
-  /* --- IZQUIERDA: flecha + título --- */
+  /* --- Grupo izquierdo: botón volver --- */
   .left-group {
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    gap: 10px;
-    min-width: 0;
-    flex-shrink: 1;
-    flex-grow: 0;
-    /* ✅ evita que se expanda de más */
+    justify-self: start;
+    gap: 8px;
+    margin-right: 0 !important;
+    /* ✅ quitamos hueco extra */
   }
 
   .back-btn {
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, .08);
+    border: 1px solid rgba(255, 255, 255, .12);
     color: #fff;
     text-decoration: none;
-    flex-shrink: 0;
+    transition: background .2s ease, transform .1s ease;
   }
 
-  /* --- Ocultar isotipo en móviles --- */
+  .back-btn:hover {
+    background: rgba(255, 255, 255, .15);
+  }
+
+  /* --- Isotipo oculto en móvil --- */
   #brandMark {
     display: none !important;
   }
 
-  /* --- TÍTULO justo a la derecha del botón back --- */
+  /* --- Título (a la derecha del botón volver) --- */
   .title-wrapper {
     display: flex;
     align-items: center;
-    min-width: 0;
-    max-width: 70vw;
-    /* ✅ evita ocupar todo el ancho */
-    flex-shrink: 1;
+    gap: 10px;
+    justify-self: start;
   }
 
   #pieceTitle {
@@ -1687,20 +1349,23 @@ model-viewer {
     font-size: 17px;
     color: var(--text);
     margin: 0;
-    line-height: 1.2;
+    line-height: 1.35;
     text-transform: none;
-    text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     pointer-events: none;
+    padding-top: 1px;
+    padding-bottom: 2px;
+    max-height: calc(1.35em * 2 + 4px);
   }
 
-  /* --- DERECHA: Botón info --- */
+  /* --- Botón “Información” (a la derecha) --- */
   #infoBtn {
     display: inline-flex !important;
+    justify-self: end;
     align-items: center;
     justify-content: center;
     height: 34px;
@@ -1708,12 +1373,19 @@ model-viewer {
     font-size: 13px;
     border-radius: 10px;
     min-width: auto;
-    flex-shrink: 0;
   }
 
-  /* --- Ocultar elementos de escritorio --- */
-  #brandLogo,
+  /* --- Ocultar elementos de escritorio en móvil --- */
   .gallery-btn {
     display: none !important;
+  }
+
+  #brandLogo {
+    display: none !important;
+  }
+
+  /* --- Asegurar que las FABs se muestran --- */
+  .fab-row {
+    display: flex !important;
   }
 }
