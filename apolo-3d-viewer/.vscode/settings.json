@@ -1,0 +1,31 @@
+{
+  "liveServer.settings.port": 5500,
+  "liveServer.settings.root": "/",
+  "liveServer.settings.ignoreFiles": [
+    "**/*.psd",
+    "**/.git/**",
+    "**/.vscode/**",
+    "**/node_modules/**"
+  ],
+  "liveServer.settings.file": "index.html",
+  "liveServer.settings.wait": 200,
+  "liveServer.settings.NoBrowser": false,
+  "liveServer.settings.CustomBrowser": "chrome",
+  "liveServer.settings.mount": [
+    [
+      "/models",
+      "./models"
+    ],
+    [
+      "/assets",
+      "./assets"
+    ],
+    [
+      "/splat",
+      "./splat"
+    ]
+  ],
+  "editor.formatOnSave": true,
+  "files.autoSave": "onFocusChange",
+  "liveServer.settings.multiRootWorkspaceName": "apolo-3d-viewer"
+}

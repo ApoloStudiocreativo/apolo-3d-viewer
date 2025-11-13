@@ -1,162 +1,221 @@
 /************************************
  * A) Ocultación UI nativa ModelViewer
  *************************************/
- model-viewer::part(ar-button) { display: none !important; }
- model-viewer::part(ar-prompt) { display: none !important; }
- model-viewer::part(ar-status) { display: none !important; }
- /* Fallback si existe elemento con slot="ar-button" */
- model-viewer button[slot="ar-button"] { display: none !important; }
- 
- 
- /******************************
+model-viewer::part(ar-button) {
+  display: none !important;
+}
+
+model-viewer::part(ar-prompt) {
+  display: none !important;
+}
+
+model-viewer::part(ar-status) {
+  display: none !important;
+}
+
+/* Fallback si existe elemento con slot="ar-button" */
+model-viewer button[slot="ar-button"] {
+  display: none !important;
+}
+
+
+/******************************
   * B) Variables y posicionamiento FAB
   ******************************/
- :root {
-   /* margen inferior base en pantallas normales */
-   --fab-bottom: calc(clamp(16px, 5vh, 90px) + env(safe-area-inset-bottom));
- }
- 
- /* el botón AR usa siempre esta variable */
- .ar-fab { bottom: var(--fab-bottom); }
- 
- /* En SPLAT, subimos los botones */
- body.mode-splat { --fab-bottom: calc(70px + env(safe-area-inset-bottom)); }
- 
- /* móviles muy estrechos: un poco más alto */
- @media (max-width: 420px) {
-   body.mode-splat { --fab-bottom: calc(70px + env(safe-area-inset-bottom)); }
- }
- 
- /* pantallas bajitas en horizontal */
- @media (max-height: 480px) {
-   body.mode-splat { --fab-bottom: calc(100px + env(safe-area-inset-bottom)); }
- }
- 
- 
- /******************************
+:root {
+  /* margen inferior base en pantallas normales */
+  --fab-bottom: calc(clamp(16px, 5vh, 90px) + env(safe-area-inset-bottom));
+}
+
+/* el botón AR usa siempre esta variable */
+.ar-fab {
+  bottom: var(--fab-bottom);
+}
+
+/* En SPLAT, subimos los botones */
+body.mode-splat {
+  --fab-bottom: calc(70px + env(safe-area-inset-bottom));
+}
+
+/* móviles muy estrechos: un poco más alto */
+@media (max-width: 420px) {
+  body.mode-splat {
+    --fab-bottom: calc(70px + env(safe-area-inset-bottom));
+  }
+}
+
+/* pantallas bajitas en horizontal */
+@media (max-height: 480px) {
+  body.mode-splat {
+    --fab-bottom: calc(100px + env(safe-area-inset-bottom));
+  }
+}
+
+
+/******************************
   * C) Fila y posición de FABs
   ******************************/
- /* AR a la derecha */
- .ar-fab {
-   position: fixed;
-   right: 18px;
-   bottom: var(--fab-bottom);
-   left: auto;
-   transform: none;
- }
- 
- /* Fila de FABs (evita solapamientos) */
- .fab-row {
-   position: fixed;
-   left: 0;
-   right: 0;
-   bottom: var(--fab-bottom);
-   display: none;                  /* solo móvil/tablet */
-   align-items: center;
-   justify-content: space-between; /* audio izq, AR dcha */
-   padding: 0 18px;
-   z-index: 20;
-   pointer-events: none;           /* la fila no intercepta, los botones sí */
- }
- 
- /* Los botones dentro de la fila dejan de ser "fixed" */
- .fab-row .ar-fab,
- .fab-row .audio-fab {
-   position: relative;
-   left: auto;
-   right: auto;
-   bottom: auto;
-   transform: none;
-   pointer-events: auto;           /* clics habilitados */
- }
- 
- /* Mostrar en móvil/tablet */
- @media (max-width: 1024px) {
-   .fab-row { display: flex; }
- }
- 
- 
- /******************************
+/* AR a la derecha */
+.ar-fab {
+  position: fixed;
+  right: 18px;
+  bottom: var(--fab-bottom);
+  left: auto;
+  transform: none;
+}
+
+/* Fila de FABs (evita solapamientos) */
+.fab-row {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: var(--fab-bottom);
+  display: none;
+  /* solo móvil/tablet */
+  align-items: center;
+  justify-content: space-between;
+  /* audio izq, AR dcha */
+  padding: 0 18px;
+  z-index: 20;
+  pointer-events: none;
+  /* la fila no intercepta, los botones sí */
+}
+
+/* Los botones dentro de la fila dejan de ser "fixed" */
+.fab-row .ar-fab,
+.fab-row .audio-fab {
+  position: relative;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  transform: none;
+  pointer-events: auto;
+  /* clics habilitados */
+}
+
+/* Mostrar en móvil/tablet */
+@media (max-width: 1024px) {
+  .fab-row {
+    display: flex;
+  }
+}
+
+
+/******************************
   * D) Cartela inferior (info-sheet)
   ******************************/
- .info-sheet {
-   position: fixed;
-   left: 0;
-   right: 0;
-   bottom: 0;
-   transform: translateY(100%);
-   background: rgba(14, 16, 20, 0.75);
-   backdrop-filter: blur(18px) saturate(140%);
-   -webkit-backdrop-filter: blur(18px) saturate(140%);
-   color: var(--text);
-   border-top-left-radius: 18px;
-   border-top-right-radius: 18px;
-   box-shadow: 0 -10px 30px rgba(0, 0, 0, .45);
-   padding-bottom: calc(18px + env(safe-area-inset-bottom));
-   z-index: 1201; /* por encima del #topBar (1000) */
-   transition: transform .28s ease, opacity .28s ease;
-   opacity: 0;
- }
- .info-sheet:not(.hidden) { transform: translateY(0%); opacity: 1; }
- 
- .info-sheet__drag {
-   width: 44px;
-   height: 5px;
-   border-radius: 999px;
-   background: rgba(255, 255, 255, .18);
-   margin: 10px auto 6px;
- }
- .info-sheet__close {
-   position: absolute;
-   right: 12px;
-   top: 10px;
-   width: 36px;
-   height: 36px;
-   border: none;
-   border-radius: 10px;
-   background: rgba(255, 255, 255, .08);
-   color: #fff;
-   font-size: 18px;
-   cursor: pointer;
- }
- .info-sheet__content { padding: 10px 18px 0 18px; }
- #infoTitle { margin: 4px 0 6px; font-size: clamp(18px, 4.6vw, 24px); font-weight: 800; }
- .info-meta { margin: 0 0 10px; color: var(--muted); font-size: clamp(12px, 3.5vw, 14px); }
- .info-desc { margin: 0 0 10px; line-height: 1.5; font-size: clamp(14px, 3.8vw, 16px); }
- .info-extra { margin-top: 12px; color: var(--muted); font-size: 13px; line-height: 1.4; }
- .info-extra strong { color: var(--text); font-weight: 600; }
- 
- /* Texto más grande en la cartela */
- #infoSheet .info-sheet__content,
- #infoSheet .info-desc,
- #infoSheet .info-meta,
- #infoSheet .info-extra {
-   font-size: 16px !important;
-   line-height: 1.55 !important;
- }
- 
- 
- /******************************
+.info-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transform: translateY(100%);
+  background: rgba(14, 16, 20, 0.75);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  color: var(--text);
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, .45);
+  padding-bottom: calc(18px + env(safe-area-inset-bottom));
+  z-index: 1201;
+  /* por encima del #topBar (1000) */
+  transition: transform .28s ease, opacity .28s ease;
+  opacity: 0;
+}
+
+.info-sheet:not(.hidden) {
+  transform: translateY(0%);
+  opacity: 1;
+}
+
+.info-sheet__drag {
+  width: 44px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .18);
+  margin: 10px auto 6px;
+}
+
+.info-sheet__close {
+  position: absolute;
+  right: 12px;
+  top: 10px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, .08);
+  color: #fff;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.info-sheet__content {
+  padding: 10px 18px 0 18px;
+}
+
+#infoTitle {
+  margin: 4px 0 6px;
+  font-size: clamp(18px, 4.6vw, 24px);
+  font-weight: 800;
+}
+
+.info-meta {
+  margin: 0 0 10px;
+  color: var(--muted);
+  font-size: clamp(12px, 3.5vw, 14px);
+}
+
+.info-desc {
+  margin: 0 0 10px;
+  line-height: 1.5;
+  font-size: clamp(14px, 3.8vw, 16px);
+}
+
+.info-extra {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.info-extra strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* Texto más grande en la cartela */
+#infoSheet .info-sheet__content,
+#infoSheet .info-desc,
+#infoSheet .info-meta,
+#infoSheet .info-extra {
+  font-size: 16px !important;
+  line-height: 1.55 !important;
+}
+
+
+/******************************
   * E) Topbar (título + botón info)
   ******************************/
- #topBar {
-   position: fixed;
-   top: env(safe-area-inset-top, 0px);
-   left: 0;
-   right: 0;
-   z-index: 15;
-   display: flex;
-   align-items: center;
-   justify-content: space-between;
-   height: 56px;
-   padding: 0 16px;
-   background: rgba(15, 17, 21, 0.65);
-   backdrop-filter: blur(8px);
-   -webkit-backdrop-filter: blur(8px);
- }
+#topBar {
+  position: fixed;
+  top: env(safe-area-inset-top, 0px);
+  left: 0;
+  right: 0;
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  padding: 0 16px;
+  background: rgba(15, 17, 21, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
 
- /* Botón Home (casita redonda) */
-.home-btn{
+/* Botón Home (casita redonda) */
+.home-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -165,73 +224,124 @@
   border-radius: 999px;
   margin-right: 10px;
   color: #fff;
-  background: rgba(255,255,255,.10);
-  border: 1px solid rgba(255,255,255,.18);
-  box-shadow: 0 8px 22px rgba(0,0,0,.25), inset 0 1px 4px rgba(255,255,255,.12);
+  background: rgba(255, 255, 255, .10);
+  border: 1px solid rgba(255, 255, 255, .18);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .25), inset 0 1px 4px rgba(255, 255, 255, .12);
   backdrop-filter: blur(10px) saturate(140%);
   -webkit-backdrop-filter: blur(10px) saturate(140%);
   text-decoration: none;
   transition: transform .12s ease, background .2s ease, box-shadow .25s ease;
-  flex: 0 0 auto; /* no crecer */
+  flex: 0 0 auto;
+  /* no crecer */
 }
-.home-btn svg{ width: 18px; height: 18px; }
-.home-btn:hover{ background: rgba(255,255,255,.16); }
-.home-btn:active{ transform: scale(.97); }
+
+.home-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.home-btn:hover {
+  background: rgba(255, 255, 255, .16);
+}
+
+.home-btn:active {
+  transform: scale(.97);
+}
 
 /* Accesible (screen-readers) */
-.sr-only{
+.sr-only {
   position: absolute !important;
-  width: 1px; height: 1px;
-  padding: 0; margin: -1px;
-  overflow: hidden; clip: rect(0,0,0,0);
-  white-space: nowrap; border: 0;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
- #topBar h1 { font-size: 18px; font-weight: 700; margin: 0; line-height: 1; display: flex; align-items: center; }
- #topBar * { pointer-events: auto; }
- #topBar.hidden { opacity: 0; }
- #topBar:not(.hidden) { opacity: 1; }
- 
- /* Botón Info */
- .info-btn {
-   display: inline-flex;
-   align-items: center;
-   justify-content: center;
-   min-width: 120px;
-   height: 36px;
-   padding: 0 14px;
-   box-sizing: border-box;
-   border: 2px solid var(--brand);
-   border-radius: 12px;
-   background: rgba(64, 203, 203, .10);
-   color: var(--brand);
-   font-weight: 700;
-   font-size: 14px;
-   line-height: 1;
-   letter-spacing: .2px;
-   cursor: pointer;
-   user-select: none;
-   -webkit-tap-highlight-color: transparent;
-   box-shadow: var(--shadow);
-   transition: all .25s ease;
- }
- .info-btn:hover { background: rgba(64, 203, 203, .16); }
- .info-btn:active { transform: translateY(1px); }
- .info-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(64, 203, 203, .35); }
- @media (max-width: 480px) {
-   .info-btn { min-width: 108px; height: 34px; font-size: 13px; }
- }
- 
- /* Ocultar UI al entrar en AR si hace falta */
- body.in-ar #topBar,
- body.in-ar .fab-row,
- body.in-ar .ar-fab,
- body.in-ar .audio-fab,
- body.in-ar .info-sheet { display: none !important; }
- 
- /* Fix header mobile: que el botón ⓘ no se “aplaste” */
- #topBar { z-index: 1000; padding-top: env(safe-area-inset-top); }
- 
+#topBar h1 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+}
+
+#topBar * {
+  pointer-events: auto;
+}
+
+#topBar.hidden {
+  opacity: 0;
+}
+
+#topBar:not(.hidden) {
+  opacity: 1;
+}
+
+/* Botón Info */
+.info-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+  height: 36px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border: 2px solid var(--brand);
+  border-radius: 12px;
+  background: rgba(64, 203, 203, .10);
+  color: var(--brand);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1;
+  letter-spacing: .2px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: var(--shadow);
+  transition: all .25s ease;
+}
+
+.info-btn:hover {
+  background: rgba(64, 203, 203, .16);
+}
+
+.info-btn:active {
+  transform: translateY(1px);
+}
+
+.info-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(64, 203, 203, .35);
+}
+
+@media (max-width: 480px) {
+  .info-btn {
+    min-width: 108px;
+    height: 34px;
+    font-size: 13px;
+  }
+}
+
+/* Ocultar UI al entrar en AR si hace falta */
+body.in-ar #topBar,
+body.in-ar .fab-row,
+body.in-ar .ar-fab,
+body.in-ar .audio-fab,
+body.in-ar .info-sheet {
+  display: none !important;
+}
+
+/* Fix header mobile: que el botón ⓘ no se “aplaste” */
+#topBar {
+  z-index: 1000;
+  padding-top: env(safe-area-inset-top);
+}
+
 /* Tipografía personalizada para títulos de obras */
 #pieceTitle {
   font-family: 'Poppins', serif;
@@ -242,8 +352,11 @@
   margin: 0;
   text-shadow: 0 2px 6px rgba(0, 0, 0, .4);
 }
+
 @media (min-width: 768px) {
-  #pieceTitle { font-size: 20px; }
+  #pieceTitle {
+    font-size: 20px;
+  }
 }
 
 /* --- Alineación correcta del título dentro del topbar --- */
@@ -257,7 +370,8 @@
   flex: 1;
   display: flex;
   align-items: center;
-  min-width: 0; /* permite truncar texto */
+  min-width: 0;
+  /* permite truncar texto */
 }
 
 #pieceTitle {
@@ -268,11 +382,13 @@
   margin: 0;
   text-shadow: 0 2px 6px rgba(0, 0, 0, .4);
   line-height: 1.2;
-  text-transform: none; /* respeta may/min */
+  text-transform: none;
+  /* respeta may/min */
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* máximo dos líneas */
+  -webkit-line-clamp: 2;
+  /* máximo dos líneas */
   -webkit-box-orient: vertical;
   word-break: break-word;
 }
@@ -280,501 +396,648 @@
 @media (min-width: 768px) {
   #pieceTitle {
     font-size: 20px;
-    -webkit-line-clamp: 1; /* en desktop solo una línea */
+    -webkit-line-clamp: 1;
+    /* en desktop solo una línea */
   }
 }
 
- /******************************
+/******************************
   * F) Safe areas globales
   ******************************/
- html,
- body {
-   height: 100%;
-   min-height: 100%;
-   padding-bottom: env(safe-area-inset-bottom);
- }
- 
- 
- /******************************
-  * G) Botón Audio (glass rojo)
-  ******************************/
- .audio-fab {
-   height: 56px;
-   width: 120px;
-   border-radius: 18px;
-   background:
-     radial-gradient(circle at 30% 30%, rgba(255, 80, 80, .55), rgba(150, 0, 0, .45)),
-     linear-gradient(135deg, rgba(255, 0, 0, .55), rgba(90, 0, 0, .42));
-   border: 1px solid rgba(255, 0, 0, .7);
-   color: #fff;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   backdrop-filter: blur(14px) saturate(200%);
-   -webkit-backdrop-filter: blur(14px) saturate(200%);
-   box-shadow:
-     0 0 12px rgba(255, 0, 0, .45),
-     0 6px 22px rgba(255, 0, 0, .30),
-     inset 0 2px 6px rgba(255, 255, 255, .18);
-   transition: transform .12s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease;
- }
- .audio-fab:active { transform: scale(.97); }
- .audio-fab.is-playing {
-   background:
-     radial-gradient(circle at 30% 30%, rgba(255, 100, 100, .66), rgba(200, 0, 0, .48)),
-     linear-gradient(135deg, rgba(255, 20, 20, .70), rgba(140, 0, 0, .50));
-   border-color: rgba(255, 40, 40, .9);
-   box-shadow:
-     0 0 18px rgba(255, 30, 30, .65),
-     0 12px 28px rgba(255, 0, 0, .40),
-     inset 0 2px 8px rgba(255, 255, 255, .22);
-   animation: pulse-glow 1.8s ease-in-out infinite;
- }
- .audio-fab .icon-pause { display: none; width: 24px; height: 24px; }
- .audio-fab .icon-play { display: block; width: 24px; height: 24px; }
- .audio-fab.is-playing .icon-play { display: none; }
- .audio-fab.is-playing .icon-pause { display: block; }
- @keyframes pulse-glow {
-   0%, 100% { box-shadow: 0 0 14px rgba(255, 30, 30, .45); }
-   50%      { box-shadow: 0 0 22px rgba(255, 50, 50, .75); }
- }
- 
- 
- /******************************
-  * H) Poster SPLAT
-  ******************************/
- .splat-poster {
-   position: fixed;
-   inset: 0;
-   background: center center / cover no-repeat #0f1115;
-   z-index: 8;
-   opacity: 0;
-   pointer-events: none;
-   transition: opacity .4s ease;
- }
- .splat-poster.visible { opacity: 1; }
- .splat-poster.fade-out {
-   opacity: 0;
-   transition: opacity .6s ease-out, filter .6s ease-out;
-   filter: blur(12px);
- }
- 
- /* H2) Poster GLB (mismo patrón que SPLAT) */
- .glb-poster {
-   position: fixed;
-   inset: 0;
-   background: center center / cover no-repeat #0f1115;
-   z-index: 8;
-   opacity: 0;
-   pointer-events: none;
-   transition: opacity .45s ease, filter .45s ease;
- }
- .glb-poster.visible { opacity: 1; }
- .glb-poster.fade-out {
-   opacity: 0;
-   filter: blur(10px);
- }
- 
- 
- /******************************
-  * I) Tipografías y tamaños cartela
-  ******************************/
- /* (ya integradas en D) y bloques de #infoSheet…) */
- 
- 
- /******************************
-  * J) Overlay "Abriendo AR…"
-  ******************************/
- .ar-loading {
-   position: fixed;
-   inset: 0;
-   z-index: 60;
-   display: grid;
-   place-items: center;
-   background: rgba(10, 12, 16, .65);
-   backdrop-filter: blur(6px);
-   opacity: 0;
-   pointer-events: none;
-   transition: opacity .25s ease;
- }
- .ar-loading.visible { opacity: 1; pointer-events: auto; }
- .ar-loading .spinner { margin-right: 10px; }
- .ar-loading span {
-   color: var(--text);
-   font: 600 14px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-   letter-spacing: .2px;
- }
- .ar-loading .spinner + span { display: inline-block; vertical-align: middle; }
- 
- 
- /******************************
-  * K) Accesibilidad e interacción (zoom, focus)
-  ******************************/
- #topBar,
- #infoSheet,
- .fab-row,
- .info-btn,
- .audio-fab,
- .ar-fab {
-   touch-action: manipulation; /* evita doble-tap zoom */
-   -ms-touch-action: manipulation;
- }
- /* En iOS ayuda a que no “salte” el zoom por gesto en la UI */
- #topBar *,
- #infoSheet *,
- .fab-row * { touch-action: manipulation; }
- 
- /* Focus visible */
- :focus-visible { outline: 2px solid #40cbcb; outline-offset: 3px; }
- .info-sheet__close:focus-visible,
- .info-btn:focus-visible,
- .audio-fab:focus-visible,
- .ar-fab:focus-visible { box-shadow: 0 0 0 3px rgba(64, 203, 203, .35); }
- 
- 
- /******************************
-  * L) Pantalla de carga (skeleton + %)
-  ******************************/
- .skeleton {
-   position: fixed;
-   inset: 0;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   background: #15161B;
-   color: #FFFFFF;
-   font-family: 'Poppins', sans-serif;
-   z-index: 9999;
-   flex-direction: column;
-   text-align: center;
-   transition: opacity .6s ease;
- }
- .skeleton.hidden { opacity: 0; pointer-events: none; }
- .loader-container { display: flex; flex-direction: column; align-items: center; justify-content: center; }
- .loader-circle {
-   width: 90px;
-   height: 90px;
-   border: 4px solid rgba(48, 134, 135, 0.25);
-   border-top: 4px solid #308687;
-   border-radius: 50%;
-   animation: spin 1.2s linear infinite;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   margin-bottom: 20px;
-   box-shadow: 0 0 10px rgba(48, 134, 135, 0.35);
- }
- @keyframes spin { to { transform: rotate(360deg); } }
- #loaderProgress {
-   position: absolute;
-   font-size: 18px;
-   font-weight: 600;
-   color: #FFFFFF;
-   text-shadow: 0 0 6px rgba(48, 134, 135, 0.4);
- }
- .loader-text {
-   font-size: 14px;
-   color: #FFFFFF;
-   opacity: .85;
-   line-height: 1.5;
-   margin-top: 10px;
-   font-weight: 400;
-   max-width: 80%;
- }
- 
- /* === Corregir rotación del loader: el texto no gira === */
- .loader-progress {
-   position: absolute;
-   transform: rotate(-1 * var(--spin-angle, 0deg));
-   font-weight: 600;
-   font-family: system-ui, sans-serif;
-   color: #fff;
- }
- 
- 
- /******************************
-  * M) Botón AR (glass azul) – base y estados
-  ******************************/
- /* Base (tamaño/caja + look) */
- .ar-fab {
-   /* tamaño y caja */
-   height: 56px;                /* “grosor” de la pastilla */
-   min-width: 180px;
-   padding: 0 18px;
-   border-radius: 18px;
-   display: flex;
-   align-items: center;
-   justify-content: center;
- 
-   /* look azul final */
-   background:
-     radial-gradient(circle at 30% 30%, rgba(13, 217, 253, 0.88), rgba(2, 199, 199, 0.62)),
-     linear-gradient(135deg, rgba(13, 110, 253, 0.88), rgba(0, 42, 120, 0.62));
-   border: 1px solid rgba(101, 255, 247, 0.98);
-   color: #fff;
-   gap: 10px;
-   font-size: 16px;
-   font-weight: 700;
-   letter-spacing: .2px;
-   backdrop-filter: blur(14px) saturate(200%);
-   -webkit-backdrop-filter: blur(14px) saturate(200%);
-   box-shadow:
-     0 0 12px rgba(13, 110, 253, 0.55),
-     0 8px 24px rgba(13, 110, 253, 0.40),
-     inset 0 2px 8px rgba(255, 255, 255, 0.18);
-   transition: background .25s ease, box-shadow .25s ease, transform .12s ease;
- }
- 
- /* Estado activo / glow */
- .ar-fab.is-active {
-   background:
-     radial-gradient(circle at 30% 30%, rgba(0, 140, 255, 0.95), rgba(0, 70, 170, 0.78)),
-     linear-gradient(135deg, rgba(0, 140, 255, 0.95), rgba(0, 70, 170, 0.78));
-   border-color: rgba(0, 140, 255, 1);
-   box-shadow:
-     0 0 18px rgba(0, 140, 255, 0.78),
-     0 12px 28px rgba(0, 100, 210, 0.48),
-     inset 0 2px 10px rgba(255, 255, 255, 0.22);
-   animation: pulse-glow-ar 1.8s ease-in-out infinite;
- }
- 
- /* Interacción */
- .ar-fab:active { transform: scale(0.97); }
- /* Si el inline del <head> centra el botón con translateX(-50%), conserva el centrado en :active */
- .ar-fab[style*="translateX(-50%)"]:active { transform: translateX(-50%) scale(0.97); }
- 
- @keyframes pulse-glow-ar {
-   0%, 100% { box-shadow: 0 0 14px rgba(48, 134, 135, 0.45); }
-   50%      { box-shadow: 0 0 22px rgba(48, 134, 135, 0.75); }
- }
- 
- 
- /******************************
-  * N) Detalles AR FAB (icono, gap, breakpoints)
-  ******************************/
- .ar-fab > svg { width: 22px; height: 22px; flex: 0 0 auto; /* evita que crezca por el layout */ }
- .ar-fab { gap: 8px; } /* separa un poco menos icono/texto */
- @media (max-width: 420px) {
-   .ar-fab > svg { width: 20px; height: 20px; }
- }
- 
- 
- /* ====== Variables base de tema (sin tocar --fab-bottom) ====== */
- :root {
-   --bg: #0f1115;
-   --text: #e9eef7;
-   --muted: #9aa4b2;
-   --brand: #40cbcb;
-   --shadow: 0 10px 30px rgba(0, 0, 0, .35);
- }
- 
- /* ====== Reseteo base del documento ====== */
- html,
- body {
-   margin: 0;
-   height: 100%;
-   color: var(--text);
-   overflow: hidden; /* la escena ocupa toda la pantalla */
- }
-
- /* Evitar scroll en móviles y arrastre accidental de página */
-html, body {
-  touch-action: none;         /* bloquea gestures tipo scroll/pinch */
-  overscroll-behavior: none;  /* evita rebote de scroll */
+html,
+body {
+  height: 100%;
+  min-height: 100%;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
- 
- /* Utilidades */
- .full { position: fixed; inset: 0; }
- .hidden { display: none !important; }
- 
+
+/******************************
+  * G) Botón Audio (glass rojo)
+  ******************************/
+.audio-fab {
+  height: 56px;
+  width: 120px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 80, 80, .55), rgba(150, 0, 0, .45)),
+    linear-gradient(135deg, rgba(255, 0, 0, .55), rgba(90, 0, 0, .42));
+  border: 1px solid rgba(255, 0, 0, .7);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(14px) saturate(200%);
+  -webkit-backdrop-filter: blur(14px) saturate(200%);
+  box-shadow:
+    0 0 12px rgba(255, 0, 0, .45),
+    0 6px 22px rgba(255, 0, 0, .30),
+    inset 0 2px 6px rgba(255, 255, 255, .18);
+  transition: transform .12s ease, box-shadow .25s ease, background .25s ease, border-color .25s ease;
+}
+
+.audio-fab:active {
+  transform: scale(.97);
+}
+
+.audio-fab.is-playing {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 100, 100, .66), rgba(200, 0, 0, .48)),
+    linear-gradient(135deg, rgba(255, 20, 20, .70), rgba(140, 0, 0, .50));
+  border-color: rgba(255, 40, 40, .9);
+  box-shadow:
+    0 0 18px rgba(255, 30, 30, .65),
+    0 12px 28px rgba(255, 0, 0, .40),
+    inset 0 2px 8px rgba(255, 255, 255, .22);
+  animation: pulse-glow 1.8s ease-in-out infinite;
+}
+
+.audio-fab .icon-pause {
+  display: none;
+  width: 24px;
+  height: 24px;
+}
+
+.audio-fab .icon-play {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+.audio-fab.is-playing .icon-play {
+  display: none;
+}
+
+.audio-fab.is-playing .icon-pause {
+  display: block;
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 14px rgba(255, 30, 30, .45);
+  }
+
+  50% {
+    box-shadow: 0 0 22px rgba(255, 50, 50, .75);
+  }
+}
+
+
+/******************************
+  * H) Poster SPLAT
+  ******************************/
+.splat-poster {
+  position: fixed;
+  inset: 0;
+  background: center center / cover no-repeat #0f1115;
+  z-index: 8;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .4s ease;
+}
+
+.splat-poster.visible {
+  opacity: 1;
+}
+
+.splat-poster.fade-out {
+  opacity: 0;
+  transition: opacity .6s ease-out, filter .6s ease-out;
+  filter: blur(12px);
+}
+
+/* H2) Poster GLB (mismo patrón que SPLAT) */
+.glb-poster {
+  position: fixed;
+  inset: 0;
+  background: center center / cover no-repeat #0f1115;
+  z-index: 8;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .45s ease, filter .45s ease;
+}
+
+.glb-poster.visible {
+  opacity: 1;
+}
+
+.glb-poster.fade-out {
+  opacity: 0;
+  filter: blur(10px);
+}
+
+
+/******************************
+  * I) Tipografías y tamaños cartela
+  ******************************/
+/* (ya integradas en D) y bloques de #infoSheet…) */
+
+
+/******************************
+  * J) Overlay "Abriendo AR…"
+  ******************************/
+.ar-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  background: rgba(10, 12, 16, .65);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+}
+
+.ar-loading.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ar-loading .spinner {
+  margin-right: 10px;
+}
+
+.ar-loading span {
+  color: var(--text);
+  font: 600 14px/1.2 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  letter-spacing: .2px;
+}
+
+.ar-loading .spinner+span {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+
+/******************************
+  * K) Accesibilidad e interacción (zoom, focus)
+  ******************************/
+#topBar,
+#infoSheet,
+.fab-row,
+.info-btn,
+.audio-fab,
+.ar-fab {
+  touch-action: manipulation;
+  /* evita doble-tap zoom */
+  -ms-touch-action: manipulation;
+}
+
+/* En iOS ayuda a que no “salte” el zoom por gesto en la UI */
+#topBar *,
+#infoSheet *,
+.fab-row * {
+  touch-action: manipulation;
+}
+
+/* Focus visible */
+:focus-visible {
+  outline: 2px solid #40cbcb;
+  outline-offset: 3px;
+}
+
+.info-sheet__close:focus-visible,
+.info-btn:focus-visible,
+.audio-fab:focus-visible,
+.ar-fab:focus-visible {
+  box-shadow: 0 0 0 3px rgba(64, 203, 203, .35);
+}
+
+
+/******************************
+  * L) Pantalla de carga (skeleton + %)
+  ******************************/
+.skeleton {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #15161B;
+  color: #FFFFFF;
+  font-family: 'Poppins', sans-serif;
+  z-index: 9999;
+  flex-direction: column;
+  text-align: center;
+  transition: opacity .6s ease;
+}
+
+.skeleton.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader-circle {
+  width: 90px;
+  height: 90px;
+  border: 4px solid rgba(48, 134, 135, 0.25);
+  border-top: 4px solid #308687;
+  border-radius: 50%;
+  animation: spin 1.2s linear infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 0 10px rgba(48, 134, 135, 0.35);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+#loaderProgress {
+  position: absolute;
+  font-size: 18px;
+  font-weight: 600;
+  color: #FFFFFF;
+  text-shadow: 0 0 6px rgba(48, 134, 135, 0.4);
+}
+
+.loader-text {
+  font-size: 14px;
+  color: #FFFFFF;
+  opacity: .85;
+  line-height: 1.5;
+  margin-top: 10px;
+  font-weight: 400;
+  max-width: 80%;
+}
+
+/* === Corregir rotación del loader: el texto no gira === */
+.loader-progress {
+  position: absolute;
+  transform: rotate(-1 * var(--spin-angle, 0deg));
+  font-weight: 600;
+  font-family: system-ui, sans-serif;
+  color: #fff;
+}
+
+
+/******************************
+  * M) Botón AR (glass azul) – base y estados
+  ******************************/
+/* Base (tamaño/caja + look) */
+.ar-fab {
+  /* tamaño y caja */
+  height: 56px;
+  /* “grosor” de la pastilla */
+  min-width: 180px;
+  padding: 0 18px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* look azul final */
+  background:
+    radial-gradient(circle at 30% 30%, rgba(13, 217, 253, 0.88), rgba(2, 199, 199, 0.62)),
+    linear-gradient(135deg, rgba(13, 110, 253, 0.88), rgba(0, 42, 120, 0.62));
+  border: 1px solid rgba(101, 255, 247, 0.98);
+  color: #fff;
+  gap: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: .2px;
+  backdrop-filter: blur(14px) saturate(200%);
+  -webkit-backdrop-filter: blur(14px) saturate(200%);
+  box-shadow:
+    0 0 12px rgba(13, 110, 253, 0.55),
+    0 8px 24px rgba(13, 110, 253, 0.40),
+    inset 0 2px 8px rgba(255, 255, 255, 0.18);
+  transition: background .25s ease, box-shadow .25s ease, transform .12s ease;
+}
+
+/* Estado activo / glow */
+.ar-fab.is-active {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(0, 140, 255, 0.95), rgba(0, 70, 170, 0.78)),
+    linear-gradient(135deg, rgba(0, 140, 255, 0.95), rgba(0, 70, 170, 0.78));
+  border-color: rgba(0, 140, 255, 1);
+  box-shadow:
+    0 0 18px rgba(0, 140, 255, 0.78),
+    0 12px 28px rgba(0, 100, 210, 0.48),
+    inset 0 2px 10px rgba(255, 255, 255, 0.22);
+  animation: pulse-glow-ar 1.8s ease-in-out infinite;
+}
+
+/* Interacción */
+.ar-fab:active {
+  transform: scale(0.97);
+}
+
+/* Si el inline del <head> centra el botón con translateX(-50%), conserva el centrado en :active */
+.ar-fab[style*="translateX(-50%)"]:active {
+  transform: translateX(-50%) scale(0.97);
+}
+
+@keyframes pulse-glow-ar {
+
+  0%,
+  100% {
+    box-shadow: 0 0 14px rgba(48, 134, 135, 0.45);
+  }
+
+  50% {
+    box-shadow: 0 0 22px rgba(48, 134, 135, 0.75);
+  }
+}
+
+
+/******************************
+  * N) Detalles AR FAB (icono, gap, breakpoints)
+  ******************************/
+.ar-fab>svg {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 auto;
+  /* evita que crezca por el layout */
+}
+
+.ar-fab {
+  gap: 8px;
+}
+
+/* separa un poco menos icono/texto */
+@media (max-width: 420px) {
+  .ar-fab>svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+
+/* ====== Variables base de tema (sin tocar --fab-bottom) ====== */
+:root {
+  --bg: #0f1115;
+  --text: #e9eef7;
+  --muted: #9aa4b2;
+  --brand: #40cbcb;
+  --shadow: 0 10px 30px rgba(0, 0, 0, .35);
+}
+
+/* ====== Reseteo base del documento ====== */
+html,
+body {
+  margin: 0;
+  height: 100%;
+  color: var(--text);
+  overflow: hidden;
+  /* la escena ocupa toda la pantalla */
+}
+
+/* Evitar scroll en móviles y arrastre accidental de página */
+html,
+body {
+  touch-action: none;
+  /* bloquea gestures tipo scroll/pinch */
+  overscroll-behavior: none;
+  /* evita rebote de scroll */
+}
+
+
+/* Utilidades */
+.full {
+  position: fixed;
+  inset: 0;
+}
+
+.hidden {
+  display: none !important;
+}
+
 /* ====== Viewports de las escenas ====== */
 model-viewer {
   width: 100vw;
   height: 100dvh;
   display: block;
-  background: transparent !important; /* el lienzo deja ver el degradado del body */
+  background: transparent !important;
+  /* el lienzo deja ver el degradado del body */
 }
 
 iframe#splat {
   width: 100vw;
   height: 100dvh;
   display: block;
-  background: var(--bg); /* el SPLAT sí usa fondo sólido */
+  background: var(--bg);
+  /* el SPLAT sí usa fondo sólido */
   border: 0;
 }
 
- 
- /* ====== Mensaje de ayuda/error ====== */
- #msg {
-   position: fixed;
-   inset: 0;
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   font: 500 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-   text-align: center;
-   color: var(--muted);
-   padding: 24px;
- }
- #msg b { color: #ff6464; }
- 
- /* === Soft reveal de escenas (fade-in al cargar) === */
- model-viewer,
- iframe#splat {
-   opacity: 0;                 /* estado inicial: oculto */
-   transition: opacity .45s ease;
- }
- model-viewer.is-visible,
- iframe#splat.is-visible {
-   opacity: 1;                 /* visible cuando la escena está lista */
- }
- 
- /* ====== Spinner visual para el overlay AR ====== */
- .ar-loading .spinner {
-   width: 28px;
-   height: 28px;
-   border-radius: 50%;
-   border: 3px solid rgba(255, 255, 255, .22);
-   border-top-color: #fff;
-   animation: spin .9s linear infinite;
- }
- 
- /* === Estado deshabilitado del botón de audio === */
- .audio-fab[disabled] {
-   opacity: 0.45;
-   cursor: not-allowed;
-   pointer-events: none;
-   filter: grayscale(70%);
-   transition: opacity 0.25s ease, filter 0.25s ease;
- }
- .audio-fab[disabled] svg { opacity: 0.6; }
- .audio-fab[disabled]::after {
-   content: "Audio no disponible";
-   position: absolute;
-   bottom: -1.8em;
-   left: 50%;
-   transform: translateX(-50%);
-   font-size: 0.75rem;
-   color: #ccc;
-   opacity: 0.8;
-   white-space: nowrap;
- }
- 
- /* AR deshabilitado mientras no carga el modelo */
- .ar-fab[disabled],
- .ar-fab.is-disabled {
-   opacity: 0.5;
-   cursor: not-allowed;
-   filter: grayscale(30%);
-   pointer-events: none;
- }
- 
- /* === FAB row: separación y safe area === */
- .fab-row {
-   gap: 12px;
-   padding: 0 18px calc(env(safe-area-inset-bottom) + 0px);
- }
- @media (max-width: 420px) {
-   .fab-row {
-     gap: 10px;
-     padding: 0 14px calc(env(safe-area-inset-bottom) + 0px);
-   }
- }
- 
- /* === Cartela: scroll interno + bloqueo de scroll de fondo === */
- body.sheet-open { overflow: hidden; }
- 
- .info-sheet { max-height: min(78vh, 640px); }
- .info-sheet__content {
-   max-height: calc(min(78vh, 640px) - 54px); /* 54px ≈ drag + paddings */
-   overflow: auto;
-   -webkit-overflow-scrolling: touch;
-   overscroll-behavior: contain;
- }
- 
- /* === Accesibilidad: reducir movimientos si el usuario lo pide === */
- @media (prefers-reduced-motion: reduce) {
-   .skeleton,
-   .ar-loading,
-   .info-sheet {
-     transition: none !important;
-     animation: none !important;
-   }
- }
- 
- /* === FIX loader: que gire solo el aro y no el número === */
- /* Deja el contenedor fijo (sin animación) */
- .loader-circle {
-   position: relative;
-   /* mantenemos tamaño y centrado existentes */
-   width: 90px;
-   height: 90px;
-   border: none !important;      /* quitamos el borde del contenedor */
-   box-shadow: none !important;  /* lo movemos al ::before */
-   animation: none !important;   /* el contenedor YA NO rota */
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   margin-bottom: 20px; /* conservado de tu regla original */
- }
- /* Dibujamos y rotamos el aro en un pseudo-elemento */
- .loader-circle::before {
-   content: "";
-   position: absolute;
-   inset: 0;                     /* ocupa todo el círculo */
-   border-radius: 50%;
-   border: 4px solid rgba(48, 134, 135, 0.25);
-   border-top-color: #308687;    /* “sector” que se ve girar */
-   box-shadow: 0 0 10px rgba(48, 134, 135, 0.35);
-   animation: spin 1.2s linear infinite; /* reutiliza tu @keyframes spin */
- }
- /* Centra el porcentaje y NO lo rota */
- #loaderProgress {
-   position: absolute;
-   top: 50%;
-   left: 50%;
-   transform: translate(-50%, -50%); /* solo centrar, sin rotación */
-   font-size: 18px;
-   font-weight: 600;
-   color: #FFFFFF;
-   text-shadow: 0 0 6px rgba(48, 134, 135, 0.4);
- }
- 
- /* === Toast mínimo (para avisos como "toca para habilitar audio") === */
- .toast {
-   position: fixed;
-   left: 50%;
-   bottom: calc(var(--fab-bottom) + 72px);
-   transform: translateX(-50%);
-   background: rgba(20, 24, 30, 0.9);
-   color: #e9eef7;
-   padding: 10px 14px;
-   border-radius: 12px;
-   font: 600 13px/1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-   box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
-   backdrop-filter: blur(10px);
-   -webkit-backdrop-filter: blur(10px);
-   z-index: 1200;
-   opacity: 0;
-   pointer-events: none;
-   transition: opacity .25s ease, transform .25s ease;
- }
- .toast.show {
-   opacity: 1;
-   transform: translateX(-50%) translateY(-4px);
- }
- 
- /* Fallback visual al tocar (para iOS/desktop sin vibración) */
- .tap-pulse {
-   transform: scale(0.98);
-   transition: transform 120ms ease;
- }
- 
- /* Deja el host visible (el póster vive aquí) */
- model-viewer { opacity: 1; transition: opacity .35s ease; }
 
- /* El lienzo 3D debe ser transparente */
+/* ====== Mensaje de ayuda/error ====== */
+#msg {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font: 500 16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  text-align: center;
+  color: var(--muted);
+  padding: 24px;
+}
+
+#msg b {
+  color: #ff6464;
+}
+
+/* === Soft reveal de escenas (fade-in al cargar) === */
+model-viewer,
+iframe#splat {
+  opacity: 0;
+  /* estado inicial: oculto */
+  transition: opacity .45s ease;
+}
+
+model-viewer.is-visible,
+iframe#splat.is-visible {
+  opacity: 1;
+  /* visible cuando la escena está lista */
+}
+
+/* ====== Spinner visual para el overlay AR ====== */
+.ar-loading .spinner {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, .22);
+  border-top-color: #fff;
+  animation: spin .9s linear infinite;
+}
+
+/* === Estado deshabilitado del botón de audio === */
+.audio-fab[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+  filter: grayscale(70%);
+  transition: opacity 0.25s ease, filter 0.25s ease;
+}
+
+.audio-fab[disabled] svg {
+  opacity: 0.6;
+}
+
+.audio-fab[disabled]::after {
+  content: "Audio no disponible";
+  position: absolute;
+  bottom: -1.8em;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: #ccc;
+  opacity: 0.8;
+  white-space: nowrap;
+}
+
+/* AR deshabilitado mientras no carga el modelo */
+.ar-fab[disabled],
+.ar-fab.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(30%);
+  pointer-events: none;
+}
+
+/* === FAB row: separación y safe area === */
+.fab-row {
+  gap: 12px;
+  padding: 0 18px calc(env(safe-area-inset-bottom) + 0px);
+}
+
+@media (max-width: 420px) {
+  .fab-row {
+    gap: 10px;
+    padding: 0 14px calc(env(safe-area-inset-bottom) + 0px);
+  }
+}
+
+/* === Cartela: scroll interno + bloqueo de scroll de fondo === */
+body.sheet-open {
+  overflow: hidden;
+}
+
+.info-sheet {
+  max-height: min(78vh, 640px);
+}
+
+.info-sheet__content {
+  max-height: calc(min(78vh, 640px) - 54px);
+  /* 54px ≈ drag + paddings */
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* === Accesibilidad: reducir movimientos si el usuario lo pide === */
+@media (prefers-reduced-motion: reduce) {
+
+  .skeleton,
+  .ar-loading,
+  .info-sheet {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* === FIX loader: que gire solo el aro y no el número === */
+/* Deja el contenedor fijo (sin animación) */
+.loader-circle {
+  position: relative;
+  /* mantenemos tamaño y centrado existentes */
+  width: 90px;
+  height: 90px;
+  border: none !important;
+  /* quitamos el borde del contenedor */
+  box-shadow: none !important;
+  /* lo movemos al ::before */
+  animation: none !important;
+  /* el contenedor YA NO rota */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  /* conservado de tu regla original */
+}
+
+/* Dibujamos y rotamos el aro en un pseudo-elemento */
+.loader-circle::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* ocupa todo el círculo */
+  border-radius: 50%;
+  border: 4px solid rgba(48, 134, 135, 0.25);
+  border-top-color: #308687;
+  /* “sector” que se ve girar */
+  box-shadow: 0 0 10px rgba(48, 134, 135, 0.35);
+  animation: spin 1.2s linear infinite;
+  /* reutiliza tu @keyframes spin */
+}
+
+/* Centra el porcentaje y NO lo rota */
+#loaderProgress {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* solo centrar, sin rotación */
+  font-size: 18px;
+  font-weight: 600;
+  color: #FFFFFF;
+  text-shadow: 0 0 6px rgba(48, 134, 135, 0.4);
+}
+
+/* === Toast mínimo (para avisos como "toca para habilitar audio") === */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--fab-bottom) + 72px);
+  transform: translateX(-50%);
+  background: rgba(20, 24, 30, 0.9);
+  color: #e9eef7;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font: 600 13px/1 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 1200;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease, transform .25s ease;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+/* Fallback visual al tocar (para iOS/desktop sin vibración) */
+.tap-pulse {
+  transform: scale(0.98);
+  transition: transform 120ms ease;
+}
+
+/* Deja el host visible (el póster vive aquí) */
+model-viewer {
+  opacity: 1;
+  transition: opacity .35s ease;
+}
+
+/* El lienzo 3D debe ser transparente */
 model-viewer {
   background: transparent !important;
 }
@@ -782,8 +1045,8 @@ model-viewer {
 /* El body puede tener un color mientras carga, pero no debe tapar al skybox del <model-viewer> */
 body {
   /* Fondo degradado suave y moderno */
-background: radial-gradient(circle at 80% 0%, #2b1a10, #140d08 50%, #0b0e14 90%),
-            linear-gradient(180deg, #19120b 0%, #0f1115 100%);
+  background: radial-gradient(circle at 80% 0%, #2b1a10, #140d08 50%, #0b0e14 90%),
+    linear-gradient(180deg, #19120b 0%, #0f1115 100%);
 
   background-attachment: fixed;
   background-size: cover;
@@ -798,6 +1061,7 @@ model-viewer {
  * DESKTOP LAYOUT (>= 1024px)
  **********************************************/
 @media (min-width: 1024px) {
+
   /* 1) Ocultar FABs/AR en escritorio */
   .fab-row,
   .ar-fab {
@@ -813,7 +1077,8 @@ model-viewer {
   /* 3) Info sheet como barra lateral fija (derecha) */
   .info-sheet {
     position: fixed;
-    top: calc(56px + env(safe-area-inset-top, 0px)); /* debajo del topbar */
+    top: calc(56px + env(safe-area-inset-top, 0px));
+    /* debajo del topbar */
     right: 0;
     bottom: 0;
     left: auto;
@@ -827,13 +1092,15 @@ model-viewer {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
 
-    background: rgba(14,16,20,.72);
+    background: rgba(14, 16, 20, .72);
     backdrop-filter: blur(18px) saturate(140%);
     -webkit-backdrop-filter: blur(18px) saturate(140%);
   }
 
   /* Drag bar no hace falta en lateral, lo ocultamos */
-  .info-sheet__drag { display: none; }
+  .info-sheet__drag {
+    display: none;
+  }
 
   /* Contenido: que use todo el alto disponible y scrollee dentro */
   .info-sheet__content {
@@ -843,27 +1110,35 @@ model-viewer {
   }
 
   /* 4) El botón de “Información” no es necesario en desktop */
-  #infoBtn { display: none !important; }
+  #infoBtn {
+    display: none !important;
+  }
 
   /* 5) “Acotar” el visor 3D y dejar hueco para la barra lateral */
   model-viewer {
     position: fixed;
-    top: calc(56px + env(safe-area-inset-top, 0px)); /* debajo del topbar */
+    top: calc(56px + env(safe-area-inset-top, 0px));
+    /* debajo del topbar */
     left: 0;
-    right: clamp(320px, 28vw, 420px); /* deja hueco para el panel lateral */
+    right: clamp(320px, 28vw, 420px);
+    /* deja hueco para el panel lateral */
     bottom: 0;
 
-    width: auto;            /* calcula por los lados */
+    width: auto;
+    /* calcula por los lados */
     height: auto;
-    max-width: 1200px;      /* limita el ancho máximo del lienzo 3D */
-    margin: 0 auto;         /* centra el canvas si sobra espacio */
+    max-width: 1200px;
+    /* limita el ancho máximo del lienzo 3D */
+    margin: 0 auto;
+    /* centra el canvas si sobra espacio */
     background: transparent !important;
   }
 
   /* 6) Posters (GLB/SPLAT): usa contain para que no “corte” en el lateral */
   .glb-poster,
   .splat-poster {
-    right: clamp(320px, 28vw, 420px); /* respeta el panel lateral */
+    right: clamp(320px, 28vw, 420px);
+    /* respeta el panel lateral */
     background-size: contain;
     background-position: center center;
   }
@@ -876,21 +1151,26 @@ model-viewer {
   }
 
   /* 8) El body no debe bloquear scroll del panel lateral */
-  body.is-desktop.sheet-open { overflow: visible; }
+  body.is-desktop.sheet-open {
+    overflow: visible;
+  }
 }
 
 /* ===== Versión ESCRITORIO (≥1024px) ===== */
 @media (min-width: 1024px) {
 
   /* Mostrar la fila de FABs en escritorio para tener el AUDIO, pero ocultar AR */
-  .fab-row { 
+  .fab-row {
     display: flex !important;
-    justify-content: flex-start;   /* audio a la izquierda */
+    justify-content: flex-start;
+    /* audio a la izquierda */
     gap: 12px;
   }
+
   .fab-row .ar-fab,
   .ar-fab {
-    display: none !important;      /* AR fuera en escritorio */
+    display: none !important;
+    /* AR fuera en escritorio */
   }
 
   /* Cartela SIEMPRE visible en escritorio, aunque JS le ponga .hidden */
@@ -898,6 +1178,7 @@ model-viewer {
     transform: translateY(0%) !important;
     opacity: 1 !important;
   }
+
   /* Si JS añade .hidden, en escritorio la ignoramos visualmente */
   .info-sheet.hidden {
     display: block !important;
@@ -916,7 +1197,8 @@ model-viewer {
     position: fixed;
     top: calc(56px + env(safe-area-inset-top, 0px));
     bottom: 0;
-    right: 0;                       /* panel a la derecha; cámbialo a left:0 si la quieres a la izq */
+    right: 0;
+    /* panel a la derecha; cámbialo a left:0 si la quieres a la izq */
     left: auto;
     width: clamp(320px, 28vw, 420px);
     border-top-left-radius: 0;
@@ -929,11 +1211,13 @@ model-viewer {
     position: fixed;
     top: calc(56px + env(safe-area-inset-top, 0px));
     left: 0;
-    right: clamp(320px, 28vw, 420px); /* reserva el lateral de la cartela */
+    right: clamp(320px, 28vw, 420px);
+    /* reserva el lateral de la cartela */
     bottom: 0;
     width: auto;
     height: auto;
-    max-width: 1400px;              /* ajusta a gusto (p.ej. 1200px) */
+    max-width: 1400px;
+    /* ajusta a gusto (p.ej. 1200px) */
     margin: 0 auto;
     background: transparent !important;
   }
@@ -946,10 +1230,13 @@ model-viewer {
 }
 
 /************ Desktop layout “curioso” ************/
-:root { --topbar-h: 56px; }
+:root {
+  --topbar-h: 56px;
+}
 
 /* Fondo con vignette + glow diagonal (muy sutil) */
 @media (min-width: 1025px) {
+
   body::before,
   body::after {
     content: "";
@@ -958,6 +1245,7 @@ model-viewer {
     pointer-events: none;
     z-index: 0;
   }
+
   /* Vignette */
   body::before {
     background:
@@ -966,16 +1254,23 @@ model-viewer {
     mix-blend-mode: screen;
     opacity: .45;
   }
+
   /* Oscurecer bordes ligeramente */
   body::after {
-    background: radial-gradient(1200px 800px at 50% -10%, transparent 40%, rgba(0,0,0,.35) 100%);
+    background: radial-gradient(1200px 800px at 50% -10%, transparent 40%, rgba(0, 0, 0, .35) 100%);
   }
 }
 
 @media (min-width: 1025px) {
+
   /* --- Reset de elementos innecesarios --- */
-  .info-sheet__close { display: none !important; }
-  .info-sheet__drag { display: none !important; }
+  .info-sheet__close {
+    display: none !important;
+  }
+
+  .info-sheet__drag {
+    display: none !important;
+  }
 
   /* --- Panel lateral limpio, sin bordes redondeados --- */
   #infoSheet {
@@ -989,7 +1284,7 @@ model-viewer {
     backdrop-filter: blur(12px) saturate(130%);
     -webkit-backdrop-filter: blur(12px) saturate(130%);
     border-left: 1px solid rgba(255, 255, 255, 0.06);
-    box-shadow: inset 1px 0 0 rgba(255,255,255,.04);
+    box-shadow: inset 1px 0 0 rgba(255, 255, 255, .04);
     z-index: 12;
     transform: none !important;
     opacity: 1 !important;
@@ -1000,13 +1295,15 @@ model-viewer {
     height: 100%;
     overflow-y: auto;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255,255,255,.15) transparent;
+    scrollbar-color: rgba(255, 255, 255, .15) transparent;
   }
+
   #infoSheet .info-sheet__content::-webkit-scrollbar {
     width: 6px;
   }
+
   #infoSheet .info-sheet__content::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,.15);
+    background: rgba(255, 255, 255, .15);
     border-radius: 0;
   }
 
@@ -1020,17 +1317,20 @@ model-viewer {
     margin-bottom: 0.8em;
     color: #f5f6f8;
   }
+
   .info-meta {
     font-size: 14px;
     line-height: 1.5;
     color: #aaa;
     margin-bottom: 1.6em;
   }
+
   .info-desc {
     font-size: 15px;
     color: #e3e3e3;
     line-height: 1.6;
   }
+
   .info-extra {
     display: grid;
     grid-template-columns: 1fr;
@@ -1039,6 +1339,7 @@ model-viewer {
     font-size: 14px;
     color: #dcdcdc;
   }
+
   .info-extra strong {
     color: #fff;
     font-weight: 500;
@@ -1047,7 +1348,7 @@ model-viewer {
   /* --- El título del topbar encima, sin interferir --- */
   #topBar {
     z-index: 30;
-    border-bottom: 1px solid rgba(255,255,255,.06);
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
     backdrop-filter: blur(12px) saturate(140%);
     -webkit-backdrop-filter: blur(12px) saturate(140%);
   }
@@ -1070,22 +1371,26 @@ model-viewer {
     position: fixed;
     inset: 0;
     background: radial-gradient(900px 700px at 70% 40%, rgba(255, 200, 150, .08), transparent 80%),
-                radial-gradient(900px 700px at 30% 70%, rgba(80, 130, 255, .07), transparent 80%);
+      radial-gradient(900px 700px at 30% 70%, rgba(80, 130, 255, .07), transparent 80%);
     opacity: .4;
     z-index: 0;
     pointer-events: none;
   }
+
   body::after {
     content: "";
     position: fixed;
     inset: 0;
-    background: radial-gradient(1400px 900px at 50% -10%, transparent 60%, rgba(0,0,0,.3) 100%);
+    background: radial-gradient(1400px 900px at 50% -10%, transparent 60%, rgba(0, 0, 0, .3) 100%);
     z-index: 0;
     pointer-events: none;
   }
 
   /* --- FABs (audio visible, AR oculto) --- */
-  body.is-desktop .ar-fab { display: none !important; }
+  body.is-desktop .ar-fab {
+    display: none !important;
+  }
+
   body.is-desktop .fab-row {
     justify-content: flex-start;
     left: 36px;
@@ -1102,21 +1407,28 @@ model-viewer {
   right: 24px;
   bottom: calc(24px + env(safe-area-inset-bottom));
   z-index: 40;
-  background: rgba(14,16,20,.82);
+  background: rgba(14, 16, 20, .82);
   backdrop-filter: blur(10px) saturate(140%);
   -webkit-backdrop-filter: blur(10px) saturate(140%);
-  border: 1px solid rgba(255,255,255,.08);
+  border: 1px solid rgba(255, 255, 255, .08);
   border-radius: 12px;
   padding: 10px 12px;
   font: 600 12px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   color: #e9eef7;
-  box-shadow: 0 12px 30px rgba(0,0,0,.35);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .35);
 }
-.kbd-help__row { display: flex; gap: 8px; align-items: baseline; white-space: nowrap; }
+
+.kbd-help__row {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  white-space: nowrap;
+}
+
 .kbd-help kbd {
-  background: rgba(255,255,255,.1);
-  border: 1px solid rgba(255,255,255,.16);
-  border-bottom-color: rgba(0,0,0,.35);
+  background: rgba(255, 255, 255, .1);
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-bottom-color: rgba(0, 0, 0, .35);
   padding: 2px 6px;
   border-radius: 6px;
   font-weight: 700;
@@ -1129,404 +1441,279 @@ model-viewer {
 /* ======================================
    TOPBAR RESPONSIVE — LOGO / TÍTULO / BOTONES
    ====================================== */
-   #topBar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(12, 16, 21, 0.9);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255,255,255,.06);
-    padding: 0 20px;
-    z-index: 40;
-  }
-  
-  /* Logo + título bloque conjunto */
-  .topbar-center {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-  }
-  
-  #brandLogo {
-    height: 28px;
-    width: auto;
-    opacity: 0.95;
-    transition: opacity 0.2s ease;
-  }
-  #brandLogo:hover {
-    opacity: 1;
-  }
-  
-  #pieceTitle {
-    font-family: "Poppins", system-ui, sans-serif;
-    font-weight: 600;
-    font-size: 20px;
-    color: #f5f6f8;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    margin: 0;
-    line-height: 1;
-  }
-  
-  /* Botón casa (solo móvil) */
-  .home-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 999px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #fff;
-    text-decoration: none;
-    transition: background 0.2s ease;
-  }
-  .home-btn::before {
-    content: "🏠";
-    font-size: 18px;
-    line-height: 1;
-  }
-  .home-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-  }
-  
-  /* Botón “Galería” (solo escritorio) */
-  .gallery-btn {
-    display: none;
-    background: none;
-    border: 1px solid rgba(255,255,255,.2);
-    padding: 8px 14px;
-    color: #fff;
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 15px;
-    text-decoration: none;
-    transition: background 0.2s ease, border-color 0.2s ease;
-  }
-  .gallery-btn:hover {
-    background: rgba(255,255,255,.1);
-    border-color: rgba(255,255,255,.3);
-  }
-  
-  /* =========================
+#topBar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(12, 16, 21, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, .06);
+  padding: 0 20px;
+  z-index: 40;
+}
+
+/* Logo + título bloque conjunto */
+.topbar-center {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#brandLogo {
+  height: 28px;
+  width: auto;
+  opacity: 0.95;
+  transition: opacity 0.2s ease;
+}
+
+#brandLogo:hover {
+  opacity: 1;
+}
+
+#pieceTitle {
+  font-family: "Poppins", system-ui, sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+  color: #f5f6f8;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 0;
+  line-height: 1;
+}
+
+/* Botón casa (solo móvil) */
+.home-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.home-btn::before {
+  content: "🏠";
+  font-size: 18px;
+  line-height: 1;
+}
+
+.home-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Botón “Galería” (solo escritorio) */
+.gallery-btn {
+  display: none;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, .2);
+  padding: 8px 14px;
+  color: #fff;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.gallery-btn:hover {
+  background: rgba(255, 255, 255, .1);
+  border-color: rgba(255, 255, 255, .3);
+}
+
+/* =========================
      DESKTOP — logo izquierda, sin título
      ========================= */
-  @media (min-width: 1025px) {
-    /* mover logo a la izquierda */
-    .topbar-center {
-      position: static;
-      transform: none;
-      left: auto;
-      top: auto;
-    }
-  
-    #brandLogo {
-      height: 32px;
-    }
-  
-    /* ocultar el texto del título */
-    #pieceTitle {
-      display: none;
-    }
-  
-    /* ocultar el botón casa */
-    .home-btn {
-      display: none;
-    }
-  
-    /* mostrar el botón “Galería” */
-    .gallery-btn {
-      display: inline-flex;
-    }
+@media (min-width: 1025px) {
+
+  /* mover logo a la izquierda */
+  .topbar-center {
+    position: static;
+    transform: none;
+    left: auto;
+    top: auto;
   }
-  
-  /* A) Ocultar SOLO en ESCRITORIO el título del topbar */
+
+  #brandLogo {
+    height: 32px;
+  }
+
+  /* ocultar el texto del título */
+  #pieceTitle {
+    display: none;
+  }
+
+  /* ocultar el botón casa */
+  .home-btn {
+    display: none;
+  }
+
+  /* mostrar el botón “Galería” */
+  .gallery-btn {
+    display: inline-flex;
+  }
+}
+
+/* A) Ocultar SOLO en ESCRITORIO el título del topbar */
 @media (min-width: 1024px) {
-  #pieceTitle { display: none !important; }
+  #pieceTitle {
+    display: none !important;
+  }
 }
 
 /* B) Mostrar el botón "Información" en móvil y ocultarlo en escritorio */
 @media (min-width: 1024px) {
-  #infoBtn { display: none !important; }
+  #infoBtn {
+    display: none !important;
+  }
 }
+
 /* (en móvil hereda tu .info-btn y se ve a la derecha del topbar) */
 
 /* C) La casita SOLO en móvil (ya la tenías, refuerzo por si acaso) */
 @media (min-width: 1024px) {
-  .home-btn { display: none !important; }
-}
-
-/* ===== Topbar: layout móvil en 3 columnas ===== */
-@media (max-width: 1023px) {
-  #topBar{
-    display: grid !important;
-    grid-template-columns: 1fr auto 1fr; /* izq — centro — dcha */
-    align-items: center;
-    gap: 8px;
-    padding: 0 10px;
-    height: 56px;
+  .home-btn {
+    display: none !important;
   }
-
-  /* Bloque izquierdo: isotipo + título */
-  .brand-left{
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    justify-self: start;
-  }
-
-  /* Móvil: mostrar isotipo, ocultar logo completo */
-  #brandMark{ display: block; height: 24px; width: auto; }
-  #brandLogo{ display: none !important; }
-
-  /* Título visible en móvil, con truncado para que no invada el centro */
-  #pieceTitle{
-    display: block !important;
-    font-size: 16px;
-    max-width: 56vw;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-transform: uppercase;
-    margin: 0;
-  }
-
-  /* Botón Información centrado */
-  #infoBtn{
-    justify-self: center;
-    min-width: auto;
-    height: 32px;
-    padding: 0 12px;
-    font-size: 13px;
-  }
-
-  /* Casa a la derecha (visible SOLO en móvil) */
-  .home-btn{
-    justify-self: end;
-    display: inline-flex !important;
-    width: 36px; height: 36px;
-  }
-
-  /* Ocultar “Galería” en móvil (por si acaso) */
-  .gallery-btn{ display: none !important; }
-}
-
-/* ===== Escritorio: logo completo, SIN título, SIN casa ===== */
-@media (min-width: 1024px) {
-  #brandMark{ display: none !important; }      /* isotipo fuera en desktop */
-  #brandLogo{ display: block; height: 32px; }  /* logo completo */
-  #pieceTitle{ display: none !important; }     /* título fuera en desktop */
-  .home-btn{ display: none !important; }       /* casa fuera en desktop */
-  .gallery-btn{ display: inline-flex; }        /* “Galería” visible en desktop */
-
-  /* Tu layout de escritorio previo sigue igual */
-}
-
-/* ===== Topbar MÓVIL (≤1023px) ===== */
-@media (max-width: 1023px) {
-  /* Aumentamos altura + respiración */
-  #topBar{
-    height: 66px; /* +10px */
-    padding: 0 10px;
-    display: grid !important;
-    grid-template-columns: 1fr auto 1fr; /* izquierda – centro – derecha */
-    align-items: center;
-    gap: 8px;
-  }
-
-  /* IZQUIERDA: isotipo visible, logo grande oculto */
-  .brand-left{
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    justify-self: start;
-  }
-  #brandMark{ display:block; height: 30px; width:auto; }  /* más alto */
-  #brandLogo{ display:none !important; }                  /* solo desktop */
-
-  /* CENTRO: título perfectamente centrado y truncado si hace falta */
-  #pieceTitle{
-    display: block !important;
-    grid-column: 2;               /* columna central */
-    justify-self: center;         /* centrado óptico */
-    margin: 0;
-    font-size: 18px;              /* un poco mayor para compensar altura */
-    line-height: 1;
-    text-transform: uppercase;
-    white-space: nowrap;
-    max-width: 64vw;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  /* DERECHA: Info + Casa juntos y alineados a la derecha */
-  .topbar-actions{
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;                     /* pegados entre sí */
-    justify-self: end;
-  }
-  #infoBtn{
-    min-width: auto;
-    height: 32px;
-    padding: 0 10px;
-    font-size: 13px;
-    border-radius: 10px;
-  }
-  .home-btn{
-    display: inline-flex !important;
-    width: 36px; height: 36px;
-  }
-
-  /* Ocultar elementos de escritorio en móvil */
-  .gallery-btn{ display:none !important; }
 }
 
 /* ===== Escritorio (≥1024px) sigue igual que ahora ===== */
-@media (min-width: 1024px){
-  #brandMark{ display:none !important; }
-  #brandLogo{ display:block; height:32px; }
-  #pieceTitle{ display:none !important; }
-  .home-btn{ display:none !important; }
-  .gallery-btn{ display:inline-flex; }
+@media (min-width: 1024px) {
+  #brandMark {
+    display: none !important;
+  }
+
+  #brandLogo {
+    display: block;
+    height: 32px;
+  }
+
+  #pieceTitle {
+    display: none !important;
+  }
+
+  .home-btn {
+    display: none !important;
+  }
+
+  .gallery-btn {
+    display: inline-flex;
+  }
 }
 
 /* ===== TOPBAR MÓVIL: [←] [Isotipo] [Título centrado] [Info.] ===== */
 /* ===== MÓVIL: flecha izquierda, SIN isotipo, título centrado perfecto, "Información" a la derecha ===== */
-@media (max-width: 1023px) {
-  /* topbar 10px más alta y preparada para centrar absoluto */
+/***********************************************
+ * MÓVIL (≤1023px)
+ * Flecha izquierda + título al lado + botón info a la derecha
+ * (Sin isotipo en móviles)
+ ***********************************************/
+@media (max-width:1023px) {
+
+  /* --- Estructura base del topbar --- */
+  /* --- Estructura base del topbar --- */
   #topBar {
-    position: relative;   /* necesario para centrar absoluto del título */
-    height: 66px;
-    padding: 0 12px;      /* un poco de aire a ambos lados */
-    display: flex;        /* flecha izquierda + botón dcha */
+    display: flex !important;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
+    /* ✅ antes era space-between */
+    height: 66px;
+    padding: 0 12px 0 8px;
+    /* ✅ reduce margen lateral derecho */
+    background: rgba(15, 17, 21, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     gap: 8px;
   }
 
-  /* Ocultar isotipo en móvil */
-  #brandMark { display: none !important; }
-
-  /* Grupo izquierdo: solo la flecha */
-  .left-group { display: inline-flex; align-items: center; gap: 10px; }
-  .back-btn   { width: 34px; height: 34px; border-radius: 50%;
-                display: inline-flex; align-items:center; justify-content:center;
-                background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); color:#fff; }
-
-  /* Título SIEMPRE centrado geométricamente, independientemente del ancho de los laterales */
-  #pieceTitle {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%,-50%);
-    margin: 0;
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: .03em;
-    text-transform: uppercase;
-    white-space: nowrap;
-    max-width: 70vw;            /* evita solapes en títulos largos */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    pointer-events: none;       /* no bloquea taps sobre los laterales */
+  /* --- IZQUIERDA: flecha + título --- */
+  .left-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex-shrink: 1;
+    flex-grow: 0;
+    /* ✅ evita que se expanda de más */
   }
 
-  /* Botón de información (texto completo) alineado a la derecha */
-  #infoBtn {
-    display: inline-flex;
+  .back-btn {
+    display: inline-flex !important;
     align-items: center;
     justify-content: center;
-    height: 34px;
-    padding: 0 14px;
-    font-size: 13px;
-    border-radius: 10px;
-    min-width: auto;            /* permite el texto más largo */
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #fff;
+    text-decoration: none;
+    flex-shrink: 0;
   }
 
-  /* Elementos solo de escritorio fuera en móvil */
-  .gallery-btn, #brandLogo { display: none !important; }
-}
+  /* --- Ocultar isotipo en móviles --- */
+  #brandMark {
+    display: none !important;
+  }
 
-/* Escritorio (se mantiene tu comportamiento actual) */
-@media (min-width: 1024px) {
-  #pieceTitle { display: none !important; }  /* sin título en topbar */
-}
-
-/* === FIX FINAL MÓVIL: [←]/casita izquierda · TÍTULO CENTRO · "Información" derecha === */
-@media (max-width:1023px){
-
-  /* Topbar en 3 columnas: izquierda | centro | derecha */
-  #topBar{
-    display: grid !important;
-    grid-template-columns: auto 1fr auto;
+  /* --- TÍTULO justo a la derecha del botón back --- */
+  .title-wrapper {
+    display: flex;
     align-items: center;
-    justify-content: stretch;
-    height: 66px;            /* +10px */
-    padding: 0 10px;
-    gap: 8px;
-    position: relative;
+    min-width: 0;
+    max-width: 70vw;
+    /* ✅ evita ocupar todo el ancho */
+    flex-shrink: 1;
   }
 
-  /* Centro: usamos el wrapper existente y anulamos el centrado absoluto previo */
-  .topbar-center{
-    position: static !important;
-    left: auto !important;
-    top: auto !important;
-    transform: none !important;
-    justify-self: center;     /* centra geométricamente */
-    display: block !important;
-  }
-
-  /* Título perfectamente centrado y sin posicionamiento absoluto */
-  #pieceTitle{
-    position: static !important;
+  #pieceTitle {
+    font-family: 'Poppins', serif;
+    font-weight: 600;
+    font-size: 17px;
+    color: var(--text);
     margin: 0;
-    font-size: 18px;
-    text-transform: uppercase;
-    white-space: nowrap;
-    max-width: 64vw;
+    line-height: 1.2;
+    text-transform: none;
+    text-align: left;
     overflow: hidden;
     text-overflow: ellipsis;
-    pointer-events: none;     /* no bloquea taps de los lados */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    pointer-events: none;
   }
 
-  /* Isotipo/logo fuera en móvil para que no empuje el título */
-  #brandLogo{ display:none !important; }
-
-  /* Izquierda: botón de volver/casa */
-  .home-btn{
+  /* --- DERECHA: Botón info --- */
+  #infoBtn {
     display: inline-flex !important;
-    justify-self: start;
-    width: 36px; height: 36px;
-  }
-
-  /* Derecha: botón de información donde siempre */
-  #infoBtn{
-    display: inline-flex !important;
-    justify-self: end;
-    min-width: auto;
+    align-items: center;
+    justify-content: center;
     height: 34px;
     padding: 0 12px;
     font-size: 13px;
     border-radius: 10px;
+    min-width: auto;
+    flex-shrink: 0;
   }
-}
 
-/* Escritorio se mantiene como ya lo tienes */
-@media (min-width:1024px){
-  #pieceTitle{ display:none !important; }
-  #infoBtn{ display:none !important; }
-  .home-btn{ display:none !important; }
+  /* --- Ocultar elementos de escritorio --- */
+  #brandLogo,
+  .gallery-btn {
+    display: none !important;
+  }
 }

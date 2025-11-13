@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Start Live Server",
+      "type": "shell",
+      "command": "code --install-extension ritwickdey.LiveServer --force && sleep 1 && npx live-server --quiet --port=5500",
+      "problemMatcher": []
+    }
+  ]
+}
