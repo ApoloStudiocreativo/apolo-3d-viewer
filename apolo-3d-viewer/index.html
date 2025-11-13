@@ -1,1035 +1,1017 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
-    />
-    <meta name="theme-color" content="#0f1115" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-    <title>Museo Virtual San Joaquín y Santa Ana</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f1115" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-    <!-- Preconnect (mejora de rendimiento fuentes) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <title>Museo Virtual San Joaquín y Santa Ana</title>
 
-    <!-- Tipografía para títulos -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght=600&display=swap" rel="stylesheet"></noscript>
-    
+  <!-- Preconnect (mejora de rendimiento fuentes) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <!-- CSS principal -->
-    <link rel="stylesheet" href="/index.css" />
+  <!-- Tipografía para títulos -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet" media="print"
+    onload="this.media='all'">
+  <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght=600&display=swap" rel="stylesheet">
+  </noscript>
 
-    <!-- Datos/metadatos -->
-    <link
-      rel="preload"
-      href="/assets/info.json"
-      as="fetch"
-      type="application/json"
-      crossorigin="anonymous"
-    />
 
-    <!-- HDR / skybox -->
-    <link rel="preload" as="image" href="/assets/hdr/studio_small_09_2k.hdr" />
-    <link rel="manifest" href="/manifest.webmanifest">
+  <!-- CSS principal -->
+  <link rel="stylesheet" href="/index.css" />
 
-    <link rel="preconnect" href="https://ajax.googleapis.com" crossorigin>
-    <link rel="modulepreload" href="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js" crossorigin>
+  <!-- Datos/metadatos -->
+  <link rel="preload" href="/assets/info.json" as="fetch" type="application/json" crossorigin="anonymous" />
+
+  <!-- HDR / skybox -->
+  <link rel="preload" as="image" href="/assets/hdr/studio_small_09_2k.hdr" />
+  <link rel="manifest" href="/manifest.webmanifest">
+
+  <link rel="preconnect" href="https://ajax.googleapis.com" crossorigin>
+  <link rel="modulepreload" href="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"
+    crossorigin>
 
 
 
-    <!-- model-viewer (GLB) -->
-    <script type="module" src="/vendor/model-viewer-4.0.0.min.js"></script>
+  <!-- model-viewer (GLB) -->
+  <script type="module" src="/vendor/model-viewer-4.0.0.min.js"></script>
 
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch((e) =>
-            console.debug('[sw] no registrado:', e?.message || e)
-          );
-        });
-      }
-    </script>
-    
-  </head>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch((e) =>
+          console.debug('[sw] no registrado:', e?.message || e)
+        );
+      });
+    }
+  </script>
 
-  <body>
-    <!-- =========================
+</head>
+
+<body>
+  <!-- =========================
          Topbar
          ========================= -->
-         <header id="topBar">
-          <!-- IZQUIERDA: Flecha + Isotipo -->
-          <div class="left-group">
-            <a class="back-btn" href="https://museovirtualsantana.es" aria-label="Volver atrás">
-              <!-- Flecha minimalista -->
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="15 18 9 12 15 6"></polyline>
-              </svg>
-            </a>
-        
-            <!-- Isotipo (solo móvil) -->
-            <img id="brandMark" src="/assets/brand/isotipo.svg" alt="Museo Virtual" />
-        
-            <!-- Logotipo completo (solo escritorio) -->
-            <img id="brandLogo" src="/assets/brand/logo-museo.svg" alt="Museo Virtual San Joaquín y Santa Ana" />
-          </div>
-          
-          <!-- TÍTULO a la derecha del botón back -->
-          <div class="title-wrapper">
-            <h1 id="pieceTitle">Cristo Yacente</h1>
-          </div>
+  <header id="topBar">
+    <!-- IZQUIERDA: Flecha + Isotipo -->
+    <div class="left-group">
+      <a class="back-btn" href="https://museovirtualsantana.es" aria-label="Volver atrás">
+        <!-- Flecha minimalista -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </a>
 
-        
-          <!-- DERECHA: Botón Info (móvil) / Galería (escritorio) -->
-          <button id="infoBtn" class="info-btn" type="button" aria-controls="infoSheet" aria-expanded="false">
-            Información
-          </button>          
-          <a class="gallery-btn" href="https://museovirtualsantana.es" target="_blank" rel="noopener">Galería</a>
-        </header>
-        
-        
-        
+      <!-- Isotipo (solo móvil) -->
+      <img id="brandMark" src="/assets/brand/isotipo.svg" alt="Museo Virtual" />
 
-<!-- Ayuda de atajos (desktop) -->
-<div id="kbdHelp" class="kbd-help hidden" aria-hidden="true">
-  <div class="kbd-help__row"><kbd>Arrastrar</kbd> Rotar</div>
-  <div class="kbd-help__row"><kbd>Shift</kbd> + arrastrar — Pan</div>
-  <div class="kbd-help__row"><kbd>Rueda</kbd> — Zoom</div>
-  <div class="kbd-help__row"><kbd>H</kbd> — Mostrar/ocultar ayuda</div>
-</div>
+      <!-- Logotipo completo (solo escritorio) -->
+      <img id="brandLogo" src="/assets/brand/logo-museo.svg" alt="Museo Virtual San Joaquín y Santa Ana" />
+    </div>
+
+    <!-- TÍTULO a la derecha del botón back -->
+    <div class="title-wrapper">
+      <h1 id="pieceTitle">Cristo Yacente</h1>
+    </div>
+
+
+    <!-- DERECHA: Botón Info (móvil) / Galería (escritorio) -->
+    <button id="infoBtn" class="info-btn" type="button" aria-controls="infoSheet" aria-expanded="false">
+      Información
+    </button>
+    <a class="gallery-btn" href="https://museovirtualsantana.es" target="_blank" rel="noopener">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v9"></path>
+        <path d="M3 10l9 5 9-5"></path>
+        <path d="M21 19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+      </svg>
+      Ir a la galería
+    </a>
+  </header>
 
 
 
-    <!-- Mensaje si faltan parámetros -->
-    <div id="msg" class="hidden"></div>
 
-    <!-- =========================
+  <!-- Ayuda de atajos (desktop) -->
+  <div id="kbdHelp" class="kbd-help hidden" aria-hidden="true">
+    <div class="kbd-help__row"><kbd>Arrastrar</kbd> Rotar</div>
+    <div class="kbd-help__row"><kbd>Shift</kbd> + arrastrar — Pan</div>
+    <div class="kbd-help__row"><kbd>Rueda</kbd> — Zoom</div>
+    <div class="kbd-help__row"><kbd>H</kbd> — Mostrar/ocultar ayuda</div>
+  </div>
+
+
+
+  <!-- Mensaje si faltan parámetros -->
+  <div id="msg" class="hidden"></div>
+
+  <!-- =========================
          Overlay skeleton (carga)
          ========================= -->
-    <div id="skel" class="skeleton">
-      <div class="loader-container">
-        <div class="loader-circle">
-          <div class="loader-progress" id="loaderProgress">0%</div>
-        </div>
-        <p class="loader-text">
-          Cargando experiencia,<br />
-          puede tardar un poco según tu conexión
-        </p>
+  <div id="skel" class="skeleton">
+    <div class="loader-container">
+      <div class="loader-circle">
+        <div class="loader-progress" id="loaderProgress">0%</div>
       </div>
+      <p class="loader-text">
+        Cargando experiencia,<br />
+        puede tardar un poco según tu conexión
+      </p>
     </div>
+  </div>
 
-    <!-- =========================
+  <!-- =========================
          Vista GLB
          ========================= -->
-    <model-viewer
-      id="mv"
-      class="hidden"
-      poster="/models/placeholder.webp"
-      alt="Modelo 3D"
-      camera-controls
-      touch-action="pan-y"
-      ar
-      ar-modes="scene-viewer quick-look webxr"
-      ar-scale="fixed"
-      ar-placement="floor"
-      environment-image="neutral"
-      shadow-intensity="1.2"
-      shadow-softness="0.9"
-      exposure="1"
-      camera-orbit="0deg 70deg 1.5m"
-      field-of-view="30deg"
-    >
+  <!-- CONTENEDOR EXCLUSIVO DE ESCRITORIO -->
+  <div id="viewerContainer" class="desktop-only">
+    <model-viewer id="mv" class="hidden" poster="/models/placeholder.webp" alt="Modelo 3D" camera-controls
+      touch-action="pan-y" ar ar-modes="scene-viewer quick-look webxr" ar-scale="fixed" ar-placement="floor"
+      environment-image="neutral" shadow-intensity="1.2" shadow-softness="0.9" exposure="1"
+      camera-orbit="0deg 70deg 1.5m" field-of-view="30deg">
     </model-viewer>
 
-    <!-- =========================
-         Vista SPLAT
-         ========================= -->
-    <iframe
-      id="splat"
-      class="hidden"
-      loading="lazy"
-      allow="autoplay; fullscreen; xr-spatial-tracking; camera; microphone; gyroscope; accelerometer"
-    >
+    <iframe id="splat" class="hidden" loading="lazy"
+      allow="autoplay; fullscreen; xr-spatial-tracking; camera; microphone; gyroscope; accelerometer">
     </iframe>
+  </div>
 
-    <!-- Poster temporal antes del SPLAT -->
-    <div id="splatPoster" class="splat-poster hidden" aria-hidden="true"></div>
 
-    <!-- =========================
+  <!-- CARTELA EXCLUSIVA ESCRITORIO -->
+  <aside id="infoPanel" class="desktop-only">
+    <div class="info-content">
+      <h2 id="infoTitleDesktop">Cristo Yacente</h2>
+      <p class="info-meta">Siglo XVIII (1740) — Luis Salvador Carmona — Madera</p>
+      <p class="info-desc">
+        Escultura barroca en madera policromada que representa el cuerpo de Cristo tras su descendimiento.
+      </p>
+
+      <ul class="info-details">
+        <li><strong>Tipología:</strong> Madera policromada</li>
+        <li><strong>Material:</strong> Madera</li>
+        <li><strong>Fecha:</strong> Siglo XVIII (1740)</li>
+        <li><strong>Autor:</strong> Luis Salvador Carmona</li>
+      </ul>
+    </div>
+  </aside>
+
+
+  <!-- Poster temporal antes del SPLAT -->
+  <div id="splatPoster" class="splat-poster hidden" aria-hidden="true"></div>
+
+  <!-- =========================
          FABs (Audio + AR)
          ========================= -->
-    <div id="fabRow" class="fab-row">
-      <!-- AUDIO (izquierda) -->
-      <button
-        id="audioBtn"
-        class="audio-fab hidden"
-        type="button"
-        aria-label="Reproducir audio"
-        aria-pressed="false"
-      >
-        <!-- Icono ALTAVOZ (parado) -->
-        <svg class="icon-play" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path
-            d="M4 9v6h3l5 4V5L7 9H4z"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-          <path
-            d="M15 10.5a3.5 3.5 0 010 3"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-          />
-          <path
-            d="M17.5 8a6 6 0 010 8"
-            stroke="currentColor"
-            stroke-width="1.8"
-            stroke-linecap="round"
-          />
-        </svg>
-        <!-- Icono PAUSA (reproduciendo) -->
-        <svg class="icon-pause" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <rect x="6" y="5" width="4" height="14" rx="1.2" stroke="currentColor" stroke-width="1.8" />
-          <rect x="14" y="5" width="4" height="14" rx="1.2" stroke="currentColor" stroke-width="1.8" />
-        </svg>
-      </button>
+  <div id="fabRow" class="fab-row">
+    <!-- AUDIO (izquierda) -->
+    <button id="audioBtn" class="audio-fab hidden" type="button" aria-label="Reproducir audio" aria-pressed="false">
+      <!-- Icono ALTAVOZ (parado) -->
+      <svg class="icon-play" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <path d="M4 9v6h3l5 4V5L7 9H4z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+          stroke-linejoin="round" />
+        <path d="M15 10.5a3.5 3.5 0 010 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+        <path d="M17.5 8a6 6 0 010 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+      </svg>
+      <!-- Icono PAUSA (reproduciendo) -->
+      <svg class="icon-pause" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="6" y="5" width="4" height="14" rx="1.2" stroke="currentColor" stroke-width="1.8" />
+        <rect x="14" y="5" width="4" height="14" rx="1.2" stroke="currentColor" stroke-width="1.8" />
+      </svg>
+    </button>
 
-      <!-- AR (derecha) -->
-      <button id="arBtn" class="ar-fab hidden" type="button" aria-label="Ver en AR">
-        <svg viewBox="0 0 24 24" fill="none">
-          <path
-            d="M12 3l8.66 5v8L12 21l-8.66-5V8L12 3zM12 3v18M3.34 8L12 13l8.66-5"
-            stroke="white"
-            stroke-width="1.8"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          />
-        </svg>
-        Ver en AR
-      </button>
-    </div>
+    <!-- AR (derecha) -->
+    <button id="arBtn" class="ar-fab hidden" type="button" aria-label="Ver en AR">
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M12 3l8.66 5v8L12 21l-8.66-5V8L12 3zM12 3v18M3.34 8L12 13l8.66-5" stroke="white" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      Ver en AR
+    </button>
+  </div>
 
-    <!-- =========================
+  <!-- =========================
          Overlay de carga AR
          ========================= -->
-    <div id="arLoading" class="ar-loading hidden" aria-hidden="true">
-      <div class="spinner" aria-hidden="true"></div>
-      <span>Abriendo AR…</span>
-    </div>
+  <div id="arLoading" class="ar-loading hidden" aria-hidden="true">
+    <div class="spinner" aria-hidden="true"></div>
+    <span>Abriendo AR…</span>
+  </div>
 
-    <!-- =========================
+  <!-- =========================
          Cartela (Info Sheet)
          ========================= -->
-    <div id="infoSheet" class="info-sheet hidden" aria-hidden="true">
-      <div class="info-sheet__drag"></div>
-      <button id="infoClose" class="info-sheet__close" aria-label="Cerrar">✕</button>
-      <div class="info-sheet__content">
-        <h2 id="infoTitle">Obra</h2>
-        <p class="info-meta" id="infoMeta"></p>
-        <p class="info-desc" id="infoDesc"></p>
-      </div>
+  <div id="infoSheet" class="info-sheet hidden" aria-hidden="true">
+    <div class="info-sheet__drag"></div>
+    <button id="infoClose" class="info-sheet__close" aria-label="Cerrar">✕</button>
+    <div class="info-sheet__content">
+      <h2 id="infoTitle">Obra</h2>
+      <p class="info-meta" id="infoMeta"></p>
+      <p class="info-desc" id="infoDesc"></p>
     </div>
+  </div>
 
-    <!-- Link AR iOS oculto -->
-    <a id="iosARLink" rel="ar" style="display:none" aria-hidden="true"></a>
+  <!-- Link AR iOS oculto -->
+  <a id="iosARLink" rel="ar" style="display:none" aria-hidden="true"></a>
 
-    <!-- =========================
+  <!-- =========================
          Script principal (sin eliminar nada, solo organizado)
          ========================= -->
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        // ---------------- URL: soporta query *y* pathname limpias ----------------
-        const qs = new URLSearchParams(location.search);
-        let type = (qs.get('type') || '').toLowerCase(); // 'glb' | 'splat'
-        let model = (qs.get('model') || '').toLowerCase();
-        let figure = (qs.get('figure') || '').toLowerCase();
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // ---------------- URL: soporta query *y* pathname limpias ----------------
+      const qs = new URLSearchParams(location.search);
+      let type = (qs.get('type') || '').toLowerCase(); // 'glb' | 'splat'
+      let model = (qs.get('model') || '').toLowerCase();
+      let figure = (qs.get('figure') || '').toLowerCase();
 
-        if (!type) {
-          const parts = location.pathname.split('/').filter(Boolean);
-          if (parts[0] === 'splat' && parts[1]) {
-            type = 'splat';
-            figure = parts[1];
-          } else if (parts[0] === 'glb' && parts[1]) {
-            type = 'glb';
-            model = parts[1];
-          } else if (parts.length === 1) {
-            type = 'glb';
-            model = parts[0]; // /:slug → GLB por defecto
-          }
+      if (!type) {
+        const parts = location.pathname.split('/').filter(Boolean);
+        if (parts[0] === 'splat' && parts[1]) {
+          type = 'splat';
+          figure = parts[1];
+        } else if (parts[0] === 'glb' && parts[1]) {
+          type = 'glb';
+          model = parts[1];
+        } else if (parts.length === 1) {
+          type = 'glb';
+          model = parts[0]; // /:slug → GLB por defecto
         }
-        const slug = model || figure || '';
+      }
+      const slug = model || figure || '';
 
-        // Estado persistente de la cartela por pieza
-        const sheetKeyFor = (s) => `sheet:${s}`;
+      // Estado persistente de la cartela por pieza
+      const sheetKeyFor = (s) => `sheet:${s}`;
 
-        // ---------------- Elementos del DOM ----------------
-        const fabRow = document.getElementById('fabRow');
-        const mv = document.getElementById('mv');
-        const splat = document.getElementById('splat');
-        const skel = document.getElementById('skel');
-        const msg = document.getElementById('msg');
-        const arBtn = document.getElementById('arBtn');
-        const topBar = document.getElementById('topBar');
-        const pieceTitle = document.getElementById('pieceTitle');
-        const infoBtn = document.getElementById('infoBtn');
-        const sheet = document.getElementById('infoSheet');
-        const sheetClose = document.getElementById('infoClose');
-        const infoTitle = document.getElementById('infoTitle');
-        const infoMeta = document.getElementById('infoMeta');
-        const infoDesc = document.getElementById('infoDesc');
-        const audioBtn = document.getElementById('audioBtn');
+      // ---------------- Elementos del DOM ----------------
+      const fabRow = document.getElementById('fabRow');
+      const mv = document.getElementById('mv');
+      const splat = document.getElementById('splat');
+      const skel = document.getElementById('skel');
+      const msg = document.getElementById('msg');
+      const arBtn = document.getElementById('arBtn');
+      const topBar = document.getElementById('topBar');
+      const pieceTitle = document.getElementById('pieceTitle');
+      const infoBtn = document.getElementById('infoBtn');
+      const sheet = document.getElementById('infoSheet');
+      const sheetClose = document.getElementById('infoClose');
+      const infoTitle = document.getElementById('infoTitle');
+      const infoMeta = document.getElementById('infoMeta');
+      const infoDesc = document.getElementById('infoDesc');
+      const audioBtn = document.getElementById('audioBtn');
 
-        // === Desktop mode toggle ===
-        const mqDesk = window.matchMedia('(min-width: 1025px)');
-        function applyDesktopClass() {
-          document.body.classList.toggle('is-desktop', mqDesk.matches);
-          // En desktop: cartela siempre visible y sin botón cerrar
-          if (mqDesk.matches) {
-            // mostrar cartela si hay slug
-            try { sheet.classList.remove('hidden'); sheet.setAttribute('aria-hidden','false'); } catch {}
-          }
+      // === Desktop mode toggle ===
+      const mqDesk = window.matchMedia('(min-width: 1025px)');
+      function applyDesktopClass() {
+        document.body.classList.toggle('is-desktop', mqDesk.matches);
+        // En desktop: cartela siempre visible y sin botón cerrar
+        if (mqDesk.matches) {
+          // mostrar cartela si hay slug
+          try { sheet.classList.remove('hidden'); sheet.setAttribute('aria-hidden', 'false'); } catch { }
         }
-        mqDesk.addEventListener?.('change', applyDesktopClass);
-        applyDesktopClass();
+      }
+      mqDesk.addEventListener?.('change', applyDesktopClass);
+      applyDesktopClass();
 
-        // === Cheatsheet: H para mostrar/ocultar (solo desktop) ===
-        const kbd = document.getElementById('kbdHelp');
-        window.addEventListener('keydown', (e) => {
-          if (!document.body.classList.contains('is-desktop')) return;
-          if (e.key.toLowerCase() === 'h') {
-            kbd.classList.toggle('hidden');
-            kbd.setAttribute('aria-hidden', kbd.classList.contains('hidden') ? 'true' : 'false');
-          }
-        });
-
-
-        if (infoBtn) {
-          infoBtn.setAttribute('aria-controls', 'infoSheet');
-          infoBtn.setAttribute('aria-expanded', 'false');
+      // === Cheatsheet: H para mostrar/ocultar (solo desktop) ===
+      const kbd = document.getElementById('kbdHelp');
+      window.addEventListener('keydown', (e) => {
+        if (!document.body.classList.contains('is-desktop')) return;
+        if (e.key.toLowerCase() === 'h') {
+          kbd.classList.toggle('hidden');
+          kbd.setAttribute('aria-hidden', kbd.classList.contains('hidden') ? 'true' : 'false');
         }
-
-        // Accesibilidad: anuncia el progreso del loader
-        const loaderProgressEl = document.getElementById('loaderProgress');
-        if (loaderProgressEl) {
-          loaderProgressEl.setAttribute('role', 'status');
-          loaderProgressEl.setAttribute('aria-live', 'polite');
-          loaderProgressEl.setAttribute('aria-atomic', 'true');
-        }
-
-        // Wake Lock para evitar que se apague la pantalla mientras se usa la app
-        let wakeLock = null;
-        async function requestWakeLock() {
-          try {
-            if ('wakeLock' in navigator && !wakeLock) {
-              wakeLock = await navigator.wakeLock.request('screen');
-              wakeLock.addEventListener('release', () => {
-                wakeLock = null;
-              });
-            }
-          } catch (e) {
-            // Algunos móviles lo bloquean; sin drama
-            console.debug('WakeLock no disponible:', e?.message || e);
-          }
-        }
-        document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible') {
-            requestWakeLock();
-          } else if (wakeLock) {
-            try {
-              wakeLock.release();
-            } catch {}
-            wakeLock = null;
-          }
-        });
-        // Primer intento en cuanto cargue
-        requestWakeLock();
-
-        // ---------------- Rutas y helpers ----------------
-        const glbUrl = (name) => `/models/${name}/${name}.glb`;
-        const usdzUrl = (name) => `/models/${name}/${name}.usdz`;
-        const splatUrl = (name) => `/splat/${name}/index.html`;
-
-        // === Firma efímera de URLs (token 60s) ===
-        const signedCache = new Map();
-
-        async function signPath(path) {
-          // Devuelve URL absoluta firmada o lanza error
-          const r = await fetch(`/api/sign?f=${encodeURIComponent(path)}`, {
-            cache: 'no-store',
-            credentials: 'omit'
-          });
-          if (!r.ok) throw new Error('sign failed');
-          const { url } = await r.json();
-          return url;
-        }
-
-        async function signedOrPlain(path) {
-          try {
-            if (signedCache.has(path)) return signedCache.get(path);
-            const url = await signPath(path);
-            signedCache.set(path, url);
-            return url;
-          } catch {
-            // Fallback si algo falla (no bloquea la UX)
-            return path;
-          }
-        }
+      });
 
 
-        async function exists(url) {
-          try {
-            const r = await fetch(url, {
-              method: 'HEAD',
-              cache: 'force-cache',
-              priority: 'low',
-              keepalive: true
+      if (infoBtn) {
+        infoBtn.setAttribute('aria-controls', 'infoSheet');
+        infoBtn.setAttribute('aria-expanded', 'false');
+      }
+
+      // Accesibilidad: anuncia el progreso del loader
+      const loaderProgressEl = document.getElementById('loaderProgress');
+      if (loaderProgressEl) {
+        loaderProgressEl.setAttribute('role', 'status');
+        loaderProgressEl.setAttribute('aria-live', 'polite');
+        loaderProgressEl.setAttribute('aria-atomic', 'true');
+      }
+
+      // Wake Lock para evitar que se apague la pantalla mientras se usa la app
+      let wakeLock = null;
+      async function requestWakeLock() {
+        try {
+          if ('wakeLock' in navigator && !wakeLock) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            wakeLock.addEventListener('release', () => {
+              wakeLock = null;
             });
-            return r.ok;
-          } catch {
-            return false;
           }
+        } catch (e) {
+          // Algunos móviles lo bloquean; sin drama
+          console.debug('WakeLock no disponible:', e?.message || e);
         }
-
-        // Helpers de plataforma
-        const isIOS =
-          /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
-          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-        const isAndroid = /Android/.test(navigator.userAgent);
-
-        // Helper para resetear listeners de un botón sin cambiar su HTML ni clases
-        function resetClick(el) {
-          const clone = el.cloneNode(true);
-          el.replaceWith(clone);
-          return clone; // el nuevo nodo sin listeners
+      }
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          requestWakeLock();
+        } else if (wakeLock) {
+          try {
+            wakeLock.release();
+          } catch { }
+          wakeLock = null;
         }
+      });
+      // Primer intento en cuanto cargue
+      requestWakeLock();
 
-        // Helpers de visibilidad
-        function show(el) {
-          if (el) el.classList.remove('hidden');
+      // ---------------- Rutas y helpers ----------------
+      const glbUrl = (name) => `/models/${name}/${name}.glb`;
+      const usdzUrl = (name) => `/models/${name}/${name}.usdz`;
+      const splatUrl = (name) => `/splat/${name}/index.html`;
+
+      // === Firma efímera de URLs (token 60s) ===
+      const signedCache = new Map();
+
+      async function signPath(path) {
+        // Devuelve URL absoluta firmada o lanza error
+        const r = await fetch(`/api/sign?f=${encodeURIComponent(path)}`, {
+          cache: 'no-store',
+          credentials: 'omit'
+        });
+        if (!r.ok) throw new Error('sign failed');
+        const { url } = await r.json();
+        return url;
+      }
+
+      async function signedOrPlain(path) {
+        try {
+          if (signedCache.has(path)) return signedCache.get(path);
+          const url = await signPath(path);
+          signedCache.set(path, url);
+          return url;
+        } catch {
+          // Fallback si algo falla (no bloquea la UX)
+          return path;
         }
-        function hide(el) {
-          if (el) el.classList.add('hidden');
+      }
+
+
+      async function exists(url) {
+        try {
+          const r = await fetch(url, {
+            method: 'HEAD',
+            cache: 'force-cache',
+            priority: 'low',
+            keepalive: true
+          });
+          return r.ok;
+        } catch {
+          return false;
         }
+      }
 
-        // 🟢 Haptics robusto + fallback visual
-        function supportsVibrate() {
-          return typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
+      // Helpers de plataforma
+      const isIOS =
+        /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isAndroid = /Android/.test(navigator.userAgent);
+
+      // Helper para resetear listeners de un botón sin cambiar su HTML ni clases
+      function resetClick(el) {
+        const clone = el.cloneNode(true);
+        el.replaceWith(clone);
+        return clone; // el nuevo nodo sin listeners
+      }
+
+      // Helpers de visibilidad
+      function show(el) {
+        if (el) el.classList.remove('hidden');
+      }
+      function hide(el) {
+        if (el) el.classList.add('hidden');
+      }
+
+      // 🟢 Haptics robusto + fallback visual
+      function supportsVibrate() {
+        return typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
+      }
+      function addHapticFeedback(selector, pattern = [18]) {
+        const btn = document.querySelector(selector);
+        if (!btn) return;
+
+        // Fallback visual (escala rápida) para iOS/desktop
+        const pulse = () => {
+          btn.classList.add('tap-pulse');
+          setTimeout(() => btn.classList.remove('tap-pulse'), 120);
+        };
+
+        const onDown = () => {
+          let didVibrate = false;
+          try {
+            if (supportsVibrate()) {
+              // En algunos Android un solo valor pequeño se ignora: patrón corto ayuda
+              didVibrate = navigator.vibrate(pattern);
+            }
+          } catch { }
+          if (!didVibrate) pulse();
+        };
+
+        // feedback inmediato
+        btn.addEventListener('pointerdown', onDown);
+      }
+      addHapticFeedback('#infoBtn', [14]);
+      addHapticFeedback('#infoClose', [14]);
+      addHapticFeedback('#arBtn', [20]);
+      addHapticFeedback('#audioBtn', [12, 8]);
+      addHapticFeedback('#homeBtn', [12]);
+      addHapticFeedback('#homeBtn', [12]);
+
+
+      console.debug('[haptics] vibrate supported?', supportsVibrate());
+
+      // Toast reutilizable (mensaje flotante)
+      function showToast(message = 'Pulsa de nuevo para habilitar el audio', ms = 1800) {
+        let t = document.querySelector('.toast');
+        if (!t) {
+          t = document.createElement('div');
+          t.className = 'toast';
+          document.body.appendChild(t);
         }
-        function addHapticFeedback(selector, pattern = [18]) {
-          const btn = document.querySelector(selector);
-          if (!btn) return;
+        t.textContent = message;
+        t.classList.add('show');
+        window.clearTimeout(showToast._timer);
+        showToast._timer = window.setTimeout(() => t.classList.remove('show'), ms);
+      }
 
-          // Fallback visual (escala rápida) para iOS/desktop
-          const pulse = () => {
-            btn.classList.add('tap-pulse');
-            setTimeout(() => btn.classList.remove('tap-pulse'), 120);
-          };
-
-          const onDown = () => {
-            let didVibrate = false;
-            try {
-              if (supportsVibrate()) {
-                // En algunos Android un solo valor pequeño se ignora: patrón corto ayuda
-                didVibrate = navigator.vibrate(pattern);
-              }
-            } catch {}
-            if (!didVibrate) pulse();
-          };
-
-          // feedback inmediato
-          btn.addEventListener('pointerdown', onDown);
-        }
-        addHapticFeedback('#infoBtn', [14]);
-        addHapticFeedback('#infoClose', [14]);
-        addHapticFeedback('#arBtn', [20]);
-        addHapticFeedback('#audioBtn', [12, 8]);
-        addHapticFeedback('#homeBtn', [12]);
-        addHapticFeedback('#homeBtn', [12]);
-
-
-        console.debug('[haptics] vibrate supported?', supportsVibrate());
-
-        // Toast reutilizable (mensaje flotante)
-        function showToast(message = 'Pulsa de nuevo para habilitar el audio', ms = 1800) {
-          let t = document.querySelector('.toast');
-          if (!t) {
-            t = document.createElement('div');
-            t.className = 'toast';
-            document.body.appendChild(t);
-          }
-          t.textContent = message;
-          t.classList.add('show');
-          window.clearTimeout(showToast._timer);
-          showToast._timer = window.setTimeout(() => t.classList.remove('show'), ms);
-        }
-
-        // Mensaje de error con CTA de reintento
-        function showErrorAndRetry(kind, name, retryFn) {
-          const cta = document.createElement('div');
-          cta.style.cssText = 'margin-top:12px; display:flex; gap:8px; justify-content:center;';
-          const btnRetry = document.createElement('button');
-          btnRetry.textContent = 'Reintentar';
-          btnRetry.className = 'info-btn';
-          btnRetry.style.minWidth = 'auto';
-          btnRetry.onclick = () => {
-            const msg = document.getElementById('msg');
-            if (msg) msg.classList.add('hidden');
-            retryFn?.();
-          };
-
+      // Mensaje de error con CTA de reintento
+      function showErrorAndRetry(kind, name, retryFn) {
+        const cta = document.createElement('div');
+        cta.style.cssText = 'margin-top:12px; display:flex; gap:8px; justify-content:center;';
+        const btnRetry = document.createElement('button');
+        btnRetry.textContent = 'Reintentar';
+        btnRetry.className = 'info-btn';
+        btnRetry.style.minWidth = 'auto';
+        btnRetry.onclick = () => {
           const msg = document.getElementById('msg');
-          if (msg) {
-            msg.innerHTML = `
+          if (msg) msg.classList.add('hidden');
+          retryFn?.();
+        };
+
+        const msg = document.getElementById('msg');
+        if (msg) {
+          msg.innerHTML = `
               <div>
                 <b>No se pudo cargar la pieza</b><br/><br/>
                 Tipo: <code>${kind}</code> · Id: <code>${name}</code><br/>
                 Puede ser tu conexión o un archivo temporalmente no disponible.
               </div>`;
-            msg.appendChild(cta);
-            cta.appendChild(btnRetry);
-            msg.classList.remove('hidden');
-          }
-
-          showToast('Error de carga. Pulsa “Reintentar”.', 2200);
-        }
-
-        // Habilita/Deshabilita el botón AR visual y funcionalmente
-        function setArEnabled(enabled) {
-          const btn = document.getElementById('arBtn');
-          if (!btn) return;
-          if (enabled) {
-            btn.removeAttribute('disabled');
-            btn.classList.remove('is-disabled');
-          } else {
-            btn.setAttribute('disabled', 'true');
-            btn.classList.add('is-disabled');
-          }
-        }
-
-                // --- Standalone detector (A2HS) ---
-        function isStandalone() {
-          const iosStandalone = ('standalone' in navigator) && navigator.standalone;
-          const pwaStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
-          return iosStandalone || pwaStandalone;
-        }
-
-        // --- Watchdog de progreso de <model-viewer> ---
-        function startProgressWatchdog(mvEl, { timeoutMs = 8000, onStall } = {}) {
-          let progressed = false;
-          const onProg = (e) => {
-            const p = e?.detail?.totalProgress ?? 0;
-            if (p > 0) progressed = true;
-          };
-          mvEl.addEventListener('progress', onProg, { passive: true });
-          const timer = setTimeout(() => {
-            mvEl.removeEventListener('progress', onProg);
-            if (!progressed) onStall?.();
-          }, timeoutMs);
-          return () => { clearTimeout(timer); mvEl.removeEventListener('progress', onProg); };
-        }
-
-
-        // ---------------- Audio por figura (botón siempre visible + cleanup) ----------------
-        let audio = null;
-        let audioCleanup = () => {};
-        async function setupAudioFor(id) {
-          // Limpia lo anterior
-          try {
-            audioCleanup();
-          } catch {}
-          audioCleanup = () => {};
-          audio = null;
-
-          if (!audioBtn) return;
-
-          const url = `/assets/audio/${id}.mp3`;
-          audio = new Audio(await signedOrPlain(url));
-
-
-          // Mostrar SIEMPRE la fila y el botón (respetando tu CSS cuando se pueda)
-          if (fabRow) {
-            fabRow.classList.remove('hidden');
-            fabRow.style.display = 'flex';
-          }
-          audioBtn.classList.remove('hidden', 'is-playing');
-          audioBtn.style.display = 'flex';
-          audioBtn.removeAttribute('disabled');
-          audioBtn.dataset.state = 'idle'; // para estilos opcionales
-          audioBtn.setAttribute('aria-pressed', 'false');
-          audioBtn.setAttribute('aria-label', 'Reproducir audio');
-
-          // Crea el elemento de audio
-          audio = new Audio(url);
-          audio.loop = true;
-          audio.preload = 'none';
-
-          const onClick = async () => {
-            if (!audio) return;
-            if (audio.paused) {
-              try {
-                await audio.play();
-                audioBtn.classList.add('is-playing');
-                audioBtn.dataset.state = 'playing';
-                audioBtn.setAttribute('aria-pressed', 'true');
-                audioBtn.setAttribute('aria-label', 'Pausar audio');
-                if (navigator.vibrate) navigator.vibrate(10);
-              } catch (e) {
-                showToast('Pulsa de nuevo para habilitar el audio');
-              }
-            } else {
-              audio.pause();
-              audioBtn.classList.remove('is-playing');
-              audioBtn.dataset.state = 'idle';
-              audioBtn.setAttribute('aria-pressed', 'false');
-              audioBtn.setAttribute('aria-label', 'Reproducir audio');
-            }
-          };
-
-          const onVisibility = () => {
-            if (document.hidden && audio && !audio.paused) {
-              audio.pause();
-              audioBtn.classList.remove('is-playing');
-              audioBtn.dataset.state = 'idle';
-              audioBtn.setAttribute('aria-pressed', 'false');
-              audioBtn.setAttribute('aria-label', 'Reproducir audio');
-            }
-          };
-
-          const onError = () => {
-            console.warn('Audio no encontrado o no reproducible:', url);
-            // Mantenemos el botón visible, pero lo desactivamos para no confundir
-            audioBtn.classList.remove('is-playing');
-            audioBtn.dataset.state = 'error';
-            audioBtn.setAttribute('aria-pressed', 'false');
-            audioBtn.setAttribute('aria-label', 'Audio no disponible');
-            audioBtn.setAttribute('disabled', 'true');
-          };
-
-          audioBtn.addEventListener('click', onClick);
-          document.addEventListener('visibilitychange', onVisibility);
-          audio.addEventListener('error', onError);
-
-          // Cleanup para la siguiente figura
-          audioCleanup = () => {
-            try {
-              if (audio) audio.pause();
-            } catch {}
-            audio = null;
-            audioBtn.removeEventListener('click', onClick);
-            document.removeEventListener('visibilitychange', onVisibility);
-            try {
-              audio.removeEventListener('error', onError);
-            } catch {}
-          };
-        }
-
-        // ---------------- AR helpers ----------------
-        function openARFor(name) {
-          const usdz = usdzUrl(name);
-          const glb = glbUrl(name);
-          const titleEl = document.getElementById('infoTitle');
-          const arTitle = encodeURIComponent((titleEl?.textContent || name).trim());
-
-          if (isIOS) {
-            window.location.href = usdz;
-            return;
-          }
-          if (isAndroid) {
-            const file = new URL(glb, location.origin).toString();
-            const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(
-              file
-            )}&mode=ar_preferred&title=${arTitle}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
-            window.location.href = intent;
-          }
-        }
-
-        function openQuickLookSync(slug) {
-          try {
-            const link = document.getElementById('iosARLink');
-            if (!link) return false;
-            const ts = Date.now(); // cache-buster (cada click es "nuevo")
-            link.setAttribute('href', preSigned?.usdz || usdzUrl(model));
-            link.click(); // síncrono, en la misma pila del gesto
-            return true;
-          } catch {
-            return false;
-          }
-        }
-
-        // Overlay “Abriendo AR….”
-        function showARLoading() {
-          const el = document.getElementById('arLoading');
-          if (!el) return;
-          el.classList.remove('hidden');
-          requestAnimationFrame(() => el.classList.add('visible'));
-        }
-        function hideARLoading() {
-          const el = document.getElementById('arLoading');
-          if (!el) return;
-          el.classList.remove('visible');
-          setTimeout(() => el.classList.add('hidden'), 250);
-        }
-        document.addEventListener('visibilitychange', () => {
-          if (!document.hidden) hideARLoading();
-        });
-
-        // ---------------- Info JSON ----------------
-        async function loadInfoDataOrFallback(current) {
-          try {
-            const res = await fetch('/assets/info.json', { cache: 'no-store' });
-            if (!res.ok) throw new Error('no info.json');
-            const json = await res.json();
-            return json || current;
-          } catch {
-            return current;
-          }
-        }
-
-        // ---------------- Cartela ----------------
-        function showHelp() {
-          skel.classList.add('hidden');
+          msg.appendChild(cta);
+          cta.appendChild(btnRetry);
           msg.classList.remove('hidden');
-          msg.innerHTML = `
+        }
+
+        showToast('Error de carga. Pulsa “Reintentar”.', 2200);
+      }
+
+      // Habilita/Deshabilita el botón AR visual y funcionalmente
+      function setArEnabled(enabled) {
+        const btn = document.getElementById('arBtn');
+        if (!btn) return;
+        if (enabled) {
+          btn.removeAttribute('disabled');
+          btn.classList.remove('is-disabled');
+        } else {
+          btn.setAttribute('disabled', 'true');
+          btn.classList.add('is-disabled');
+        }
+      }
+
+      // --- Standalone detector (A2HS) ---
+      function isStandalone() {
+        const iosStandalone = ('standalone' in navigator) && navigator.standalone;
+        const pwaStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+        return iosStandalone || pwaStandalone;
+      }
+
+      // --- Watchdog de progreso de <model-viewer> ---
+      function startProgressWatchdog(mvEl, { timeoutMs = 8000, onStall } = {}) {
+        let progressed = false;
+        const onProg = (e) => {
+          const p = e?.detail?.totalProgress ?? 0;
+          if (p > 0) progressed = true;
+        };
+        mvEl.addEventListener('progress', onProg, { passive: true });
+        const timer = setTimeout(() => {
+          mvEl.removeEventListener('progress', onProg);
+          if (!progressed) onStall?.();
+        }, timeoutMs);
+        return () => { clearTimeout(timer); mvEl.removeEventListener('progress', onProg); };
+      }
+
+
+      // ---------------- Audio por figura (botón siempre visible + cleanup) ----------------
+      let audio = null;
+      let audioCleanup = () => { };
+      async function setupAudioFor(id) {
+        // Limpia lo anterior
+        try {
+          audioCleanup();
+        } catch { }
+        audioCleanup = () => { };
+        audio = null;
+
+        if (!audioBtn) return;
+
+        const url = `/assets/audio/${id}.mp3`;
+        audio = new Audio(await signedOrPlain(url));
+
+
+        // Mostrar SIEMPRE la fila y el botón (respetando tu CSS cuando se pueda)
+        if (fabRow) {
+          fabRow.classList.remove('hidden');
+          fabRow.style.display = 'flex';
+        }
+        audioBtn.classList.remove('hidden', 'is-playing');
+        audioBtn.style.display = 'flex';
+        audioBtn.removeAttribute('disabled');
+        audioBtn.dataset.state = 'idle'; // para estilos opcionales
+        audioBtn.setAttribute('aria-pressed', 'false');
+        audioBtn.setAttribute('aria-label', 'Reproducir audio');
+
+        // Crea el elemento de audio
+        audio = new Audio(url);
+        audio.loop = true;
+        audio.preload = 'none';
+
+        const onClick = async () => {
+          if (!audio) return;
+          if (audio.paused) {
+            try {
+              await audio.play();
+              audioBtn.classList.add('is-playing');
+              audioBtn.dataset.state = 'playing';
+              audioBtn.setAttribute('aria-pressed', 'true');
+              audioBtn.setAttribute('aria-label', 'Pausar audio');
+              if (navigator.vibrate) navigator.vibrate(10);
+            } catch (e) {
+              showToast('Pulsa de nuevo para habilitar el audio');
+            }
+          } else {
+            audio.pause();
+            audioBtn.classList.remove('is-playing');
+            audioBtn.dataset.state = 'idle';
+            audioBtn.setAttribute('aria-pressed', 'false');
+            audioBtn.setAttribute('aria-label', 'Reproducir audio');
+          }
+        };
+
+        const onVisibility = () => {
+          if (document.hidden && audio && !audio.paused) {
+            audio.pause();
+            audioBtn.classList.remove('is-playing');
+            audioBtn.dataset.state = 'idle';
+            audioBtn.setAttribute('aria-pressed', 'false');
+            audioBtn.setAttribute('aria-label', 'Reproducir audio');
+          }
+        };
+
+        const onError = () => {
+          console.warn('Audio no encontrado o no reproducible:', url);
+          // Mantenemos el botón visible, pero lo desactivamos para no confundir
+          audioBtn.classList.remove('is-playing');
+          audioBtn.dataset.state = 'error';
+          audioBtn.setAttribute('aria-pressed', 'false');
+          audioBtn.setAttribute('aria-label', 'Audio no disponible');
+          audioBtn.setAttribute('disabled', 'true');
+        };
+
+        audioBtn.addEventListener('click', onClick);
+        document.addEventListener('visibilitychange', onVisibility);
+        audio.addEventListener('error', onError);
+
+        // Cleanup para la siguiente figura
+        audioCleanup = () => {
+          try {
+            if (audio) audio.pause();
+          } catch { }
+          audio = null;
+          audioBtn.removeEventListener('click', onClick);
+          document.removeEventListener('visibilitychange', onVisibility);
+          try {
+            audio.removeEventListener('error', onError);
+          } catch { }
+        };
+      }
+
+      // ---------------- AR helpers ----------------
+      function openARFor(name) {
+        const usdz = usdzUrl(name);
+        const glb = glbUrl(name);
+        const titleEl = document.getElementById('infoTitle');
+        const arTitle = encodeURIComponent((titleEl?.textContent || name).trim());
+
+        if (isIOS) {
+          window.location.href = usdz;
+          return;
+        }
+        if (isAndroid) {
+          const file = new URL(glb, location.origin).toString();
+          const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(
+            file
+          )}&mode=ar_preferred&title=${arTitle}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+          window.location.href = intent;
+        }
+      }
+
+      function openQuickLookSync(slug) {
+        try {
+          const link = document.getElementById('iosARLink');
+          if (!link) return false;
+          const ts = Date.now(); // cache-buster (cada click es "nuevo")
+          link.setAttribute('href', preSigned?.usdz || usdzUrl(model));
+          link.click(); // síncrono, en la misma pila del gesto
+          return true;
+        } catch {
+          return false;
+        }
+      }
+
+      // Overlay “Abriendo AR….”
+      function showARLoading() {
+        const el = document.getElementById('arLoading');
+        if (!el) return;
+        el.classList.remove('hidden');
+        requestAnimationFrame(() => el.classList.add('visible'));
+      }
+      function hideARLoading() {
+        const el = document.getElementById('arLoading');
+        if (!el) return;
+        el.classList.remove('visible');
+        setTimeout(() => el.classList.add('hidden'), 250);
+      }
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) hideARLoading();
+      });
+
+      // ---------------- Info JSON ----------------
+      async function loadInfoDataOrFallback(current) {
+        try {
+          const res = await fetch('/assets/info.json', { cache: 'no-store' });
+          if (!res.ok) throw new Error('no info.json');
+          const json = await res.json();
+          return json || current;
+        } catch {
+          return current;
+        }
+      }
+
+      // ---------------- Cartela ----------------
+      function showHelp() {
+        skel.classList.add('hidden');
+        msg.classList.remove('hidden');
+        msg.innerHTML = `
             <div>
               <b>Falta parámetro en la URL.</b><br/><br/>
               Usa ejemplos:<br/>
               <code>?type=glb&model=cristo-yacente</code><br/>
               <code>?type=splat&figure=calvo-anillo</code>
             </div>`;
+      }
+
+      let infoData = {
+        'cristo-yacente': {
+          title: 'Cristo Yacente',
+          meta: 's. XVII · Autor/a desconocido/a',
+          desc: 'Descripción pendiente.'
+        },
+        'virgen-romanica': {
+          title: 'Virgen Románica',
+          meta: 's. XII · Talla policromada',
+          desc: 'Descripción pendiente.'
+        },
+        'san-jose-con-el-nino': {
+          title: 'San José con el Niño',
+          meta: 's. XVIII',
+          desc: 'Descripción pendiente.'
+        },
+        'jesus-en-la-cruz': {
+          title: 'Cristo en la Cruz',
+          meta: 's. XVII',
+          desc: 'Descripción pendiente.'
         }
+      };
 
-        let infoData = {
-          'cristo-yacente': {
-            title: 'Cristo Yacente',
-            meta: 's. XVII · Autor/a desconocido/a',
-            desc: 'Descripción pendiente.'
-          },
-          'virgen-romanica': {
-            title: 'Virgen Románica',
-            meta: 's. XII · Talla policromada',
-            desc: 'Descripción pendiente.'
-          },
-          'san-jose-con-el-nino': {
-            title: 'San José con el Niño',
-            meta: 's. XVIII',
-            desc: 'Descripción pendiente.'
-          },
-          'jesus-en-la-cruz': {
-            title: 'Cristo en la Cruz',
-            meta: 's. XVII',
-            desc: 'Descripción pendiente.'
-          }
-        };
-
-        // Cámara por figura
-        const cameraSettings = {
-          'cristo-yacente': {
-            orbit: '0deg 74deg 10.6m',
-            target: '0m 2m 0m',
-            minRadius: '2.5m',
-            maxRadius: '13.1m',
-            minFov: '22deg',
-            maxFov: '30deg'
-          },
-          'jesus-en-la-cruz': {
-            orbit: '0deg 60deg 3.5m',
-            target: '0m 1.8m 0m',
-            minRadius: '2m',
-            maxRadius: '5m',
-            minFov: '22deg',
-            maxFov: '45deg'
-          },
-          'san-jose-con-el-nino': {
-            orbit: '0deg 65deg 3m',
-            target: '0m 0.8m 0m',
-            minRadius: '1.5m',
-            maxRadius: '6m',
-            minFov: '22deg',
-            maxFov: '45deg'
-          },
-          'san-bernardo-con-la-virgen': {
-            orbit: '0deg 65deg 3m',
-            target: '0m 0.8m 0m',
-            minRadius: '1.5m',
-            maxRadius: '5m',
-            minFov: '22deg',
-            maxFov: '45deg'
-          },
-          'virgen-asuncion': {
-            orbit: '0deg 60deg 2.8m',
-            target: '0m 0.75m 0m',
-            minRadius: '1.5m',
-            maxRadius: '5m',
-            minFov: '20deg',
-            maxFov: '45deg'
-          },
-          'virgen-de-mena': {
-            orbit: '0deg 60deg 3m',
-            target: '0m 0.8m 0m',
-            minRadius: '1.5m',
-            maxRadius: '6m',
-            minFov: '22deg',
-            maxFov: '45deg'
-          },
-          'virgen-romanica': {
-            orbit: '0deg 55deg 2.5m',
-            target: '0m 0.35m 0m',
-            minRadius: '1.2m',
-            maxRadius: '5m',
-            minFov: '20deg',
-            maxFov: '45deg'
-          },
-          'ecce-homo': {
-            orbit: '0deg 60deg 2.2m',
-            target: '0m 0.4m 0m',
-            minRadius: '1.0m',
-            maxRadius: '4m',
-            minFov: '20deg',
-            maxFov: '45deg'
-          },
-          'reliquia-dorada': {
-            orbit: '0deg 60deg 1.8m',
-            target: '0m 0.25m 0m',
-            minRadius: '0.8m',
-            maxRadius: '3m',
-            minFov: '20deg',
-            maxFov: '45deg'
-          },
-          'bargueno-relicario': {
-            orbit: '0deg 55deg 2.8m',
-            target: '0m 0.4m 0m',
-            minRadius: '1.2m',
-            maxRadius: '5m',
-            minFov: '20deg',
-            maxFov: '45deg'
-          },
-          'tapiz': {
-            orbit: '0deg 90deg 3m',
-            target: '0m 1.2m 0m',
-            minRadius: '2m',
-            maxRadius: '6m',
-            minFov: '25deg',
-            maxFov: '45deg'
-          },
-          'casulla-santa-ana': {
-            orbit: '0deg 85deg 2.5m',
-            target: '0m 1.0m 0m',
-            minRadius: '1.5m',
-            maxRadius: '5m',
-            minFov: '25deg',
-            maxFov: '45deg'
-          },
-          'novisimos': {
-            orbit: '0deg 60deg 2.8m',
-            target: '0m 0.6m 0m',
-            minRadius: '1.2m',
-            maxRadius: '5m',
-            minFov: '22deg',
-            maxFov: '45deg'
-          },
-          'cristo-atado-a-la-columna': {
-            orbit: '0deg 65deg 2.8m',
-            target: '0m 0.8m 0m',
-            minRadius: '1.2m',
-            maxRadius: '5m',
-            minFov: '22deg',
-            maxFov: '45deg'
-          }
-        };
-
-        window.cameraSettings = cameraSettings;
-
-        function buildMeta(d) {
-          if (!d) return '';
-          if (d.author || d.year || d.material) {
-            const parts = [];
-            if (d.year) parts.push(d.year);
-            if (d.author) parts.push(d.author);
-            if (d.material) parts.push(d.material);
-            return parts.filter(Boolean).join(' · ');
-          }
-          return d.meta || '';
+      // Cámara por figura
+      const cameraSettings = {
+        'cristo-yacente': {
+          orbit: '0deg 74deg 10.6m',
+          target: '0m 2m 0m',
+          minRadius: '2.5m',
+          maxRadius: '13.1m',
+          minFov: '22deg',
+          maxFov: '30deg'
+        },
+        'jesus-en-la-cruz': {
+          orbit: '0deg 60deg 3.5m',
+          target: '0m 1.8m 0m',
+          minRadius: '2m',
+          maxRadius: '5m',
+          minFov: '22deg',
+          maxFov: '45deg'
+        },
+        'san-jose-con-el-nino': {
+          orbit: '0deg 65deg 3m',
+          target: '0m 0.8m 0m',
+          minRadius: '1.5m',
+          maxRadius: '6m',
+          minFov: '22deg',
+          maxFov: '45deg'
+        },
+        'san-bernardo-con-la-virgen': {
+          orbit: '0deg 65deg 3m',
+          target: '0m 0.8m 0m',
+          minRadius: '1.5m',
+          maxRadius: '5m',
+          minFov: '22deg',
+          maxFov: '45deg'
+        },
+        'virgen-asuncion': {
+          orbit: '0deg 60deg 2.8m',
+          target: '0m 0.75m 0m',
+          minRadius: '1.5m',
+          maxRadius: '5m',
+          minFov: '20deg',
+          maxFov: '45deg'
+        },
+        'virgen-de-mena': {
+          orbit: '0deg 60deg 3m',
+          target: '0m 0.8m 0m',
+          minRadius: '1.5m',
+          maxRadius: '6m',
+          minFov: '22deg',
+          maxFov: '45deg'
+        },
+        'virgen-romanica': {
+          orbit: '0deg 55deg 2.5m',
+          target: '0m 0.35m 0m',
+          minRadius: '1.2m',
+          maxRadius: '5m',
+          minFov: '20deg',
+          maxFov: '45deg'
+        },
+        'ecce-homo': {
+          orbit: '0deg 60deg 2.2m',
+          target: '0m 0.4m 0m',
+          minRadius: '1.0m',
+          maxRadius: '4m',
+          minFov: '20deg',
+          maxFov: '45deg'
+        },
+        'reliquia-dorada': {
+          orbit: '0deg 60deg 1.8m',
+          target: '0m 0.25m 0m',
+          minRadius: '0.8m',
+          maxRadius: '3m',
+          minFov: '20deg',
+          maxFov: '45deg'
+        },
+        'bargueno-relicario': {
+          orbit: '0deg 55deg 2.8m',
+          target: '0m 0.4m 0m',
+          minRadius: '1.2m',
+          maxRadius: '5m',
+          minFov: '20deg',
+          maxFov: '45deg'
+        },
+        'tapiz': {
+          orbit: '0deg 90deg 3m',
+          target: '0m 1.2m 0m',
+          minRadius: '2m',
+          maxRadius: '6m',
+          minFov: '25deg',
+          maxFov: '45deg'
+        },
+        'casulla-santa-ana': {
+          orbit: '0deg 85deg 2.5m',
+          target: '0m 1.0m 0m',
+          minRadius: '1.5m',
+          maxRadius: '5m',
+          minFov: '25deg',
+          maxFov: '45deg'
+        },
+        'novisimos': {
+          orbit: '0deg 60deg 2.8m',
+          target: '0m 0.6m 0m',
+          minRadius: '1.2m',
+          maxRadius: '5m',
+          minFov: '22deg',
+          maxFov: '45deg'
+        },
+        'cristo-atado-a-la-columna': {
+          orbit: '0deg 65deg 2.8m',
+          target: '0m 0.8m 0m',
+          minRadius: '1.2m',
+          maxRadius: '5m',
+          minFov: '22deg',
+          maxFov: '45deg'
         }
+      };
 
-        function renderInfo(s) {
-          const d = infoData[s] || {};
-          const nice = (x) => (x || s || '').replace(/-/g, ' ').trim();
+      window.cameraSettings = cameraSettings;
 
-          if (topBar && s) {
-            topBar.classList.remove('hidden');
-            pieceTitle.textContent = d.title || nice(s);
-          }
-          infoTitle.textContent = d.title || nice(s);
-          infoMeta.textContent = buildMeta(d);
-
-          const desc = d.desc || '';
-          const extras = [];
-          if (d.typology) extras.push(`<div><strong>Tipología:</strong> ${d.typology}</div>`);
-          if (d.material) extras.push(`<div><strong>Material:</strong> ${d.material}</div>`);
-          if (d.technique) extras.push(`<div><strong>Técnica:</strong> ${d.technique}</div>`);
-          if (d.dimensions) extras.push(`<div><strong>Dimensiones:</strong> ${d.dimensions}</div>`);
-          if (d.year) extras.push(`<div><strong>Fecha:</strong> ${d.year}</div>`);
-          if (d.author) extras.push(`<div><strong>Autor:</strong> ${d.author}</div>`);
-
-          const extrasHtml = extras.length ? `<div class="info-extra">${extras.join('')}</div>` : '';
-          infoDesc.innerHTML = [desc, extrasHtml].filter(Boolean).join('');
-
-          // Actualizar <title> del documento
-          try {
-            const txt = (infoTitle?.textContent || s || 'Museo Virtual').trim();
-            if (txt) document.title = `${txt} · Museo Virtual San Joaquín y Santa Ana`;
-          } catch {}
+      function buildMeta(d) {
+        if (!d) return '';
+        if (d.author || d.year || d.material) {
+          const parts = [];
+          if (d.year) parts.push(d.year);
+          if (d.author) parts.push(d.author);
+          if (d.material) parts.push(d.material);
+          return parts.filter(Boolean).join(' · ');
         }
+        return d.meta || '';
+      }
 
-        // Panel/cartela UI
-        function openSheet() {
-          renderInfo(slug);
-          sheet.classList.remove('hidden');
-          sheet.setAttribute('aria-hidden', 'false');
-          document.body.classList.add('sheet-open');
+      function renderInfo(s) {
+        const d = infoData[s] || {};
+        const nice = (x) => (x || s || '').replace(/-/g, ' ').trim();
 
-          if (infoBtn) {
-            infoBtn.setAttribute('aria-expanded', 'true');
-            infoBtn.setAttribute('aria-label', 'Ocultar información');
-          }
-
-          if (slug) {
-            try {
-              localStorage.setItem(sheetKeyFor(slug), 'open');
-            } catch {}
-          }
+        if (topBar && s) {
+          topBar.classList.remove('hidden');
+          pieceTitle.textContent = d.title || nice(s);
         }
+        infoTitle.textContent = d.title || nice(s);
+        infoMeta.textContent = buildMeta(d);
 
-        function closeSheet() {
-          sheet.classList.add('hidden');
-          sheet.setAttribute('aria-hidden', 'true');
-          document.body.classList.remove('sheet-open');
+        const desc = d.desc || '';
+        const extras = [];
+        if (d.typology) extras.push(`<div><strong>Tipología:</strong> ${d.typology}</div>`);
+        if (d.material) extras.push(`<div><strong>Material:</strong> ${d.material}</div>`);
+        if (d.technique) extras.push(`<div><strong>Técnica:</strong> ${d.technique}</div>`);
+        if (d.dimensions) extras.push(`<div><strong>Dimensiones:</strong> ${d.dimensions}</div>`);
+        if (d.year) extras.push(`<div><strong>Fecha:</strong> ${d.year}</div>`);
+        if (d.author) extras.push(`<div><strong>Autor:</strong> ${d.author}</div>`);
 
-          if (infoBtn) {
-            infoBtn.setAttribute('aria-expanded', 'false');
-            infoBtn.setAttribute('aria-label', 'Mostrar información');
-          }
+        const extrasHtml = extras.length ? `<div class="info-extra">${extras.join('')}</div>` : '';
+        infoDesc.innerHTML = [desc, extrasHtml].filter(Boolean).join('');
 
-          if (slug) {
-            try {
-              localStorage.setItem(sheetKeyFor(slug), 'closed');
-            } catch {}
-          }
-        }
+        // Actualizar <title> del documento
+        try {
+          const txt = (infoTitle?.textContent || s || 'Museo Virtual').trim();
+          if (txt) document.title = `${txt} · Museo Virtual San Joaquín y Santa Ana`;
+        } catch { }
+      }
 
-        function toggleSheet() {
-          const hidden = sheet.classList.contains('hidden');
-          hidden ? openSheet() : closeSheet();
-        }
-
-        if (infoBtn) infoBtn.addEventListener('click', toggleSheet);
-        sheetClose.addEventListener('click', closeSheet);
-        sheet.addEventListener('click', (e) => {
-          if (e.target === sheet) closeSheet();
-        });
-
-        window.addEventListener('keydown', (e) => {
-          // Ignorar si escribes dentro de inputs/textarea/contenteditable
-          const t = e.target;
-          const typing =
-            t &&
-            (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
-          if (typing) return;
-
-          if (e.key === 'Escape') {
-            closeSheet();
-          } else if (e.key.toLowerCase() === 'i') {
-            toggleSheet();
-          }
-        });
-
-        /* === Desktop mode: barra lateral fija + sin AR === */
-        const DESKTOP_MQ = window.matchMedia('(min-width: 1024px)');
-        function applyDesktopMode() {
-          const isDesktop = DESKTOP_MQ.matches && !/Android|iPhone|iPad/i.test(navigator.userAgent);
-          document.body.classList.toggle('is-desktop', isDesktop);
-
-          // En desktop: cartela siempre visible como lateral
-          const sheet = document.getElementById('infoSheet');
-          const topBar = document.getElementById('topBar');
-          if (isDesktop) {
-            // Asegura topbar y cartela visibles
-            topBar?.classList.remove('hidden');
-            sheet?.classList.remove('hidden');
-            sheet?.setAttribute('aria-hidden', 'false');
-            document.body.classList.add('sheet-open');
-
-            // Oculta AR (aunque el CSS ya lo esconde)
-            const arBtn = document.getElementById('arBtn');
-            if (arBtn) {
-              arBtn.setAttribute('disabled', 'true');
-              arBtn.classList.add('is-disabled', 'hidden');
-            }
-          } else {
-            // Vuelve a comportamiento móvil (cartela controlada por el botón)
-            document.body.classList.remove('sheet-open');
-            // no forzamos hidden aquí: de eso se encarga tu lógica actual
-          }
-        }
-        DESKTOP_MQ.addEventListener?.('change', applyDesktopMode);
-        applyDesktopMode();
-
-        // 👉 Forzar reglas de escritorio desde JS (defensa extra por si algún handler intenta cerrar)
-  const IS_DESKTOP = window.matchMedia('(min-width: 1024px)').matches;
-  if (IS_DESKTOP) {
-    try {
-      // Forzar cartela abierta
-      const sheet = document.getElementById('infoSheet');
-      const infoBtn = document.getElementById('infoBtn');
-      const sheetClose = document.getElementById('infoClose');
-
-      if (sheet) {
+      // Panel/cartela UI
+      function openSheet() {
+        renderInfo(slug);
         sheet.classList.remove('hidden');
         sheet.setAttribute('aria-hidden', 'false');
         document.body.classList.add('sheet-open');
-      }
-      // Ocultar controles de abrir/cerrar
-      if (infoBtn) infoBtn.style.display = 'none';
-      if (sheetClose) sheetClose.style.display = 'none';
 
-      // Neutralizar posibles cierres por teclado (Esc) u otros
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          e.stopImmediatePropagation();
-          e.preventDefault();
+        if (infoBtn) {
+          infoBtn.setAttribute('aria-expanded', 'true');
+          infoBtn.setAttribute('aria-label', 'Ocultar información');
         }
-      }, true);
-    } catch {}
-  }
 
-        
-
-
-        // ---------------- Inicialización ----------------
-        (async function init() {
+        if (slug) {
           try {
-            if (type === 'glb' && model) {
-              document.body.classList.remove('mode-splat');
+            localStorage.setItem(sheetKeyFor(slug), 'open');
+          } catch { }
+        }
+      }
 
-              // Fuente GLB
-              mv.src = glbUrl(model);
-              // Prefirmamos GLB y USDZ antes de mostrar AR (evita async en el click iOS)
-              const preSigned = {
-                glb: await signedOrPlain(glbUrl(model)),
-                usdz: await signedOrPlain(usdzUrl(model))
-              };
+      function closeSheet() {
+        sheet.classList.add('hidden');
+        sheet.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('sheet-open');
 
-              mv.src = preSigned.glb;          // <model-viewer> carga con token
-              mv.iosSrc = preSigned.usdz;      // Quick Look listo con token
+        if (infoBtn) {
+          infoBtn.setAttribute('aria-expanded', 'false');
+          infoBtn.setAttribute('aria-label', 'Mostrar información');
+        }
+
+        if (slug) {
+          try {
+            localStorage.setItem(sheetKeyFor(slug), 'closed');
+          } catch { }
+        }
+      }
+
+      function toggleSheet() {
+        const hidden = sheet.classList.contains('hidden');
+        hidden ? openSheet() : closeSheet();
+      }
+
+      if (infoBtn) infoBtn.addEventListener('click', toggleSheet);
+      sheetClose.addEventListener('click', closeSheet);
+      sheet.addEventListener('click', (e) => {
+        if (e.target === sheet) closeSheet();
+      });
+
+      window.addEventListener('keydown', (e) => {
+        // Ignorar si escribes dentro de inputs/textarea/contenteditable
+        const t = e.target;
+        const typing =
+          t &&
+          (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
+        if (typing) return;
+
+        if (e.key === 'Escape') {
+          closeSheet();
+        } else if (e.key.toLowerCase() === 'i') {
+          toggleSheet();
+        }
+      });
+
+      /* === Desktop mode: barra lateral fija + sin AR === */
+      const DESKTOP_MQ = window.matchMedia('(min-width: 1024px)');
+      function applyDesktopMode() {
+        const isDesktop = DESKTOP_MQ.matches && !/Android|iPhone|iPad/i.test(navigator.userAgent);
+        document.body.classList.toggle('is-desktop', isDesktop);
+
+        // En desktop: cartela siempre visible como lateral
+        const sheet = document.getElementById('infoSheet');
+        const topBar = document.getElementById('topBar');
+        if (isDesktop) {
+          // Asegura topbar y cartela visibles
+          topBar?.classList.remove('hidden');
+          sheet?.classList.remove('hidden');
+          sheet?.setAttribute('aria-hidden', 'false');
+          document.body.classList.add('sheet-open');
+
+          // Oculta AR (aunque el CSS ya lo esconde)
+          const arBtn = document.getElementById('arBtn');
+          if (arBtn) {
+            arBtn.setAttribute('disabled', 'true');
+            arBtn.classList.add('is-disabled', 'hidden');
+          }
+        } else {
+          // Vuelve a comportamiento móvil (cartela controlada por el botón)
+          document.body.classList.remove('sheet-open');
+          // no forzamos hidden aquí: de eso se encarga tu lógica actual
+        }
+      }
+      DESKTOP_MQ.addEventListener?.('change', applyDesktopMode);
+      applyDesktopMode();
+
+      // 👉 Forzar reglas de escritorio desde JS (defensa extra por si algún handler intenta cerrar)
+      const IS_DESKTOP = window.matchMedia('(min-width: 1024px)').matches;
+      if (IS_DESKTOP) {
+        try {
+          // Forzar cartela abierta
+          const sheet = document.getElementById('infoSheet');
+          const infoBtn = document.getElementById('infoBtn');
+          const sheetClose = document.getElementById('infoClose');
+
+          if (sheet) {
+            sheet.classList.remove('hidden');
+            sheet.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('sheet-open');
+          }
+          // Ocultar controles de abrir/cerrar
+          if (infoBtn) infoBtn.style.display = 'none';
+          if (sheetClose) sheetClose.style.display = 'none';
+
+          // Neutralizar posibles cierres por teclado (Esc) u otros
+          window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+              e.stopImmediatePropagation();
+              e.preventDefault();
+            }
+          }, true);
+        } catch { }
+      }
 
 
-                          const stopWatchdog = startProgressWatchdog(mv, {
+
+
+      // ---------------- Inicialización ----------------
+      (async function init() {
+        try {
+          if (type === 'glb' && model) {
+            document.body.classList.remove('mode-splat');
+
+            // Fuente GLB
+            mv.src = glbUrl(model);
+            // Prefirmamos GLB y USDZ antes de mostrar AR (evita async en el click iOS)
+            const preSigned = {
+              glb: await signedOrPlain(glbUrl(model)),
+              usdz: await signedOrPlain(usdzUrl(model))
+            };
+
+            mv.src = preSigned.glb;          // <model-viewer> carga con token
+            mv.iosSrc = preSigned.usdz;      // Quick Look listo con token
+
+
+            const stopWatchdog = startProgressWatchdog(mv, {
               timeoutMs: isStandalone() ? 7000 : 10000,
               onStall: () => {
                 // Sin progreso real: muestra CTA y reintenta con cache-buster
@@ -1052,463 +1034,463 @@
               }
             });
             // Al cargar, paramos el watchdog
-            mv.addEventListener('load', () => { try { stopWatchdog?.(); } catch {} }, { once: true });
+            mv.addEventListener('load', () => { try { stopWatchdog?.(); } catch { } }, { once: true });
 
 
-              // Deshabilita AR hasta que el modelo esté listo
-              setArEnabled(false);
+            // Deshabilita AR hasta que el modelo esté listo
+            setArEnabled(false);
 
-              // Función de reintento (con cache-buster) y rehacer póster overlay si existe
-              const retryGlb = () => {
-                const sk = document.getElementById('skel');
-                if (sk) {
-                  sk.classList.remove('hidden');
-                  sk.style.opacity = '1';
-                }
-                const bust = `?v=${Date.now()}`;
-                mv.src = glbUrl(model) + bust;
+            // Función de reintento (con cache-buster) y rehacer póster overlay si existe
+            const retryGlb = () => {
+              const sk = document.getElementById('skel');
+              if (sk) {
+                sk.classList.remove('hidden');
+                sk.style.opacity = '1';
+              }
+              const bust = `?v=${Date.now()}`;
+              mv.src = glbUrl(model) + bust;
 
-                const gp = document.getElementById('glbPoster');
-                if (gp) {
-                  gp.classList.remove('fade-out');
-                  gp.classList.add('visible');
-                }
-              };
+              const gp = document.getElementById('glbPoster');
+              if (gp) {
+                gp.classList.remove('fade-out');
+                gp.classList.add('visible');
+              }
+            };
 
-              // Si model-viewer reporta error: mostramos CTA de reintento
-              mv.addEventListener('error', () => {
-                const sk = document.getElementById('skel');
-                if (sk) {
-                  sk.style.opacity = '0';
-                  setTimeout(() => sk.classList.add('hidden'), 400);
-                }
-                showErrorAndRetry('glb', model, retryGlb);
+            // Si model-viewer reporta error: mostramos CTA de reintento
+            mv.addEventListener('error', () => {
+              const sk = document.getElementById('skel');
+              if (sk) {
+                sk.style.opacity = '0';
+                setTimeout(() => sk.classList.add('hidden'), 400);
+              }
+              showErrorAndRetry('glb', model, retryGlb);
+            });
+
+            // Auto-reintentar una vez al recuperar conexión si el estado era de error
+            window.addEventListener('online', () => {
+              const msg = document.getElementById('msg');
+              if (msg && !msg.classList.contains('hidden')) retryGlb();
+            });
+
+            // ▼▼ AÑADE ESTA LÍNEA AQUÍ ▼▼
+            mv.classList.remove('hidden');
+
+            // Failsafe: oculta el skeleton si algún navegador no dispara 'load'
+            setTimeout(() => {
+              const sk = document.getElementById('skel');
+              if (sk && !sk.classList.contains('hidden')) {
+                sk.style.opacity = '0';
+                setTimeout(() => sk.classList.add('hidden'), 600);
+              }
+            }, 12000);
+
+            // === Indicador de progreso del modelo ===
+            const progressEl = document.getElementById('loaderProgress');
+            if (mv) {
+              mv.addEventListener('progress', (e) => {
+                const ratio = Math.round(e.detail.totalProgress * 100);
+                if (progressEl) progressEl.textContent = `${ratio}%`;
               });
 
-              // Auto-reintentar una vez al recuperar conexión si el estado era de error
-              window.addEventListener('online', () => {
-                const msg = document.getElementById('msg');
-                if (msg && !msg.classList.contains('hidden')) retryGlb();
-              });
-
-              // ▼▼ AÑADE ESTA LÍNEA AQUÍ ▼▼
-              mv.classList.remove('hidden');
-
-              // Failsafe: oculta el skeleton si algún navegador no dispara 'load'
-              setTimeout(() => {
-                const sk = document.getElementById('skel');
-                if (sk && !sk.classList.contains('hidden')) {
-                  sk.style.opacity = '0';
-                  setTimeout(() => sk.classList.add('hidden'), 600);
-                }
-              }, 12000);
-
-              // === Indicador de progreso del modelo ===
-              const progressEl = document.getElementById('loaderProgress');
-              if (mv) {
-                mv.addEventListener('progress', (e) => {
-                  const ratio = Math.round(e.detail.totalProgress * 100);
-                  if (progressEl) progressEl.textContent = `${ratio}%`;
-                });
-
-                // ▶ PÓSTER GLB (overlay separado para poder hacer fade)
-                let glbPoster = document.getElementById('glbPoster');
-                if (!glbPoster) {
-                  glbPoster = document.createElement('div');
-                  glbPoster.id = 'glbPoster';
-                  glbPoster.className = 'glb-poster';
-                  document.body.appendChild(glbPoster);
-                }
-
-                // Usa el mismo póster que intentas para <model-viewer> o el placeholder
-                const glbPosterUrl = (await exists(`/assets/posters/${model}.webp`))
-                  ? `/assets/posters/${model}.webp`
-                  : '/models/placeholder.webp';
-
-                glbPoster.style.backgroundImage = `url('${glbPosterUrl}')`;
-
-                // muéstralo ya (queda bajo el skeleton hasta que se oculte)
-                glbPoster.classList.add('visible');
-
-                mv.addEventListener('load', () => {
-                  // ... tu código para ocultar skeleton ...
-
-                  // ya haces visible el modelo:
-                  requestAnimationFrame(() => mv.classList.add('is-visible'));
-
-                  // ▶ Crossfade: poster GLB se desvanece tras un frame
-                  const glbPoster = document.getElementById('glbPoster');
-                  if (glbPoster) {
-                    // da un pequeño margen para que el modelo ya esté pintado
-                    setTimeout(() => {
-                      glbPoster.classList.add('fade-out');
-                      // limpia el DOM tras la animación
-                      setTimeout(() => {
-                        glbPoster.remove();
-                      }, 500); // ≈ a tu transition .45s
-                    }, 30);
-                  }
-                  // Modelo listo → habilita AR
-                  setArEnabled(true);
-                });
+              // ▶ PÓSTER GLB (overlay separado para poder hacer fade)
+              let glbPoster = document.getElementById('glbPoster');
+              if (!glbPoster) {
+                glbPoster = document.createElement('div');
+                glbPoster.id = 'glbPoster';
+                glbPoster.className = 'glb-poster';
+                document.body.appendChild(glbPoster);
               }
 
-              // Poster por pieza con fallback
-              try {
-                const posterSrc = `/assets/posters/${model}.webp`;
-                if (await exists(posterSrc)) {
-                  mv.poster = posterSrc;
-                  mv.setAttribute('poster', posterSrc);
-                } else {
-                  mv.poster = '/models/placeholder.webp';
-                  mv.setAttribute('poster', '/models/placeholder.webp');
+              // Usa el mismo póster que intentas para <model-viewer> o el placeholder
+              const glbPosterUrl = (await exists(`/assets/posters/${model}.webp`))
+                ? `/assets/posters/${model}.webp`
+                : '/models/placeholder.webp';
+
+              glbPoster.style.backgroundImage = `url('${glbPosterUrl}')`;
+
+              // muéstralo ya (queda bajo el skeleton hasta que se oculte)
+              glbPoster.classList.add('visible');
+
+              mv.addEventListener('load', () => {
+                // ... tu código para ocultar skeleton ...
+
+                // ya haces visible el modelo:
+                requestAnimationFrame(() => mv.classList.add('is-visible'));
+
+                // ▶ Crossfade: poster GLB se desvanece tras un frame
+                const glbPoster = document.getElementById('glbPoster');
+                if (glbPoster) {
+                  // da un pequeño margen para que el modelo ya esté pintado
+                  setTimeout(() => {
+                    glbPoster.classList.add('fade-out');
+                    // limpia el DOM tras la animación
+                    setTimeout(() => {
+                      glbPoster.remove();
+                    }, 500); // ≈ a tu transition .45s
+                  }, 30);
                 }
-              } catch {
+                // Modelo listo → habilita AR
+                setArEnabled(true);
+              });
+            }
+
+            // Poster por pieza con fallback
+            try {
+              const posterSrc = `/assets/posters/${model}.webp`;
+              if (await exists(posterSrc)) {
+                mv.poster = posterSrc;
+                mv.setAttribute('poster', posterSrc);
+              } else {
                 mv.poster = '/models/placeholder.webp';
                 mv.setAttribute('poster', '/models/placeholder.webp');
               }
-
-              // Config cámara
-              const cam = cameraSettings[model];
-              if (cam) {
-                if (cam.orbit) mv.cameraOrbit = cam.orbit;
-                if (cam.target) mv.cameraTarget = cam.target;
-                if (cam.minRadius) mv.minCameraOrbit = `auto auto ${cam.minRadius}`;
-                if (cam.maxRadius) mv.maxCameraOrbit = `auto auto ${cam.maxRadius}`;
-                if (cam.minFov) mv.minFieldOfView = cam.minFov;
-                if (cam.maxFov) mv.maxFieldOfView = cam.maxFov;
-              }
-
-              // === ENTORNO: usar HDR solo como luz; SIN skybox visible ===
-const HDR_PRIMARY  = '/assets/hdr/studio_small_09_2k.hdr';
-const HDR_FALLBACK = 'neutral'; // si falla, luz neutra
-
-async function firstExisting(urls) {
-  for (const u of urls) {
-    try {
-      const r = await fetch(u, { method: 'HEAD', cache: 'force-cache' });
-      if (r.ok) return u;
-    } catch {}
-  }
-  return '';
-}
-
-// Aplica solo iluminación (environment-image). Elimina cualquier skybox.
-async function applyEnvironmentOnly(mv, hdrUrl) {
-  const env = hdrUrl || 'neutral';
-  mv.setAttribute('environment-image', env);
-  mv.environmentImage = env;
-
-  // 🔒 Sin skybox visible
-  mv.removeAttribute('skybox-image');
-  mv.skyboxImage = '';
-
-  // Ajustes de look (ajusta a tu gusto)
-  mv.exposure = '1.25';
-  mv.shadowIntensity = '0.8';
-  mv.shadowSoftness = '1.0';
-  // mv.environmentRotation = '10deg'; // opcional
-}
-
-// Elegimos un HDR válido (o neutro)
-const hdrToUse = (await firstExisting([HDR_PRIMARY])) || HDR_FALLBACK;
-
-// Ilumina sin fondo HDR
-await applyEnvironmentOnly(mv, hdrToUse);
-
-// Algunos navegadores “resetean” atributos tras ciertos eventos: lo reforzamos
-mv.addEventListener('load', () => applyEnvironmentOnly(mv, hdrToUse), { once: true });
-
-
-
-              // Iluminación por pieza (opcional)
-              const lightSettings = {
-                'cristo-yacente': {
-                  exposure: 1.6,
-                  shadowIntensity: 0.9,
-                  shadowSoftness: 0.9,
-                  environmentRotation: '15deg'
-                },
-                'virgen-romanica': { exposure: 1.3, environmentRotation: '0deg' }
-              };
-              const L = lightSettings[model];
-              if (L) {
-                if (L.exposure != null) mv.exposure = String(L.exposure);
-                if (L.shadowIntensity != null) mv.shadowIntensity = String(L.shadowIntensity);
-                if (L.shadowSoftness != null) mv.shadowSoftness = String(L.shadowSoftness);
-                if (L.environmentRotation) mv.environmentRotation = L.environmentRotation;
-              }
-
-              // iOS Quick Look
-              mv.iosSrc = usdzUrl(model);
-              mv.classList.remove('hidden');
-
-              // Oculta botón AR nativo
-              if (!mv.querySelector('[slot="ar-button"]')) {
-                const blocker = document.createElement('button');
-                blocker.setAttribute('slot', 'ar-button');
-                blocker.setAttribute('aria-hidden', 'true');
-                blocker.style.display = 'none';
-                blocker.tabIndex = -1;
-                mv.appendChild(blocker);
-              }
-
-              // ✅ Botón AR unificado (optimizado y reseteado por carga)
-              if (arBtn) {
-                // Elimina handlers previos si la página fue recargada desde memoria
-                arBtn.replaceWith(arBtn.cloneNode(true));
-                const newArBtn = document.getElementById('arBtn');
-
-                const fileSigned = preSigned?.glb || glbUrl(model);
-                const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(
-                  fileSigned
-                )}&mode=ar_preferred&title=${encodeURIComponent(model)}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
-
-
-                newArBtn.classList.remove('hidden');
-                newArBtn.addEventListener('click', async () => {
-                  showARLoading();
-
-                  try {
-                    if (isIOS) {
-                      const ok = openQuickLookSync(model);
-                      if (!ok) window.location.href = usdzUrl(model);
-                      return;
-                    }
-
-                    if (isAndroid) {
-                      const a = document.createElement('a');
-                      const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(
-                        glbUrl(model)
-                      )}&mode=ar_preferred&title=${encodeURIComponent(
-                        model
-                      )}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
-                      a.href = intent;
-                      a.style.display = 'none';
-                      document.body.appendChild(a);
-                      a.click();
-                      document.body.removeChild(a);
-                      return;
-                    }
-
-                    if (mv?.activateAR) await mv.activateAR();
-                    else openARFor(model);
-                  } catch (err) {
-                    console.error('Error abriendo AR:', err);
-                    openARFor(model);
-                  } finally {
-                    hideARLoading();
-                  }
-                });
-              }
-
-              if (slug) {
-                infoData = await loadInfoDataOrFallback(infoData);
-                renderInfo(slug);
-              }
-
-              // Auto-open si el usuario lo dejó abierto para este slug o si viene con ?info=1 o #info
-              const wantsInfo =
-                new URLSearchParams(location.search).get('info') === '1' ||
-                location.hash === '#info';
-              let lastState = 'closed';
-              try {
-                lastState = localStorage.getItem(sheetKeyFor(slug)) || 'closed';
-              } catch {}
-              if (wantsInfo || lastState === 'open') {
-                // Deja un frame para que el DOM pinte antes del open (suaviza la transición)
-                requestAnimationFrame(() => openSheet());
-              }
-
-              setupAudioFor(model);
-              skel.classList.add('hidden');
-              return;
+            } catch {
+              mv.poster = '/models/placeholder.webp';
+              mv.setAttribute('poster', '/models/placeholder.webp');
             }
 
-            if (type === 'splat' && figure) {
-              document.body.classList.add('mode-splat');
+            // Config cámara
+            const cam = cameraSettings[model];
+            if (cam) {
+              if (cam.orbit) mv.cameraOrbit = cam.orbit;
+              if (cam.target) mv.cameraTarget = cam.target;
+              if (cam.minRadius) mv.minCameraOrbit = `auto auto ${cam.minRadius}`;
+              if (cam.maxRadius) mv.maxCameraOrbit = `auto auto ${cam.maxRadius}`;
+              if (cam.minFov) mv.minFieldOfView = cam.minFov;
+              if (cam.maxFov) mv.maxFieldOfView = cam.maxFov;
+            }
 
-              // Deshabilita AR mientras el SPLAT no esté listo
-              setArEnabled(false);
+            // === ENTORNO: usar HDR solo como luz; SIN skybox visible ===
+            const HDR_PRIMARY = '/assets/hdr/studio_small_09_2k.hdr';
+            const HDR_FALLBACK = 'neutral'; // si falla, luz neutra
 
-              // Estado de carga + watchdog de seguridad
-              let splatLoaded = false;
-              const WATCHDOG_MS = 12000;
-
-              const retrySplat = () => {
-                // Reaparece el skeleton suavemente
-                const sk = document.getElementById('skel');
-                if (sk) {
-                  sk.classList.remove('hidden');
-                  sk.style.opacity = '1';
-                }
-
-                // Rehacer poster overlay si estaba
-                const sp = document.getElementById('splatPoster');
-                if (sp) {
-                  sp.classList.remove('hidden', 'fade-out');
-                  requestAnimationFrame(() => sp.classList.add('visible'));
-                }
-
-                // Cache-buster al iframe
-                const bust = `?v=${Date.now()}`;
-                splat.src = splatUrl(figure) + bust;
-
-                // Reinicia estado
-                splatLoaded = false;
-                startWatchdog();
-              };
-
-              let watchdogTimer = null;
-              function startWatchdog() {
-                clearTimeout(watchdogTimer);
-                watchdogTimer = setTimeout(() => {
-                  if (!splatLoaded) {
-                    showErrorAndRetry('splat', figure, retrySplat);
-                    // Al fallar, mantiene AR desactivado
-                    setArEnabled(false);
-                  }
-                }, WATCHDOG_MS);
+            async function firstExisting(urls) {
+              for (const u of urls) {
+                try {
+                  const r = await fetch(u, { method: 'HEAD', cache: 'force-cache' });
+                  if (r.ok) return u;
+                } catch { }
               }
+              return '';
+            }
 
-              // Si vuelve la conexión y aún no cargó, reintenta
-              window.addEventListener('online', () => {
-                if (!splatLoaded) retrySplat();
-              });
+            // Aplica solo iluminación (environment-image). Elimina cualquier skybox.
+            async function applyEnvironmentOnly(mv, hdrUrl) {
+              const env = hdrUrl || 'neutral';
+              mv.setAttribute('environment-image', env);
+              mv.environmentImage = env;
 
-              // --- Poster previo al SPLAT (aparece ya, antes del src) ---
-              const splatPoster = document.getElementById('splatPoster');
-              if (splatPoster) {
-                // Fallback inmediato
-                splatPoster.style.backgroundImage = `url('/models/placeholder.webp')`;
-                splatPoster.classList.remove('hidden');
-                requestAnimationFrame(() => splatPoster.classList.add('visible'));
-                startWatchdog();
+              // 🔒 Sin skybox visible
+              mv.removeAttribute('skybox-image');
+              mv.skyboxImage = '';
 
-                // Intentar poster específico en paralelo
-                (async () => {
-                  try {
-                    const posterUrl = `/assets/posters/${figure}.webp`;
-                    const r = await fetch(posterUrl, { method: 'HEAD', cache: 'force-cache' });
-                    if (r.ok) splatPoster.style.backgroundImage = `url('${posterUrl}')`;
-                  } catch {}
-                })();
+              // Ajustes de look (ajusta a tu gusto)
+              mv.exposure = '1.25';
+              mv.shadowIntensity = '0.8';
+              mv.shadowSoftness = '1.0';
+              // mv.environmentRotation = '10deg'; // opcional
+            }
 
-                // Ocultar cuando el SPLAT carga
-                splat.addEventListener(
-                  'load',
-                  () => {
-                    splatLoaded = true;
-                    clearTimeout(watchdogTimer);
+            // Elegimos un HDR válido (o neutro)
+            const hdrToUse = (await firstExisting([HDR_PRIMARY])) || HDR_FALLBACK;
 
-                    splatPoster.classList.add('fade-out');
-                    setTimeout(() => splatPoster.classList.add('hidden'), 700);
+            // Ilumina sin fondo HDR
+            await applyEnvironmentOnly(mv, hdrToUse);
 
-                    // SPLAT ya pintado → habilita AR y muestra la escena
-                    setArEnabled(true);
-                    requestAnimationFrame(() => splat.classList.add('is-visible'));
+            // Algunos navegadores “resetean” atributos tras ciertos eventos: lo reforzamos
+            mv.addEventListener('load', () => applyEnvironmentOnly(mv, hdrToUse), { once: true });
 
-                    // Oculta skeleton por si seguía visible
-                    const sk = document.getElementById('skel');
-                    if (sk) {
-                      sk.style.opacity = '0';
-                      setTimeout(() => sk.classList.add('hidden'), 400);
-                    }
-                  },
-                  { once: true }
-                );
-              }
 
-              // Cargar SPLAT
-              splat.src = splatUrl(figure);
-              splat.classList.remove('is-visible');
-              splat.classList.remove('hidden');
 
-              // FAB AR
-              arBtn.classList.remove('hidden');
-              arBtn.onclick = () => {
+            // Iluminación por pieza (opcional)
+            const lightSettings = {
+              'cristo-yacente': {
+                exposure: 1.6,
+                shadowIntensity: 0.9,
+                shadowSoftness: 0.9,
+                environmentRotation: '15deg'
+              },
+              'virgen-romanica': { exposure: 1.3, environmentRotation: '0deg' }
+            };
+            const L = lightSettings[model];
+            if (L) {
+              if (L.exposure != null) mv.exposure = String(L.exposure);
+              if (L.shadowIntensity != null) mv.shadowIntensity = String(L.shadowIntensity);
+              if (L.shadowSoftness != null) mv.shadowSoftness = String(L.shadowSoftness);
+              if (L.environmentRotation) mv.environmentRotation = L.environmentRotation;
+            }
+
+            // iOS Quick Look
+            mv.iosSrc = usdzUrl(model);
+            mv.classList.remove('hidden');
+
+            // Oculta botón AR nativo
+            if (!mv.querySelector('[slot="ar-button"]')) {
+              const blocker = document.createElement('button');
+              blocker.setAttribute('slot', 'ar-button');
+              blocker.setAttribute('aria-hidden', 'true');
+              blocker.style.display = 'none';
+              blocker.tabIndex = -1;
+              mv.appendChild(blocker);
+            }
+
+            // ✅ Botón AR unificado (optimizado y reseteado por carga)
+            if (arBtn) {
+              // Elimina handlers previos si la página fue recargada desde memoria
+              arBtn.replaceWith(arBtn.cloneNode(true));
+              const newArBtn = document.getElementById('arBtn');
+
+              const fileSigned = preSigned?.glb || glbUrl(model);
+              const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(
+                fileSigned
+              )}&mode=ar_preferred&title=${encodeURIComponent(model)}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+
+
+              newArBtn.classList.remove('hidden');
+              newArBtn.addEventListener('click', async () => {
                 showARLoading();
-                if (isIOS) {
-                  const ok = openQuickLookSync(figure);
-                  if (!ok) window.location.href = usdzUrl(figure); // fallback duro
-                  return;
+
+                try {
+                  if (isIOS) {
+                    const ok = openQuickLookSync(model);
+                    if (!ok) window.location.href = usdzUrl(model);
+                    return;
+                  }
+
+                  if (isAndroid) {
+                    const a = document.createElement('a');
+                    const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(
+                      glbUrl(model)
+                    )}&mode=ar_preferred&title=${encodeURIComponent(
+                      model
+                    )}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+                    a.href = intent;
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    return;
+                  }
+
+                  if (mv?.activateAR) await mv.activateAR();
+                  else openARFor(model);
+                } catch (err) {
+                  console.error('Error abriendo AR:', err);
+                  openARFor(model);
+                } finally {
+                  hideARLoading();
                 }
-                openARFor(figure);
-              };
-
-              if (slug) {
-                infoData = await loadInfoDataOrFallback(infoData);
-                renderInfo(slug);
-              }
-
-              // Auto-open si el usuario lo dejó abierto para este slug o si viene con ?info=1 o #info
-              const wantsInfo =
-                new URLSearchParams(location.search).get('info') === '1' ||
-                location.hash === '#info';
-              let lastState = 'closed';
-              try {
-                lastState = localStorage.getItem(sheetKeyFor(slug)) || 'closed';
-              } catch {}
-              if (wantsInfo || lastState === 'open') {
-                // Deja un frame para que el DOM pinte antes del open (suaviza la transición)
-                requestAnimationFrame(() => openSheet());
-              }
-
-              setupAudioFor(figure);
-              skel.classList.add('hidden');
-              return;
+              });
             }
 
-            // Sin parámetros válidos:
-            showHelp();
-          } catch (err) {
-            console.error(err);
-            msg.classList.remove('hidden');
-            msg.innerHTML = `<b>Error:</b> ${String(err).replace(/</g, '&lt;')}`;
+            if (slug) {
+              infoData = await loadInfoDataOrFallback(infoData);
+              renderInfo(slug);
+            }
+
+            // Auto-open si el usuario lo dejó abierto para este slug o si viene con ?info=1 o #info
+            const wantsInfo =
+              new URLSearchParams(location.search).get('info') === '1' ||
+              location.hash === '#info';
+            let lastState = 'closed';
+            try {
+              lastState = localStorage.getItem(sheetKeyFor(slug)) || 'closed';
+            } catch { }
+            if (wantsInfo || lastState === 'open') {
+              // Deja un frame para que el DOM pinte antes del open (suaviza la transición)
+              requestAnimationFrame(() => openSheet());
+            }
+
+            setupAudioFor(model);
             skel.classList.add('hidden');
+            return;
           }
-        })();
-      });
 
-      /* === PANEL VISUAL DE AJUSTE DE CÁMARA (con min/max zoom) === */
-      (function setupCameraDebugPanel() {
-        if (!location.search.includes('debug=true')) return;
+          if (type === 'splat' && figure) {
+            document.body.classList.add('mode-splat');
 
-        const qs = new URLSearchParams(location.search);
-        let dbgModel = (qs.get('model') || qs.get('figure') || '').toLowerCase();
-        if (!dbgModel) {
-          const p = location.pathname.split('/').filter(Boolean);
-          if (p[0] === 'splat' && p[1]) dbgModel = p[1];
-          else if (p[0] === 'glb' && p[1]) dbgModel = p[1];
-          else if (p.length === 1) dbgModel = p[0];
+            // Deshabilita AR mientras el SPLAT no esté listo
+            setArEnabled(false);
+
+            // Estado de carga + watchdog de seguridad
+            let splatLoaded = false;
+            const WATCHDOG_MS = 12000;
+
+            const retrySplat = () => {
+              // Reaparece el skeleton suavemente
+              const sk = document.getElementById('skel');
+              if (sk) {
+                sk.classList.remove('hidden');
+                sk.style.opacity = '1';
+              }
+
+              // Rehacer poster overlay si estaba
+              const sp = document.getElementById('splatPoster');
+              if (sp) {
+                sp.classList.remove('hidden', 'fade-out');
+                requestAnimationFrame(() => sp.classList.add('visible'));
+              }
+
+              // Cache-buster al iframe
+              const bust = `?v=${Date.now()}`;
+              splat.src = splatUrl(figure) + bust;
+
+              // Reinicia estado
+              splatLoaded = false;
+              startWatchdog();
+            };
+
+            let watchdogTimer = null;
+            function startWatchdog() {
+              clearTimeout(watchdogTimer);
+              watchdogTimer = setTimeout(() => {
+                if (!splatLoaded) {
+                  showErrorAndRetry('splat', figure, retrySplat);
+                  // Al fallar, mantiene AR desactivado
+                  setArEnabled(false);
+                }
+              }, WATCHDOG_MS);
+            }
+
+            // Si vuelve la conexión y aún no cargó, reintenta
+            window.addEventListener('online', () => {
+              if (!splatLoaded) retrySplat();
+            });
+
+            // --- Poster previo al SPLAT (aparece ya, antes del src) ---
+            const splatPoster = document.getElementById('splatPoster');
+            if (splatPoster) {
+              // Fallback inmediato
+              splatPoster.style.backgroundImage = `url('/models/placeholder.webp')`;
+              splatPoster.classList.remove('hidden');
+              requestAnimationFrame(() => splatPoster.classList.add('visible'));
+              startWatchdog();
+
+              // Intentar poster específico en paralelo
+              (async () => {
+                try {
+                  const posterUrl = `/assets/posters/${figure}.webp`;
+                  const r = await fetch(posterUrl, { method: 'HEAD', cache: 'force-cache' });
+                  if (r.ok) splatPoster.style.backgroundImage = `url('${posterUrl}')`;
+                } catch { }
+              })();
+
+              // Ocultar cuando el SPLAT carga
+              splat.addEventListener(
+                'load',
+                () => {
+                  splatLoaded = true;
+                  clearTimeout(watchdogTimer);
+
+                  splatPoster.classList.add('fade-out');
+                  setTimeout(() => splatPoster.classList.add('hidden'), 700);
+
+                  // SPLAT ya pintado → habilita AR y muestra la escena
+                  setArEnabled(true);
+                  requestAnimationFrame(() => splat.classList.add('is-visible'));
+
+                  // Oculta skeleton por si seguía visible
+                  const sk = document.getElementById('skel');
+                  if (sk) {
+                    sk.style.opacity = '0';
+                    setTimeout(() => sk.classList.add('hidden'), 400);
+                  }
+                },
+                { once: true }
+              );
+            }
+
+            // Cargar SPLAT
+            splat.src = splatUrl(figure);
+            splat.classList.remove('is-visible');
+            splat.classList.remove('hidden');
+
+            // FAB AR
+            arBtn.classList.remove('hidden');
+            arBtn.onclick = () => {
+              showARLoading();
+              if (isIOS) {
+                const ok = openQuickLookSync(figure);
+                if (!ok) window.location.href = usdzUrl(figure); // fallback duro
+                return;
+              }
+              openARFor(figure);
+            };
+
+            if (slug) {
+              infoData = await loadInfoDataOrFallback(infoData);
+              renderInfo(slug);
+            }
+
+            // Auto-open si el usuario lo dejó abierto para este slug o si viene con ?info=1 o #info
+            const wantsInfo =
+              new URLSearchParams(location.search).get('info') === '1' ||
+              location.hash === '#info';
+            let lastState = 'closed';
+            try {
+              lastState = localStorage.getItem(sheetKeyFor(slug)) || 'closed';
+            } catch { }
+            if (wantsInfo || lastState === 'open') {
+              // Deja un frame para que el DOM pinte antes del open (suaviza la transición)
+              requestAnimationFrame(() => openSheet());
+            }
+
+            setupAudioFor(figure);
+            skel.classList.add('hidden');
+            return;
+          }
+
+          // Sin parámetros válidos:
+          showHelp();
+        } catch (err) {
+          console.error(err);
+          msg.classList.remove('hidden');
+          msg.innerHTML = `<b>Error:</b> ${String(err).replace(/</g, '&lt;')}`;
+          skel.classList.add('hidden');
         }
-        const model = dbgModel;
+      })();
+    });
 
-        const mv = document.getElementById('mv');
-        if (!mv) return;
+    /* === PANEL VISUAL DE AJUSTE DE CÁMARA (con min/max zoom) === */
+    (function setupCameraDebugPanel() {
+      if (!location.search.includes('debug=true')) return;
 
-        const num = (s, def = 0) => {
-          if (s == null) return def;
-          const m = String(s).match(/-?\d+(\.\d+)?/);
-          return m ? parseFloat(m[0]) : def;
-        };
+      const qs = new URLSearchParams(location.search);
+      let dbgModel = (qs.get('model') || qs.get('figure') || '').toLowerCase();
+      if (!dbgModel) {
+        const p = location.pathname.split('/').filter(Boolean);
+        if (p[0] === 'splat' && p[1]) dbgModel = p[1];
+        else if (p[0] === 'glb' && p[1]) dbgModel = p[1];
+        else if (p.length === 1) dbgModel = p[0];
+      }
+      const model = dbgModel;
 
-        const cam = (window.cameraSettings && window.cameraSettings[model]) || {};
-        const initPhi = num((cam.orbit || '0deg 70deg 3m').split(' ')[1], 70);
-        const initR = num((cam.orbit || '0deg 70deg 3m').split(' ')[2], 3);
-        const initY = num((cam.target || '0m 0.5m 0m').split(' ')[1], 0.5);
-        const initMinR = num(cam.minRadius, Math.max(0.4, initR * 0.4));
-        const initMaxR = num(cam.maxRadius, Math.max(initR * 1.5, initMinR + 0.5));
-        const initFov = num(cam.fov || mv.fieldOfView || '30deg', 30);
+      const mv = document.getElementById('mv');
+      if (!mv) return;
 
-        const panel = document.createElement('div');
-        panel.id = 'camDebug';
-        panel.style.cssText = `
+      const num = (s, def = 0) => {
+        if (s == null) return def;
+        const m = String(s).match(/-?\d+(\.\d+)?/);
+        return m ? parseFloat(m[0]) : def;
+      };
+
+      const cam = (window.cameraSettings && window.cameraSettings[model]) || {};
+      const initPhi = num((cam.orbit || '0deg 70deg 3m').split(' ')[1], 70);
+      const initR = num((cam.orbit || '0deg 70deg 3m').split(' ')[2], 3);
+      const initY = num((cam.target || '0m 0.5m 0m').split(' ')[1], 0.5);
+      const initMinR = num(cam.minRadius, Math.max(0.4, initR * 0.4));
+      const initMaxR = num(cam.maxRadius, Math.max(initR * 1.5, initMinR + 0.5));
+      const initFov = num(cam.fov || mv.fieldOfView || '30deg', 30);
+
+      const panel = document.createElement('div');
+      panel.id = 'camDebug';
+      panel.style.cssText = `
           position: fixed; top: 10px; right: 10px; width: 260px;
           background: rgba(15,17,21,0.95); color: #e9eef7; font: 13px/1.2 system-ui,sans-serif;
           border-radius: 12px; padding: 12px; z-index: 9999; box-shadow: 0 0 15px rgba(0,0,0,.4); backdrop-filter: blur(8px);
         `;
-        panel.innerHTML = `
+      panel.innerHTML = `
           <b>🎥 Ajuste de Cámara</b><br><br>
 
           <label>Altura (target Y): <span id="valY">${initY.toFixed(2)}</span> m</label><br>
@@ -1535,67 +1517,67 @@ mv.addEventListener('load', () => applyEnvironmentOnly(mv, hdrToUse), { once: tr
             📋 Copiar valores
           </button>
         `;
-        document.body.appendChild(panel);
+      document.body.appendChild(panel);
 
-        const yRange = panel.querySelector('#ctrlY');
-        const rRange = panel.querySelector('#ctrlR');
-        const phiRange = panel.querySelector('#ctrlPhi');
-        const fovRange = panel.querySelector('#ctrlFov');
-        const minRRange = panel.querySelector('#ctrlMinR');
-        const maxRRange = panel.querySelector('#ctrlMaxR');
+      const yRange = panel.querySelector('#ctrlY');
+      const rRange = panel.querySelector('#ctrlR');
+      const phiRange = panel.querySelector('#ctrlPhi');
+      const fovRange = panel.querySelector('#ctrlFov');
+      const minRRange = panel.querySelector('#ctrlMinR');
+      const maxRRange = panel.querySelector('#ctrlMaxR');
 
-        const valY = panel.querySelector('#valY');
-        const valR = panel.querySelector('#valR');
-        const valPhi = panel.querySelector('#valPhi');
-        const valFov = panel.querySelector('#valFov');
-        const valMinR = panel.querySelector('#valMinR');
-        const valMaxR = panel.querySelector('#valMaxR');
+      const valY = panel.querySelector('#valY');
+      const valR = panel.querySelector('#valR');
+      const valPhi = panel.querySelector('#valPhi');
+      const valFov = panel.querySelector('#valFov');
+      const valMinR = panel.querySelector('#valMinR');
+      const valMaxR = panel.querySelector('#valMaxR');
 
-        function clampLimits() {
-          let minR = parseFloat(minRRange.value);
-          let r = parseFloat(rRange.value);
-          let maxR = parseFloat(maxRRange.value);
+      function clampLimits() {
+        let minR = parseFloat(minRRange.value);
+        let r = parseFloat(rRange.value);
+        let maxR = parseFloat(maxRRange.value);
 
-          if (minR > maxR - 0.1) minR = maxR - 0.1;
-          if (r < minR) r = minR;
-          if (r > maxR) r = maxR;
+        if (minR > maxR - 0.1) minR = maxR - 0.1;
+        if (r < minR) r = minR;
+        if (r > maxR) r = maxR;
 
-          minRRange.value = minR.toFixed(1);
-          rRange.value = r.toFixed(1);
-          maxRRange.value = maxR.toFixed(1);
+        minRRange.value = minR.toFixed(1);
+        rRange.value = r.toFixed(1);
+        maxRRange.value = maxR.toFixed(1);
 
-          valMinR.textContent = minR.toFixed(1);
-          valR.textContent = r.toFixed(1);
-          valMaxR.textContent = maxR.toFixed(1);
-          return { minR, r, maxR };
-        }
+        valMinR.textContent = minR.toFixed(1);
+        valR.textContent = r.toFixed(1);
+        valMaxR.textContent = maxR.toFixed(1);
+        return { minR, r, maxR };
+      }
 
-        function updateCamera() {
-          const y = parseFloat(yRange.value);
-          const phi = parseFloat(phiRange.value);
-          const fov = parseFloat(fovRange.value);
-          const { minR, r, maxR } = clampLimits();
+      function updateCamera() {
+        const y = parseFloat(yRange.value);
+        const phi = parseFloat(phiRange.value);
+        const fov = parseFloat(fovRange.value);
+        const { minR, r, maxR } = clampLimits();
 
-          valY.textContent = y.toFixed(2);
-          valPhi.textContent = phi.toFixed(0);
-          valFov.textContent = fov.toFixed(0);
+        valY.textContent = y.toFixed(2);
+        valPhi.textContent = phi.toFixed(0);
+        valFov.textContent = fov.toFixed(0);
 
-          mv.minCameraOrbit = `auto auto ${minR}m`;
-          mv.maxCameraOrbit = `auto auto ${maxR}m`;
-          mv.cameraTarget = `0m ${y}m 0m`;
-          mv.cameraOrbit = `0deg ${phi}deg ${r}m`;
-          mv.fieldOfView = `${fov}deg`;
-          mv.jumpCameraToGoal();
-        }
+        mv.minCameraOrbit = `auto auto ${minR}m`;
+        mv.maxCameraOrbit = `auto auto ${maxR}m`;
+        mv.cameraTarget = `0m ${y}m 0m`;
+        mv.cameraOrbit = `0deg ${phi}deg ${r}m`;
+        mv.fieldOfView = `${fov}deg`;
+        mv.jumpCameraToGoal();
+      }
 
-        [yRange, rRange, phiRange, fovRange, minRRange, maxRRange].forEach((i) =>
-          i.addEventListener('input', updateCamera)
-        );
+      [yRange, rRange, phiRange, fovRange, minRRange, maxRRange].forEach((i) =>
+        i.addEventListener('input', updateCamera)
+      );
 
-        updateCamera();
+      updateCamera();
 
-        panel.querySelector('#copyCam').onclick = () => {
-          const text = `
+      panel.querySelector('#copyCam').onclick = () => {
+        const text = `
 "${model || 'cristo-yacente'}": {
   orbit: "0deg ${phiRange.value}deg ${rRange.value}m",
   target: "0m ${yRange.value}m 0m",
@@ -1604,135 +1586,136 @@ mv.addEventListener('load', () => applyEnvironmentOnly(mv, hdrToUse), { once: tr
   minFov: "22deg",
   maxFov: "${fovRange.value}deg"
 },`.trim();
-          navigator.clipboard.writeText(text);
-          const btn = panel.querySelector('#copyCam');
-          btn.textContent = '✅ Copiado';
-          setTimeout(() => (btn.textContent = '📋 Copiar valores'), 1200);
-        };
-      })();
+        navigator.clipboard.writeText(text);
+        const btn = panel.querySelector('#copyCam');
+        btn.textContent = '✅ Copiado';
+        setTimeout(() => (btn.textContent = '📋 Copiar valores'), 1200);
+      };
+    })();
 
-      /* === Interacción táctil para arrastrar la cartela (UX mejorado + fix reopen) === */
-      (function enableInfoSheetDrag() {
-        const sheet = document.getElementById('infoSheet');
-        const infoBtn = document.getElementById('infoBtn');
-        if (!sheet || !infoBtn) return;
+    /* === Interacción táctil para arrastrar la cartela (UX mejorado + fix reopen) === */
+    (function enableInfoSheetDrag() {
+      const sheet = document.getElementById('infoSheet');
+      const infoBtn = document.getElementById('infoBtn');
+      if (!sheet || !infoBtn) return;
 
-        let startY = 0;
-        let currentY = 0;
-        let isDragging = false;
-        const threshold = 90; // píxeles de arrastre necesarios para cerrar
+      let startY = 0;
+      let currentY = 0;
+      let isDragging = false;
+      const threshold = 90; // píxeles de arrastre necesarios para cerrar
 
-        const onStart = (e) => {
-          if (e.touches?.length !== 1) return;
-          startY = e.touches[0].clientY;
-          isDragging = true;
-          sheet.style.transition = 'none';
-        };
+      const onStart = (e) => {
+        if (e.touches?.length !== 1) return;
+        startY = e.touches[0].clientY;
+        isDragging = true;
+        sheet.style.transition = 'none';
+      };
 
-        const onMove = (e) => {
-          if (!isDragging || e.touches?.length !== 1) return;
-          currentY = e.touches[0].clientY - startY;
-          if (currentY > 0) {
-            sheet.style.transform = `translateY(${currentY}px)`;
-            sheet.style.opacity = `${1 - Math.min(currentY / 250, 0.4)}`;
+      const onMove = (e) => {
+        if (!isDragging || e.touches?.length !== 1) return;
+        currentY = e.touches[0].clientY - startY;
+        if (currentY > 0) {
+          sheet.style.transform = `translateY(${currentY}px)`;
+          sheet.style.opacity = `${1 - Math.min(currentY / 250, 0.4)}`;
+        }
+      };
+
+      const closeSheetSmooth = () => {
+        sheet.style.transition = 'transform .28s ease, opacity .28s ease';
+        sheet.style.transform = 'translateY(100%)';
+        sheet.style.opacity = '0';
+        // pequeño retraso para permitir la animación antes del hidden
+        setTimeout(() => {
+          sheet.classList.add('hidden');
+          sheet.setAttribute('aria-hidden', 'true');
+          sheet.style.transform = '';
+          sheet.style.opacity = '';
+        }, 280);
+      };
+
+      const onEnd = () => {
+        if (!isDragging) return;
+        sheet.style.transition = 'transform .28s ease, opacity .28s ease';
+        if (currentY > threshold) {
+          closeSheetSmooth();
+        } else {
+          sheet.style.transform = 'translateY(0)';
+          sheet.style.opacity = '1';
+        }
+        isDragging = false;
+        startY = 0;
+        currentY = 0;
+      };
+
+      // Escuchar gestos táctiles
+      sheet.addEventListener('touchstart', onStart, { passive: true });
+      sheet.addEventListener('touchmove', onMove, { passive: true });
+      sheet.addEventListener('touchend', onEnd);
+    })();
+
+    /* 🔒 Bloquear page-zoom del navegador solo cuando el gesto ocurre sobre la UI */
+    (function preventPageZoomOnUI() {
+      const uiRoots = ['#topBar', '#infoSheet', '#fabRow'];
+
+      const isInUI = (target) => {
+        if (!target || !target.closest) return false;
+        return uiRoots.some((sel) => target.closest(sel));
+      };
+
+      /* iOS: gesturestart/gesturechange → pinch page-zoom */
+      const onGesture = (e) => {
+        if (isInUI(e.target)) {
+          e.preventDefault(); // requiere passive:false
+        }
+      };
+      document.addEventListener('gesturestart', onGesture, {
+        passive: false,
+        capture: true
+      });
+      document.addEventListener('gesturechange', onGesture, {
+        passive: false,
+        capture: true
+      });
+
+      /* Trackpad pinch (Ctrl+wheel) en Desktop → evita zoom si es sobre UI */
+      window.addEventListener(
+        'wheel',
+        (e) => {
+          if (e.ctrlKey && isInUI(e.target)) {
+            e.preventDefault();
           }
-        };
+        },
+        { passive: false, capture: true }
+      );
 
-        const closeSheetSmooth = () => {
-          sheet.style.transition = 'transform .28s ease, opacity .28s ease';
-          sheet.style.transform = 'translateY(100%)';
-          sheet.style.opacity = '0';
-          // pequeño retraso para permitir la animación antes del hidden
-          setTimeout(() => {
-            sheet.classList.add('hidden');
-            sheet.setAttribute('aria-hidden', 'true');
-            sheet.style.transform = '';
-            sheet.style.opacity = '';
-          }, 280);
-        };
+      /* Evitar double-tap zoom en iOS SOLO en UI */
+      let lastTouchEnd = 0;
+      const onTouchEnd = (e) => {
+        if (!isInUI(e.target)) return;
+        const now = Date.now();
+        if (now - lastTouchEnd < 350) {
+          e.preventDefault(); // suprime double-tap zoom
+        }
+        lastTouchEnd = now;
+      };
+      document.addEventListener('touchend', onTouchEnd, {
+        passive: false,
+        capture: true
+      });
 
-        const onEnd = () => {
-          if (!isDragging) return;
-          sheet.style.transition = 'transform .28s ease, opacity .28s ease';
-          if (currentY > threshold) {
-            closeSheetSmooth();
-          } else {
-            sheet.style.transform = 'translateY(0)';
-            sheet.style.opacity = '1';
-          }
-          isDragging = false;
-          startY = 0;
-          currentY = 0;
-        };
+      /* Extra: evita scroll-bounce que a veces dispara zoom accidental en UI */
+      const onTouchMove = (e) => {
+        if (isInUI(e.target)) {
+          // permitimos desplazamiento en la cartela, pero no “pinch zoom” de página
+          if (e.scale && e.scale !== 1) e.preventDefault();
+        }
+      };
+      document.addEventListener('touchmove', onTouchMove, {
+        passive: false,
+        capture: true
+      });
+    })();
+  </script>
+</body>
 
-        // Escuchar gestos táctiles
-        sheet.addEventListener('touchstart', onStart, { passive: true });
-        sheet.addEventListener('touchmove', onMove, { passive: true });
-        sheet.addEventListener('touchend', onEnd);
-      })();
-
-      /* 🔒 Bloquear page-zoom del navegador solo cuando el gesto ocurre sobre la UI */
-      (function preventPageZoomOnUI() {
-        const uiRoots = ['#topBar', '#infoSheet', '#fabRow'];
-
-        const isInUI = (target) => {
-          if (!target || !target.closest) return false;
-          return uiRoots.some((sel) => target.closest(sel));
-        };
-
-        /* iOS: gesturestart/gesturechange → pinch page-zoom */
-        const onGesture = (e) => {
-          if (isInUI(e.target)) {
-            e.preventDefault(); // requiere passive:false
-          }
-        };
-        document.addEventListener('gesturestart', onGesture, {
-          passive: false,
-          capture: true
-        });
-        document.addEventListener('gesturechange', onGesture, {
-          passive: false,
-          capture: true
-        });
-
-        /* Trackpad pinch (Ctrl+wheel) en Desktop → evita zoom si es sobre UI */
-        window.addEventListener(
-          'wheel',
-          (e) => {
-            if (e.ctrlKey && isInUI(e.target)) {
-              e.preventDefault();
-            }
-          },
-          { passive: false, capture: true }
-        );
-
-        /* Evitar double-tap zoom en iOS SOLO en UI */
-        let lastTouchEnd = 0;
-        const onTouchEnd = (e) => {
-          if (!isInUI(e.target)) return;
-          const now = Date.now();
-          if (now - lastTouchEnd < 350) {
-            e.preventDefault(); // suprime double-tap zoom
-          }
-          lastTouchEnd = now;
-        };
-        document.addEventListener('touchend', onTouchEnd, {
-          passive: false,
-          capture: true
-        });
-
-        /* Extra: evita scroll-bounce que a veces dispara zoom accidental en UI */
-        const onTouchMove = (e) => {
-          if (isInUI(e.target)) {
-            // permitimos desplazamiento en la cartela, pero no “pinch zoom” de página
-            if (e.scale && e.scale !== 1) e.preventDefault();
-          }
-        };
-        document.addEventListener('touchmove', onTouchMove, {
-          passive: false,
-          capture: true
-        });
-      })();
-    </script>
-  </body>
 </html>
