@@ -1,9 +1,10 @@
 {
   "version": 2,
   "routes": [
+    { "src": "^/$", "dest": "/landing/index.html" },
+
     {
       "src": "^/$",
-      "dest": "/index.html",
       "headers": {
         "Content-Security-Policy": "default-src 'self' https://ajax.googleapis.com; img-src 'self' data: blob:; media-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' https://ajax.googleapis.com; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self';",
         "X-Frame-Options": "DENY",
@@ -13,72 +14,119 @@
         "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload"
       }
     },
+
     {
-      "src": "^/splat/([a-z0-9-]+)/?$",
-      "dest": "/?type=splat&figure=$1"
+      "src": "^/landing/index\\.html$",
+      "headers": {
+        "Content-Security-Policy": "default-src 'self' https://ajax.googleapis.com; img-src 'self' data: blob:; media-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' https://ajax.googleapis.com; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self';",
+        "X-Frame-Options": "DENY",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "accelerometer=(), camera=(), microphone=(), gyroscope=(), geolocation=(), xr-spatial-tracking=(self)",
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload"
+      }
+    },
+
+    {
+      "src": "^/index\\.html$",
+      "headers": {
+        "Content-Security-Policy": "default-src 'self' https://ajax.googleapis.com; img-src 'self' data: blob:; media-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' https://ajax.googleapis.com; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self';",
+        "X-Frame-Options": "DENY",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "strict-origin-when-cross-origin",
+        "Permissions-Policy": "accelerometer=(), camera=(), microphone=(), gyroscope=(), geolocation=(), xr-spatial-tracking=(self)",
+        "Strict-Transport-Security": "max-age=63072000; includeSubDomains; preload"
+      }
+    },
+
+    { "src": "^/splat/([a-z0-9-]+)/?$", "dest": "/?type=splat&figure=$1" },
+    { "src": "^/glb/([a-z0-9-]+)/?$",   "dest": "/?type=glb&model=$1" },
+
+    {
+      "src": "^/models/(.+\\.(?:glb|usdz))$",
+      "dest": "/api/protect?f=/models/$1",
+      "missing": [{ "type": "query", "key": "ok" }]
     },
     {
-      "src": "^/glb/([a-z0-9-]+)/?$",
-      "dest": "/?type=glb&model=$1"
+      "src": "^/assets/audio/(.+\\.mp3)$",
+      "dest": "/api/protect?f=/assets/audio/$1",
+      "missing": [{ "type": "query", "key": "ok" }]
     },
+
     {
       "src": "^/models/(.*)\\.usdz$",
       "headers": {
         "Content-Type": "model/vnd.usdz+zip",
+        "X-Content-Type-Options": "nosniff",
         "Cache-Control": "public, max-age=31536000, immutable",
-        "Cross-Origin-Resource-Policy": "same-origin"
+        "Cross-Origin-Resource-Policy": "same-origin",
+        "X-Robots-Tag": "noindex, noimageindex, noarchive"
       }
     },
     {
       "src": "^/models/(.*)\\.glb$",
       "headers": {
         "Content-Type": "model/gltf-binary",
+        "X-Content-Type-Options": "nosniff",
         "Cache-Control": "public, max-age=31536000, immutable",
-        "Cross-Origin-Resource-Policy": "same-origin"
-      }
-    },
-    {
-      "src": "^/assets/audio/(.*)\\.mp3$",
-      "headers": {
-        "Content-Type": "audio/mpeg",
-        "Cache-Control": "public, max-age=31536000, immutable",
-        "Cross-Origin-Resource-Policy": "same-origin"
-      }
-    },
-    {
-      "src": "^/assets/posters/(.*)\\.webp$",
-      "headers": {
-        "Content-Type": "image/webp",
-        "Cache-Control": "public, max-age=31536000, immutable",
-        "Cross-Origin-Resource-Policy": "same-origin"
+        "Cross-Origin-Resource-Policy": "same-origin",
+        "X-Robots-Tag": "noindex, noimageindex, noarchive"
       }
     },
     {
       "src": "^/assets/hdr/(.*)\\.hdr$",
       "headers": {
         "Content-Type": "image/vnd.radiance",
+        "X-Content-Type-Options": "nosniff",
         "Cache-Control": "public, max-age=31536000, immutable",
-        "Cross-Origin-Resource-Policy": "same-origin"
+        "Cross-Origin-Resource-Policy": "same-origin",
+        "X-Robots-Tag": "noindex, noarchive"
       }
     },
+
     {
-      "src": "^/manifest\\.webmanifest$",
+      "src": "^/assets/landing/(.*)\\.webp$",
       "headers": {
-        "Content-Type": "application/manifest+json",
+        "Content-Type": "image/webp",
         "Cache-Control": "public, max-age=31536000, immutable"
       }
     },
     {
-      "handle": "filesystem"
+      "src": "^/assets/posters/(.*)\\.webp$",
+      "headers": {
+        "Content-Type": "image/webp",
+        "X-Content-Type-Options": "nosniff",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Cross-Origin-Resource-Policy": "same-origin"
+      }
     },
+
     {
-      "src": "^/([a-z0-9-]+)/?$",
-      "dest": "/?type=glb&model=$1"
-    }
-  ],
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "errorPages": {
-    "404": "/404.html"
-  }
+      "src": "^/assets/audio/(.*)\\.mp3$",
+      "headers": {
+        "Content-Type": "audio/mpeg",
+        "X-Content-Type-Options": "nosniff",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Accept-Ranges": "bytes",
+        "Cross-Origin-Resource-Policy": "same-origin",
+        "X-Robots-Tag": "noindex, noarchive"
+      }
+    },
+
+    {
+      "src": "^/splat/(.*)$",
+      "headers": {
+        "X-Content-Type-Options": "nosniff",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Cross-Origin-Resource-Policy": "same-origin"
+      }
+    },
+
+    { "src": "^/manifest\\.webmanifest$", "headers": { "Content-Type": "application/manifest+json", "Cache-Control": "public, max-age=31536000, immutable" } },
+    { "src": "^/robots\\.txt$", "headers": { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "public, max-age=86400" } },
+
+    { "handle": "filesystem" },
+
+    { "src": "^/([a-z0-9-]+)/?$", "dest": "/?type=glb&model=$1" }
+  ]
 }
