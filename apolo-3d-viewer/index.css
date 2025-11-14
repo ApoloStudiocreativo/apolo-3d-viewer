@@ -486,57 +486,6 @@ body {
   }
 }
 
-
-/******************************
-  * H) Poster SPLAT
-  ******************************/
-.splat-poster {
-  position: fixed;
-  inset: 0;
-  background: center center / cover no-repeat #0f1115;
-  z-index: 8;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .4s ease;
-}
-
-.splat-poster.visible {
-  opacity: 1;
-}
-
-.splat-poster.fade-out {
-  opacity: 0;
-  transition: opacity .6s ease-out, filter .6s ease-out;
-  filter: blur(12px);
-}
-
-/* H2) Poster GLB (mismo patrón que SPLAT) */
-.glb-poster {
-  position: fixed;
-  inset: 0;
-  background: center center / cover no-repeat #0f1115;
-  z-index: 8;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity .45s ease, filter .45s ease;
-}
-
-.glb-poster.visible {
-  opacity: 1;
-}
-
-.glb-poster.fade-out {
-  opacity: 0;
-  filter: blur(10px);
-}
-
-
-/******************************
-  * I) Tipografías y tamaños cartela
-  ******************************/
-/* (ya integradas en D) y bloques de #infoSheet…) */
-
-
 /******************************
   * J) Overlay "Abriendo AR…"
   ******************************/
@@ -686,6 +635,11 @@ body {
   color: #fff;
 }
 
+.info-desc,
+.info-details,
+.info-meta {
+  font-family: 'Lora', Georgia, serif;
+}
 
 /******************************
   * M) Botón AR (glass azul) – base y estados
@@ -808,7 +762,6 @@ body {
   /* evita rebote de scroll */
 }
 
-
 /* Utilidades */
 .full {
   position: fixed;
@@ -837,6 +790,38 @@ iframe#splat {
   border: 0;
 }
 
+/* === SPLAT poster dentro del marco === */
+#viewerContainer {
+  position: relative;
+  overflow: hidden;
+}
+
+#splatPoster {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 2;
+  /* encima del iframe */
+  transition: opacity 0.9s ease, filter 0.9s ease, transform 0.9s ease;
+}
+
+#splatPoster.fade-out {
+  opacity: 0;
+  filter: blur(14px) brightness(0.8);
+  transform: scale(1.03);
+}
+
+/* Asegurar que el iframe del SPLAT queda debajo */
+iframe#splat {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
 
 /* ====== Mensaje de ayuda/error ====== */
 #msg {
@@ -1037,10 +1022,6 @@ body.sheet-open {
 model-viewer {
   opacity: 1;
   transition: opacity .35s ease;
-}
-
-/* El lienzo 3D debe ser transparente */
-model-viewer {
   background: transparent !important;
 }
 
@@ -1193,11 +1174,6 @@ model-viewer {
     flex-shrink: 0;
   }
 
-
-
-
-
-
   .gallery-btn:hover {
     background: rgba(64, 203, 203, 0.18);
   }
@@ -1269,20 +1245,21 @@ model-viewer {
   /* Cartela lateral: ocupa toda la altura */
   /* Cartela integrada en el layout (no flotante) */
   #infoSheet {
-    flex: 0 0 30%;
-    height: 100%;
-    align-self: stretch;
-    background: rgba(14, 16, 20, 0.85);
-    backdrop-filter: blur(18px);
-    border-radius: 18px;
-    box-shadow: 0 0 25px rgba(0, 0, 0, 0.35);
-    padding: 30px 28px;
+    position: fixed;
+    top: var(--topbar-h, 80px);
+    right: 60px;
+    bottom: 60px;
+    width: 400px;
+    border-radius: 20px;
+    background: rgba(15, 17, 21, 0.88);
+    backdrop-filter: blur(16px) saturate(160%);
+    -webkit-backdrop-filter: blur(16px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.45);
     color: var(--text);
-    overflow-y: auto;
-    position: relative;
-    /* antes era fixed */
-    top: 0;
-    right: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
   /* Contenido interno: scrolla dentro del panel */
@@ -1297,8 +1274,22 @@ model-viewer {
   /* 5️⃣ Posters (GLB/SPLAT) */
   .glb-poster,
   .splat-poster {
-    right: clamp(380px, 28vw, 480px);
-    background-size: contain;
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: inherit;
+    z-index: 5;
+    opacity: 1;
+    transition: opacity 0.9s ease, filter 0.9s ease, transform 0.9s ease;
+  }
+
+  .glb-poster.fade-out,
+  .splat-poster.fade-out {
+    opacity: 0;
+    filter: blur(14px) brightness(0.8);
+    transform: scale(1.03);
   }
 
   /* 6️⃣ Tipografía de cartela */
@@ -1395,19 +1386,6 @@ model-viewer {
     display: block;
   }
 
-  /* Cartela fija a la derecha */
-  #infoSheet {
-    flex: 0 0 30%;
-    height: 100%;
-    background: rgba(14, 16, 20, 0.85);
-    backdrop-filter: blur(18px);
-    border-radius: 18px;
-    box-shadow: -4px 0 22px rgba(0, 0, 0, 0.45);
-    padding: 30px 28px;
-    color: var(--text);
-    overflow-y: auto;
-  }
-
   /* Ocultar drag y botón de cerrar */
   .info-sheet__drag,
   .info-sheet__close {
@@ -1426,7 +1404,7 @@ model-viewer {
     /* margen inferior */
     left: 60px;
     /* margen izquierdo */
-    width: calc(60% - 15px);
+    width: calc(66%);
     /* 70% del espacio menos la mitad del gap */
     background: rgba(18, 20, 25, 0.85);
     backdrop-filter: blur(20px);
@@ -1452,6 +1430,7 @@ model-viewer {
     /* coincide con el marco */
     background: transparent;
     object-fit: contain;
+    z-index: 5;
   }
 
   /* ===== ESCRITORIO: ocultar botón de audio ===== */
@@ -1460,8 +1439,6 @@ model-viewer {
       display: none !important;
     }
   }
-
-
 
   /*****************************************************
  * 🖥️ CARTELA EXCLUSIVA DE ESCRITORIO
@@ -1500,65 +1477,142 @@ model-viewer {
       display: none !important;
     }
 
-    /* Cartela lateral */
+    /* Cartela lateral Solo Escritorio, tocar aqui para todo lo visual*/
     #infoPanel {
       position: fixed;
       top: 130px;
       bottom: 60px;
       right: 60px;
-      /* margen derecho */
-      width: calc(30%);
-      /* 30% del espacio menos la mitad del gap */
-      background: rgba(14, 16, 20, 0.9);
-      backdrop-filter: blur(20px);
-      border-radius: 24px;
-      box-shadow: 0 0 25px rgba(0, 0, 0, 0.45);
-      padding: 40px 32px;
+      width: clamp(340px, 25vw, 420px);
+      /* ✅ más estrecha y flexible */
+      background: rgba(18, 20, 25, 0.9);
+      backdrop-filter: blur(24px) saturate(130%);
+      -webkit-backdrop-filter: blur(24px) saturate(130%);
+      border-radius: 22px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      padding: 36px 40px 48px;
+      /* ✅ padding más equilibrado */
       overflow-y: auto;
       z-index: 20;
     }
   }
 
   #infoPanel h2 {
-    font-size: 1.6rem;
+    font-family: "Poppins", system-ui, sans-serif;
     font-weight: 600;
-    color: #fff;
-    margin-bottom: 8px;
+    font-size: clamp(22px, 1.7vw, 28px);
+    color: #ffffff;
+    margin-bottom: 0.5em;
     letter-spacing: 0.5px;
   }
 
   #infoPanel .info-meta {
     font-size: 0.9rem;
-    font-style: italic;
-    opacity: 0.7;
-    margin-bottom: 18px;
+    color: rgba(255, 255, 255, 0.65);
+    margin-bottom: 1.2em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    /* ✅ divisor sutil */
+    padding-bottom: 0.8em;
   }
 
   #infoPanel .info-desc {
-    font-size: 1rem;
-    line-height: 1.6;
-    opacity: 0.9;
-    margin-bottom: 24px;
+    font-size: 0.97rem;
+    line-height: 1.65;
+    color: rgba(240, 240, 240, 0.9);
+    margin-bottom: 1.5em;
+  }
+
+  #infoPanel .info-details {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    margin-top: 1.5em;
+    padding-top: 1em;
+    display: grid;
+    row-gap: 8px;
   }
 
   #infoPanel .info-details li {
-    margin-bottom: 8px;
-    font-size: 0.95rem;
-    opacity: 0.9;
-  }
-
-
-  #infoPanel .info-details li {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.85);
     margin-bottom: 6px;
   }
 
   #infoPanel strong {
-    color: #fff;
+    color: #ffffff;
+    font-weight: 500;
   }
 
+  /* === Botones inferiores cartela escritorio === */
+  #infoPanel .info-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    margin-top: 1.8em;
+    padding-top: 1.4em;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
 
+  #infoPanel .info-actions button,
+  #infoPanel .info-actions a {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.92rem;
+    font-weight: 500;
+    padding: 10px 16px;
+    border-radius: 10px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.3s ease, transform 0.2s ease;
+  }
 
+  #infoPanel .info-actions button svg,
+  #infoPanel .info-actions a svg {
+    stroke-width: 2;
+  }
+
+  #infoPanel .info-btn-audio {
+    background: rgba(255, 80, 80, 0.15);
+    color: #ff6d6d;
+    border: 1px solid rgba(255, 80, 80, 0.25);
+  }
+
+  #infoPanel .info-btn-audio:hover {
+    background: rgba(255, 80, 80, 0.25);
+    transform: translateY(-2px);
+  }
+
+  #infoPanel .info-btn-visit {
+    background: rgba(64, 203, 203, 0.15);
+    color: #40cbcb;
+    border: 1px solid rgba(64, 203, 203, 0.25);
+  }
+
+  #infoPanel .info-btn-visit:hover {
+    background: rgba(64, 203, 203, 0.25);
+    transform: translateY(-2px);
+  }
 }
+
+.lang-btn {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: white;
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin-left: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+.lang-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 
 /* =========================================================
    📱 MOBILE LAYOUT (≤1023px)
@@ -1582,6 +1636,17 @@ model-viewer {
     -webkit-backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255, 255, 255, .06);
     z-index: 40;
+  }
+
+  #viewerContainer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    border-radius: 0;
+    background: #0f1115;
+    overflow: hidden;
   }
 
   /* --- Grupo izquierdo: botón volver --- */
@@ -1677,5 +1742,32 @@ model-viewer {
   /* --- Asegurar que las FABs se muestran --- */
   .fab-row {
     display: flex !important;
+  }
+
+  .glb-poster,
+  .splat-poster {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: inherit;
+    z-index: 5;
+    opacity: 1;
+    transition: opacity 0.9s ease, filter 0.9s ease, transform 0.9s ease;
+  }
+
+  .glb-poster.fade-out,
+  .splat-poster.fade-out {
+    opacity: 0;
+    filter: blur(14px) brightness(0.8);
+    transform: scale(1.03);
+  }
+
+  /* Asegura que el visor esté por encima del póster */
+  model-viewer,
+  iframe#splat {
+    position: relative;
+    z-index: 5;
   }
 }

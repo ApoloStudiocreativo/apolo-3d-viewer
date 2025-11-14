@@ -1,84 +1,159 @@
-/* sw.js */
-const VERSION = 'v1.0.0';
-const STATIC_CACHE = `static-${VERSION}`;
-const RUNTIME_CACHE = `runtime-${VERSION}`;
+/* ==========================================================================
+   Museo Virtual Service Worker — v2.0.0
+   ========================================================================== */
 
-const matchRoute = (url) => {
-  const { pathname } = new URL(url, self.location.origin);
+const VERSION = 'v2.0.0';
+const STATIC_CACHE = `museo-static-${VERSION}`;
+const DYNAMIC_CACHE = `museo-dynamic-${VERSION}`;
+const CLEANUP_INTERVAL_DAYS = 7;
+
+/* --- Tipos de rutas y estrategias --- */
+function matchRoute(pathname) {
   if (pathname.startsWith('/assets/hdr/')) return 'HDR';
   if (pathname.startsWith('/assets/posters/')) return 'POSTER';
-  if (pathname === '/assets/info.json') return 'INFO';
-  if (/^\/splat\/[^/]+\/index\.html$/.test(pathname)) return 'SPLAT_HTML';
-  return null;
-};
+  if (pathname.startsWith('/assets/audio/')) return 'AUDIO';
+  if (pathname.startsWith('/models/')) return 'MODEL';
+  if (pathname.endsWith('/info.json')) return 'INFO';
+  if (pathname.endsWith('.splat.html')) return 'SPLAT_HTML';
+  return 'OTHER';
+}
 
+/* --- Instalación inicial --- */
 self.addEventListener('install', (event) => {
-  // Precache mínimo (opcional): nada forzado, el runtime se irá llenando.
-  event.waitUntil(self.skipWaiting());
+  self.skipWaiting();
+  event.waitUntil(
+    caches.open(STATIC_CACHE).then((cache) =>
+      cache.addAll([
+        '/',
+        '/index.html',
+        '/index.css',
+        '/assets/brand/logo-museo.svg',
+        '/assets/brand/isotipo.svg',
+      ])
+    )
+  );
 });
 
+/* --- Activación + limpieza antigua --- */
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
       const keys = await caches.keys();
-      await Promise.all(keys.map(k => (k.startsWith('static-') || k.startsWith('runtime-')) && k !== STATIC_CACHE && k !== RUNTIME_CACHE ? caches.delete(k) : null));
-      await self.clients.claim();
+      await Promise.all(
+        keys.map((key) => {
+          if (!key.includes(VERSION)) {
+            console.log('[SW] Borrando caché antigua:', key);
+            return caches.delete(key);
+          }
+        })
+      );
+
+      // Guardamos fecha de última limpieza
+      await caches.open(STATIC_CACHE).then((cache) =>
+        cache.put('cleanup-date', new Response(Date.now().toString()))
+      );
     })()
   );
+  self.clients.claim();
 });
 
-self.addEventListener('fetch', (event) => {
-  const req = event.request;
-  const route = matchRoute(req.url);
-  if (!route || req.method !== 'GET') return;
+/* --- Limpieza semanal automática --- */
+async function shouldCleanup() {
+  const cache = await caches.open(STATIC_CACHE);
+  const resp = await cache.match('cleanup-date');
+  if (!resp) return true;
+  const last = parseInt(await resp.text());
+  const diffDays = (Date.now() - last) / (1000 * 60 * 60 * 24);
+  return diffDays >= CLEANUP_INTERVAL_DAYS;
+}
 
-  if (route === 'HDR' || route === 'POSTER') {
-    // Cache-first
+/* --- Manejador de peticiones --- */
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  const url = new URL(request.url);
+  const route = matchRoute(url.pathname);
+
+  // HDR, POSTER, AUDIO, MODEL → Cache First
+  if (['HDR', 'POSTER', 'AUDIO', 'MODEL'].includes(route)) {
     event.respondWith(
       caches.open(STATIC_CACHE).then(async (cache) => {
-        const hit = await cache.match(req, { ignoreVary: true });
+        const hit = await cache.match(request);
         if (hit) return hit;
-        const res = await fetch(req);
-        if (res.ok) cache.put(req, res.clone());
-        return res;
+        try {
+          const res = await fetch(request);
+          if (res.ok) cache.put(request, res.clone());
+          return res;
+        } catch {
+          return hit || new Response(null, { status: 504 });
+        }
       })
     );
     return;
   }
 
+  // INFO.JSON → Stale While Revalidate
   if (route === 'INFO') {
-    // Stale-while-revalidate
     event.respondWith(
-      (async () => {
-        const cache = await caches.open(RUNTIME_CACHE);
-        const cached = await cache.match(req);
-        const network = fetch(req)
+      caches.open(DYNAMIC_CACHE).then(async (cache) => {
+        const cached = await cache.match(request);
+        const fetchPromise = fetch(request)
           .then((res) => {
-            if (res.ok) cache.put(req, res.clone());
+            if (res.ok) cache.put(request, res.clone());
             return res;
           })
-          .catch(() => null);
-        return cached || (await network) || new Response('{}', { headers: { 'Content-Type': 'application/json' } });
+          .catch(() => cached);
+        return cached || fetchPromise;
+      })
+    );
+    return;
+  }
+
+  // SPLAT HTML → Network First con fallback a caché
+  if (route === 'SPLAT_HTML') {
+    event.respondWith(
+      (async () => {
+        try {
+          const res = await fetch(request);
+          if (res.ok) {
+            const cache = await caches.open(DYNAMIC_CACHE);
+            cache.put(request, res.clone());
+            return res;
+          }
+        } catch (err) {
+          const cached = await caches.match(request);
+          if (cached) return cached;
+        }
+        return new Response('<h1>Offline</h1>', {
+          headers: { 'Content-Type': 'text/html' },
+        });
       })()
     );
     return;
   }
 
-  if (route === 'SPLAT_HTML') {
-    // Network-first con fallback cacheado
-    event.respondWith(
+  // Otras peticiones → Network First genérico
+  event.respondWith(
+    fetch(request).catch(() => caches.match(request))
+  );
+});
+
+/* --- Tarea periódica: limpieza semanal --- */
+self.addEventListener('periodicsync', (event) => {
+  if (event.tag === 'cleanup') {
+    event.waitUntil(
       (async () => {
-        const cache = await caches.open(RUNTIME_CACHE);
-        try {
-          const res = await fetch(req, { cache: 'no-store' });
-          if (res.ok) cache.put(req, res.clone());
-          return res;
-        } catch {
-          const fallback = await cache.match(req);
-          return fallback || new Response('<!doctype html><meta charset="utf-8"><body style="background:#0f1115;color:#e9eef7;font:16px system-ui;padding:24px">Sin conexión. Reintenta.</body>', { headers: { 'Content-Type': 'text/html' } });
+        if (await shouldCleanup()) {
+          const keys = await caches.keys();
+          await Promise.all(
+            keys.map((key) => {
+              if (!key.includes(VERSION)) return caches.delete(key);
+            })
+          );
+          const cache = await caches.open(STATIC_CACHE);
+          await cache.put('cleanup-date', new Response(Date.now().toString()));
+          console.log('[SW] Limpieza semanal completada.');
         }
       })()
     );
-    return;
   }
 });
