@@ -111,8 +111,6 @@
     <div class="kbd-help__row"><kbd>H</kbd> — Mostrar/ocultar ayuda</div>
   </div>
 
-
-
   <!-- Mensaje si faltan parámetros -->
   <div id="msg" class="hidden"></div>
 
@@ -284,6 +282,71 @@
         }
       }
       const slug = model || figure || '';
+
+      // === 🌐 Selector manual de idioma ===
+
+      // Recuperar idioma guardado o usar español por defecto
+      let currentLang = localStorage.getItem('museum-lang') || 'es';
+      const langToggleBtn = document.getElementById('langToggleBtn');
+
+      if (langToggleBtn) {
+        langToggleBtn.textContent = currentLang.toUpperCase();
+
+        langToggleBtn.addEventListener('click', () => {
+          currentLang = currentLang === 'es' ? 'en' : 'es';
+          localStorage.setItem('museum-lang', currentLang);
+          langToggleBtn.textContent = currentLang.toUpperCase();
+          loadInfoForSlug(slug, currentLang); // 🔁 Recargar cartela dinámicamente
+        });
+      }
+
+      // --- Función unificada de carga de información ---
+      function loadInfoForSlug(slug, lang) {
+        const infoPath = `/assets/info${lang === 'en' ? '_en' : ''}.json`;
+        fetch(infoPath)
+          .then(res => res.json())
+          .then(infoData => {
+            const info = infoData[slug];
+            if (!info) return;
+
+            // Móvil
+            const infoTitle = document.getElementById('infoTitle');
+            const infoMeta = document.getElementById('infoMeta');
+            const infoDesc = document.getElementById('infoDesc');
+            if (infoTitle && infoMeta && infoDesc) {
+              infoTitle.textContent = info.title;
+              infoMeta.textContent = `${info.year} — ${info.author} — ${info.material}`;
+              infoDesc.textContent = info.desc;
+            }
+
+            // Escritorio
+            const infoTitleDesktop = document.getElementById('infoTitleDesktop');
+            const infoMetaDesktop = document.querySelector('#infoPanel .info-meta');
+            const infoDescDesktop = document.querySelector('#infoPanel .info-desc');
+            const infoDetails = document.querySelector('#infoPanel .info-details');
+
+            if (infoTitleDesktop) infoTitleDesktop.textContent = info.title;
+            if (infoMetaDesktop) infoMetaDesktop.textContent = `${info.year} — ${info.author} — ${info.material}`;
+            if (infoDescDesktop) infoDescDesktop.textContent = info.desc;
+            if (infoDetails) {
+              infoDetails.innerHTML = `
+          <li><strong>${lang === 'en' ? 'Typology' : 'Tipología'}:</strong> ${info.typology || '—'}</li>
+          <li><strong>${lang === 'en' ? 'Material' : 'Material'}:</strong> ${info.material || '—'}</li>
+          <li><strong>${lang === 'en' ? 'Date' : 'Fecha'}:</strong> ${info.year || '—'}</li>
+          <li><strong>${lang === 'en' ? 'Author' : 'Autor'}:</strong> ${info.author || '—'}</li>
+        `;
+            }
+
+            console.log(`[Museo] Idioma: ${lang.toUpperCase()} — Datos cargados de ${infoPath}`);
+          })
+          .catch(err => console.error('[Museo] Error cargando info.json:', err));
+      }
+
+      // Cargar idioma inicial al abrir la página
+      document.addEventListener('DOMContentLoaded', () => {
+        loadInfoForSlug(slug, currentLang);
+      });
+
 
       // === 🎧 SINCRONIZAR CARTELA Y AUDIO (VERSIÓN ESCRITORIO) ===
 
@@ -2086,59 +2149,75 @@
   </script>
   <!-- ==== REGISTRO DEL SERVICE WORKER ==== -->
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', async () => {
-        try {
-          const reg = await navigator.serviceWorker.register('/sw.js', {
-            scope: '/',
-          });
-          console.log('[SW] Registrado con éxito:', reg.scope);
+    document.addEventListener('DOMContentLoaded', () => {
+      // ---------------- URL: soporta query *y* pathname limpias ----------------
+      const qs = new URLSearchParams(location.search);
+      let type = (qs.get('type') || '').toLowerCase(); // 'glb' | 'splat'
+      let model = (qs.get('model') || '').toLowerCase();
+      let figure = (qs.get('figure') || '').toLowerCase();
 
-          // Detectar nuevas versiones del SW y avisar al usuario
-          if (reg.waiting) {
-            console.log('[SW] Nueva versión ya esperando.');
-          }
-
-          reg.addEventListener('updatefound', () => {
-            const newWorker = reg.installing;
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('[SW] Nueva versión lista. Recarga para aplicar cambios.');
-                // Opcional: mostrar aviso o recargar automáticamente
-                // location.reload();
-              }
-            });
-          });
-        } catch (err) {
-          console.warn('[SW] Error al registrar:', err);
+      if (!type) {
+        const parts = location.pathname.split('/').filter(Boolean);
+        if (parts[0] === 'splat' && parts[1]) {
+          type = 'splat';
+          figure = parts[1];
+        } else if (parts[0] === 'glb' && parts[1]) {
+          type = 'glb';
+          model = parts[1];
+        } else if (parts.length === 1) {
+          type = 'glb';
+          model = parts[0];
         }
-      });
+      }
 
-      // =======================
-      // 🧠 LÓGICA CAMBIO DE IDIOMA (corregida)
-      // =======================
-      let currentLang = "es";
+      const slug = model || figure || '';
 
-      document.getElementById("langToggle").addEventListener("click", async () => {
-        currentLang = currentLang === "es" ? "en" : "es";
-        document.getElementById("langToggle").textContent =
-          currentLang === "es" ? "EN" : "ES";
+      // --- Función unificada de carga de información ---
+      function loadInfoForSlug(slug) {
+        const infoPath = `/assets/info.json`;
+        fetch(infoPath)
+          .then(res => res.json())
+          .then(infoData => {
+            const info = infoData[slug];
+            if (!info) return;
 
-        try {
-          // Forzar recarga del archivo JSON del nuevo idioma
-          const res = await fetch(
-            currentLang === "en" ? "./assets/info_en.json" : "./assets/info.json",
-            { cache: "no-store" }
-          );
-          infoData = await res.json();
+            // Móvil
+            const infoTitle = document.getElementById('infoTitle');
+            const infoMeta = document.getElementById('infoMeta');
+            const infoDesc = document.getElementById('infoDesc');
+            if (infoTitle && infoMeta && infoDesc) {
+              infoTitle.textContent = info.title;
+              infoMeta.textContent = `${info.year} — ${info.author} — ${info.material}`;
+              infoDesc.textContent = info.desc;
+            }
 
-          console.log(`✅ Idioma cambiado a ${currentLang}`, infoData);
-          renderInfo(slug); // volver a pintar cartela
-        } catch (err) {
-          console.error("❌ Error al cambiar idioma:", err);
-        }
-      });
-    }
+            // Escritorio
+            const infoTitleDesktop = document.getElementById('infoTitleDesktop');
+            const infoMetaDesktop = document.querySelector('#infoPanel .info-meta');
+            const infoDescDesktop = document.querySelector('#infoPanel .info-desc');
+            const infoDetails = document.querySelector('#infoPanel .info-details');
+
+            if (infoTitleDesktop) infoTitleDesktop.textContent = info.title;
+            if (infoMetaDesktop) infoMetaDesktop.textContent = `${info.year} — ${info.author} — ${info.material}`;
+            if (infoDescDesktop) infoDescDesktop.textContent = info.desc;
+
+            if (infoDetails) {
+              infoDetails.innerHTML = `
+            <li><strong>Tipología:</strong> ${info.typology || '—'}</li>
+            <li><strong>Material:</strong> ${info.material || '—'}</li>
+            <li><strong>Fecha:</strong> ${info.year || '—'}</li>
+            <li><strong>Autor:</strong> ${info.author || '—'}</li>
+          `;
+            }
+
+            console.log(`[Museo] Datos cargados de ${infoPath}`);
+          })
+          .catch(err => console.error('[Museo] Error cargando info.json:', err));
+      }
+
+      // Cargar idioma inicial al abrir la página
+      loadInfoForSlug(slug);
+    });
   </script>
 
 </body>

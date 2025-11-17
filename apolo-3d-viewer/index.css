@@ -1081,7 +1081,7 @@ model-viewer {
   /* Botón galería a la derecha */
   .gallery-btn {
     position: absolute;
-    right: 48px;
+    left: 60px;
     top: 50%;
     transform: translateY(-50%);
     display: inline-flex;
@@ -1139,29 +1139,35 @@ model-viewer {
     display: none !important;
   }
 
+
+
   /* Botón info oculto, galería visible */
   #infoBtn {
     display: none !important;
   }
 
   .gallery-btn {
-    position: absolute;
-    right: 48px;
-    top: 50%;
-    transform: translateY(-50%);
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 16px;
-    border-radius: 10px;
-    background: rgba(64, 203, 203, .10);
+    justify-content: center;
+    gap: 6px;
+    min-width: 130px;
+    height: 36px;
+    padding: 0 14px;
+    box-sizing: border-box;
     border: 2px solid var(--brand);
+    border-radius: 12px;
+    background: rgba(64, 203, 203, .10);
     color: var(--brand);
     font-weight: 700;
     font-size: 14px;
     line-height: 1;
+    letter-spacing: .2px;
+    cursor: pointer;
+    user-select: none;
     text-decoration: none;
     transition: all .25s ease;
+    box-shadow: 0 0 14px rgba(64, 203, 203, 0.2);
   }
 
   #topBar::before,
@@ -1175,7 +1181,16 @@ model-viewer {
   }
 
   .gallery-btn:hover {
-    background: rgba(64, 203, 203, 0.18);
+    background: rgba(64, 203, 203, .16);
+  }
+
+  .gallery-btn:active {
+    transform: translateY(1px);
+  }
+
+  .gallery-btn svg {
+    width: 18px;
+    height: 18px;
   }
 
   /* 3️⃣ Info-sheet como panel lateral derecho */
@@ -1402,9 +1417,10 @@ model-viewer {
     /* margen superior */
     bottom: 60px;
     /* margen inferior */
-    left: 60px;
+    left: 50px;
     /* margen izquierdo */
-    width: calc(66%);
+    right: calc(clamp(340px, 25vw, 420px) + 190px);
+    /* +20px de aire constante */
     /* 70% del espacio menos la mitad del gap */
     background: rgba(18, 20, 25, 0.85);
     backdrop-filter: blur(20px);
@@ -1613,6 +1629,39 @@ model-viewer {
   background: rgba(255, 255, 255, 0.1);
 }
 
+/* === 🌐 Botón de cambio de idioma (Topbar) === */
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e9eef7;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border-radius: 12px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(8px);
+}
+
+.lang-toggle:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
+  transform: scale(1.03);
+}
+
+.lang-toggle .flag {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.lang-toggle .lang-label {
+  user-select: none;
+}
+
+
 
 /* =========================================================
    📱 MOBILE LAYOUT (≤1023px)
@@ -1764,10 +1813,19 @@ model-viewer {
     transform: scale(1.03);
   }
 
+  #infoMeta small {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+
   /* Asegura que el visor esté por encima del póster */
   model-viewer,
   iframe#splat {
     position: relative;
     z-index: 5;
   }
+
 }
