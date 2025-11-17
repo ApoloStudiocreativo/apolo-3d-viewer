@@ -1128,7 +1128,7 @@ model-viewer {
   /* Logo centrado perfectamente */
   #brandLogo {
     display: block;
-    height: 52px;
+    height: 42px;
     margin: 0 auto;
   }
 
@@ -1154,10 +1154,10 @@ model-viewer {
     justify-content: center;
     gap: 6px;
     min-width: 130px;
-    height: 36px;
+    height: 46px;
     padding: 0 14px;
     box-sizing: border-box;
-    border: 2px solid var(--brand);
+    border: 1px solid rgba(64, 203, 203, 0.25);
     border-radius: 12px;
     background: rgba(64, 203, 203, .10);
     color: var(--brand);
