@@ -100,7 +100,6 @@ body.mode-splat {
   }
 }
 
-
 /******************************
   * D) Cartela inferior (info-sheet)
   ******************************/
@@ -122,6 +121,9 @@ body.mode-splat {
   /* por encima del #topBar (1000) */
   transition: transform .28s ease, opacity .28s ease;
   opacity: 0;
+  will-change: transform, opacity;
+  touch-action: none;
+  /* Evita scroll del fondo */
 }
 
 .info-sheet:not(.hidden) {

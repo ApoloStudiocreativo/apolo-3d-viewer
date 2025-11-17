@@ -2219,6 +2219,59 @@
       loadInfoForSlug(slug);
     });
   </script>
+  <script>
+    // --- Swipe down para cerrar la cartela móvil ---
+    (function () {
+      const sheet = document.getElementById('infoSheet');
+      const dragHandle = document.querySelector('.info-sheet__drag');
+      if (!sheet || !dragHandle) return;
+
+      let startY = 0;
+      let currentY = 0;
+      let isDragging = false;
+
+      const onTouchStart = (e) => {
+        startY = e.touches[0].clientY;
+        isDragging = true;
+        sheet.style.transition = 'none';
+      };
+
+      const onTouchMove = (e) => {
+        if (!isDragging) return;
+        currentY = e.touches[0].clientY;
+        const diff = currentY - startY;
+
+        // Solo desplazamos hacia abajo
+        if (diff > 0) {
+          sheet.style.transform = `translateY(${diff}px)`;
+          sheet.style.opacity = `${Math.max(1 - diff / 300, 0.4)}`;
+        }
+      };
+
+      const onTouchEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        sheet.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+
+        const diff = currentY - startY;
+        if (diff > 120) {
+          // cerrar cartela
+          sheet.classList.add('hidden');
+          sheet.setAttribute('aria-hidden', 'true');
+          document.body.classList.remove('sheet-open');
+        } else {
+          // volver a su sitio
+          sheet.style.transform = '';
+          sheet.style.opacity = '';
+        }
+      };
+
+      dragHandle.addEventListener('touchstart', onTouchStart);
+      dragHandle.addEventListener('touchmove', onTouchMove);
+      dragHandle.addEventListener('touchend', onTouchEnd);
+    })();
+  </script>
+
 
 </body>
 
