@@ -56,8 +56,6 @@
   <!-- Tipografía clásica para cuerpo de texto -->
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
 
-
-
 </head>
 
 <body>
@@ -86,7 +84,6 @@
     <div class="title-wrapper">
       <h1 id="pieceTitle">Cristo Yacente</h1>
     </div>
-
 
     <!-- DERECHA: Botón Info (móvil) / Galería (escritorio) -->
     <button id="infoBtn" class="info-btn" type="button" aria-controls="infoSheet" aria-expanded="false">
@@ -217,7 +214,6 @@
       Ver en AR
     </button>
   </div>
-
   <!-- =========================
          Overlay de carga AR
          ========================= -->
@@ -393,54 +389,6 @@
       `;
           }
 
-          // 🎧 Configurar audioguía compartida
-          const audio = new Audio(`/assets/audio/${slug}.mp3`);
-          audio.loop = true;
-
-          // --- Botón móvil (ya existente) ---
-          const audioBtn = document.getElementById('audioBtn');
-          if (audioBtn) {
-            audioBtn.addEventListener('click', () => {
-              if (audio.paused) {
-                audio.play();
-                audioBtn.classList.add('is-playing');
-              } else {
-                audio.pause();
-                audioBtn.classList.remove('is-playing');
-              }
-            });
-          }
-
-          // --- Botón escritorio ---
-          const audioGuideBtn = document.getElementById('audioGuideBtn');
-          if (audioGuideBtn) {
-            audioGuideBtn.addEventListener('click', () => {
-              if (audio.paused) {
-                audio.play();
-                audioGuideBtn.classList.add('is-playing');
-                audioGuideBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="6" y="4" width="4" height="16"></rect>
-              <rect x="14" y="4" width="4" height="16"></rect>
-            </svg>
-            Pausar audioguía
-          `;
-              } else {
-                audio.pause();
-                audioGuideBtn.classList.remove('is-playing');
-                audioGuideBtn.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="5 3 19 12 5 21 5 3"></polygon>
-            </svg>
-            Escuchar audioguía
-          `;
-              }
-            });
-          }
-
-          console.log(`[Museo] Cartela y audio actualizados para "${slug}"`);
         })
         .catch(err => console.error('[Museo] Error cargando info.json:', err));
 
@@ -719,37 +667,32 @@
       let audio = null;
       let audioCleanup = () => { };
       async function setupAudioFor(id) {
-
-        // ==== AUDIOGUÍA (versión escritorio mejorada) ====
+        const audioPath = `/assets/audio/${id}.mp3`;
+        const audioBtn = document.getElementById('audioBtn');
         const audioGuideBtn = document.getElementById('audioGuideBtn');
-        let currentAudio = null;
 
-        async function setupAudioFor(id) {
-          const audioPath = `/assets/audio/${id}.mp3`;
-          const audioBtn = document.getElementById('audioBtn');
-          const audioGuideBtn = document.getElementById('audioGuideBtn');
+        // Detener y limpiar audios anteriores
+        if (audio) {
+          try { audio.pause(); } catch { }
+          audio = null;
+        }
 
-          // Detener y limpiar audios anteriores
-          if (audio) {
-            try { audio.pause(); } catch { }
-            audio = null;
-          }
-          try { audioCleanup(); } catch { }
+        try { audioCleanup(); } catch { }
 
-          // Crear audio nuevo
-          audio = new Audio(audioPath);
-          audio.loop = true;
-          audio.preload = 'auto';
+        // Crear audio nuevo
+        audio = new Audio(audioPath);
+        audio.loop = true;
+        audio.preload = 'auto';
 
-          // Función para alternar play/pause y actualizar botones varios
-          const toggleAudio = async (btn) => {
-            if (!audio) return;
-            if (audio.paused) {
-              try {
-                await audio.play();
-                btn.classList.add('is-playing');
-                if (btn === audioGuideBtn) {
-                  btn.innerHTML = `
+        // Función para alternar play/pause y actualizar botones varios
+        const toggleAudio = async (btn) => {
+          if (!audio) return;
+          if (audio.paused) {
+            try {
+              await audio.play();
+              btn.classList.add('is-playing');
+              if (btn === audioGuideBtn) {
+                btn.innerHTML = `
             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="6" y="5" width="4" height="14" rx="1.2"></rect>
@@ -757,116 +700,38 @@
             </svg>
             Pausar audioguía
           `;
-                }
-              } catch (err) {
-                console.warn('Audio bloqueado o no disponible:', err);
               }
-            } else {
-              audio.pause();
-              btn.classList.remove('is-playing');
-              if (btn === audioGuideBtn) {
-                btn.innerHTML = `
+            } catch (err) {
+              console.warn('Audio bloqueado o no disponible:', err);
+            }
+          } else {
+            audio.pause();
+            btn.classList.remove('is-playing');
+            if (btn === audioGuideBtn) {
+              btn.innerHTML = `
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="5 3 19 12 5 21 5 3"></polygon>
           </svg>
           Escuchar audioguía
         `;
-              }
             }
-          };
-
-          // Listeners para ambos botones
-          if (audioBtn) {
-            audioBtn.classList.remove('hidden');
-            audioBtn.onclick = () => toggleAudio(audioBtn);
           }
-          if (audioGuideBtn) {
-            audioGuideBtn.onclick = () => toggleAudio(audioGuideBtn);
-          }
+        };
 
-          // Limpieza
-          audioCleanup = () => {
-            try { audio.pause(); } catch { }
-            audio = null;
-          };
+        // Listeners para ambos botones
+        if (audioBtn) {
+          audioBtn.classList.remove('hidden');
+          audioBtn.onclick = () => toggleAudio(audioBtn);
+        }
+        if (audioGuideBtn) {
+          audioGuideBtn.onclick = () => toggleAudio(audioGuideBtn);
         }
 
-
-        // Mostrar SIEMPRE la fila y el botón (respetando tu CSS cuando se pueda)
-        if (fabRow) {
-          fabRow.classList.remove('hidden');
-          fabRow.style.display = 'flex';
-        }
-        audioBtn.classList.remove('hidden', 'is-playing');
-        audioBtn.style.display = 'flex';
-        audioBtn.removeAttribute('disabled');
-        audioBtn.dataset.state = 'idle'; // para estilos opcionales
-        audioBtn.setAttribute('aria-pressed', 'false');
-        audioBtn.setAttribute('aria-label', 'Reproducir audio');
-
-        // Crea el elemento de audio
-        audio = new Audio(url);
-        audio.loop = true;
-        audio.preload = 'none';
-
-        const onClick = async () => {
-          if (!audio) return;
-          if (audio.paused) {
-            try {
-              await audio.play();
-              audioBtn.classList.add('is-playing');
-              audioBtn.dataset.state = 'playing';
-              audioBtn.setAttribute('aria-pressed', 'true');
-              audioBtn.setAttribute('aria-label', 'Pausar audio');
-              if (navigator.vibrate) navigator.vibrate(10);
-            } catch (e) {
-              showToast('Pulsa de nuevo para habilitar el audio');
-            }
-          } else {
-            audio.pause();
-            audioBtn.classList.remove('is-playing');
-            audioBtn.dataset.state = 'idle';
-            audioBtn.setAttribute('aria-pressed', 'false');
-            audioBtn.setAttribute('aria-label', 'Reproducir audio');
-          }
-        };
-
-        const onVisibility = () => {
-          if (document.hidden && audio && !audio.paused) {
-            audio.pause();
-            audioBtn.classList.remove('is-playing');
-            audioBtn.dataset.state = 'idle';
-            audioBtn.setAttribute('aria-pressed', 'false');
-            audioBtn.setAttribute('aria-label', 'Reproducir audio');
-          }
-        };
-
-        const onError = () => {
-          console.warn('Audio no encontrado o no reproducible:', url);
-          // Mantenemos el botón visible, pero lo desactivamos para no confundir
-          audioBtn.classList.remove('is-playing');
-          audioBtn.dataset.state = 'error';
-          audioBtn.setAttribute('aria-pressed', 'false');
-          audioBtn.setAttribute('aria-label', 'Audio no disponible');
-          audioBtn.setAttribute('disabled', 'true');
-        };
-
-        audioBtn.addEventListener('click', onClick);
-        document.addEventListener('visibilitychange', onVisibility);
-        audio.addEventListener('error', onError);
-
-        // Cleanup para la siguiente figura
+        // Limpieza
         audioCleanup = () => {
-          try {
-            if (audio) audio.pause();
-          } catch { }
+          try { audio.pause(); } catch { }
           audio = null;
-          audioBtn.removeEventListener('click', onClick);
-          document.removeEventListener('visibilitychange', onVisibility);
-          try {
-            audio.removeEventListener('error', onError);
-          } catch { }
         };
       }
 
@@ -1797,19 +1662,6 @@
               } catch (err) {
                 console.warn("Error precargando audio:", err);
               }
-            }
-
-
-
-            // Reactiva el botón de audioguía
-            const audioGuideBtn = document.getElementById('audioGuideBtn');
-            if (audioGuideBtn) {
-              audioGuideBtn.addEventListener('click', async () => {
-                const audioPath = `/assets/audio/${slug}.mp3`;
-                const audio = new Audio(audioPath);
-                audio.loop = true;
-                await audio.play();
-              });
             }
 
           } catch (err) {
