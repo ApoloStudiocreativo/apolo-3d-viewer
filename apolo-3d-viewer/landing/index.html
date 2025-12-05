@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
-  />
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#061F32" />
 
   <title>Museo y Real Monasterio de San Joaquin y Santa Ana · Museo Virtual</title>
@@ -22,192 +21,401 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap" rel="stylesheet" />
 
   <style>
     /* ===== Tokens base (mínimos) ===== */
-    :root{
-      --text:#e9eef7;
-      --muted:#9aa4b2;
-      --card:#141720;
-      --card-hover:#1a1f2a;
-      --radius:16px;
+    :root {
+      --text: #e9eef7;
+      --muted: #9aa4b2;
+      --card: #141720;
+      --card-hover: #1a1f2a;
+      --radius: 16px;
     }
 
     /* ===== Layout base ===== */
-      html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
-      html,body{
-      margin:0;
-      min-height:100%;
-      background:var(--bg);
-      color:var(--text);
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      }
+    html,
+    body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
 
-    .wrap{max-width:1100px;margin:0 auto;padding:18px 16px 28px;}
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 18px 16px 28px;
+    }
 
     /* ===== Grid tarjetas ===== */
-    .grid{
-      display:grid; gap:14px;
+    .grid {
+      display: grid;
+      gap: 14px;
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-    @media(min-width:560px){ .grid{ grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-    @media(min-width:920px){ .grid{ grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
-    .card{
-      display:block; text-decoration:none; color:inherit;
-      background:var(--card); border:1px solid #1e2430; border-radius:var(--radius);
-      overflow:hidden; transition:transform .12s ease, background .25s ease, border-color .25s ease, box-shadow .25s ease;
-      box-shadow:0 10px 28px rgba(0,0,0,.18);
+    @media(min-width:560px) {
+      .grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
     }
-    .card:hover{ transform:translateY(-2px); background:var(--card-hover); border-color:#2a3343; box-shadow:0 14px 34px rgba(0,0,0,.25); }
-    .thumb{ aspect-ratio: 4 / 3; width:100%; background:#0e1117 center/cover no-repeat; }
-    .card .body{padding:10px 12px 12px;}
-    .title{font:600 14px/1.25 'Poppins',sans-serif; margin:0 0 6px;}
-    .sub{color:var(--muted); font-size:12px; margin:0;}
+
+    @media(min-width:920px) {
+      .grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
+    .card {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      background: var(--card);
+      border: 1px solid #1e2430;
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: transform .12s ease, background .25s ease, border-color .25s ease, box-shadow .25s ease;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, .18);
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      background: var(--card-hover);
+      border-color: #2a3343;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, .25);
+    }
+
+    .thumb {
+      aspect-ratio: 4 / 3;
+      width: 100%;
+      background: #0e1117 center/cover no-repeat;
+    }
+
+    .card .body {
+      padding: 10px 12px 12px;
+    }
+
+    .title {
+      font: 600 14px/1.25 'Poppins', sans-serif;
+      margin: 0 0 6px;
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: 12px;
+      margin: 0;
+    }
 
     /* Badge (estructura + tamaño; los colores los pone el tema) */
-    .badge{
-      position:absolute; top:8px; right:8px;
-      display:inline-flex; align-items:center; justify-content:center;
-      width:26px; height:26px; border-radius:999px; padding:0;
-      border:1px solid transparent; background:transparent;
+    .badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      padding: 0;
+      border: 1px solid transparent;
+      background: transparent;
     }
-    .badge svg{ width:14px; height:14px; display:block; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; fill:none; }
-    .thumb-wrap{position:relative;}
+
+    .badge svg {
+      width: 14px;
+      height: 14px;
+      display: block;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    .thumb-wrap {
+      position: relative;
+    }
 
     /* Texto compacto en móviles muy estrechos */
-    @media (max-width:380px){
-      .title{ font-size:13px; }
-      .sub{ font-size:11px; }
+    @media (max-width:380px) {
+      .title {
+        font-size: 13px;
+      }
+
+      .sub {
+        font-size: 11px;
+      }
     }
 
     /* Bloqueo de zoom accidental SOLO en UI */
-    header, .search, .grid, .card { touch-action: manipulation; }
+    header,
+    .search,
+    .grid,
+    .card {
+      touch-action: manipulation;
+    }
 
     /* ===== Masthead ===== */
-    .mast{
+    .mast {
       --mast-height: 60px;
       display: grid;
-      grid-template-columns: auto 1fr var(--mast-height); /* logo | título | botón/inline */
+      grid-template-columns: auto 1fr var(--mast-height);
+      /* logo | título | botón/inline */
       align-items: center;
       gap: 6px;
       margin: 10px 0 15px;
       min-height: var(--mast-height);
     }
-    .mast-logo { height: var(--mast-height); width: var(--mast-height); display:flex; align-items:center; justify-content:flex-start; margin-left:3px; }
-    .mast-logo img{ width:100%; height:auto; object-fit:contain; border-radius:12px; box-shadow:0 1px 4px rgba(0,0,0,.25); }
 
-    .mast-title{ text-align:center; line-height:1.1; }
-    .mast-title h1{ font:600 18px/1.15 'Poppins',sans-serif; margin:0 0 2px; letter-spacing:.2px; }
-    .mast-title small{ color:var(--muted); font-size:13px; }
+    .mast-logo {
+      height: var(--mast-height);
+      width: var(--mast-height);
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      margin-left: 3px;
+    }
+
+    .mast-logo img {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
+    }
+
+    .mast-title {
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    .mast-title h1 {
+      font: 600 18px/1.15 'Poppins', sans-serif;
+      margin: 0 0 2px;
+      letter-spacing: .2px;
+    }
+
+    .mast-title small {
+      color: var(--muted);
+      font-size: 13px;
+    }
 
     /* Botón lupa móvil (mismo alto que el mast) */
-    .mast-search-btn{
-      width:var(--mast-height); height:var(--mast-height);
-      border-radius:16px; border:1px solid #119095; background:#11151d; color:#9fb1c5;
-      display:grid; place-items:center; cursor:pointer; -webkit-tap-highlight-color:transparent;
+    .mast-search-btn {
+      width: var(--mast-height);
+      height: var(--mast-height);
+      border-radius: 16px;
+      border: 1px solid #119095;
+      background: #11151d;
+      color: #9fb1c5;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
     }
-    .mast-search-btn svg{ width:22px; height:22px; }
+
+    .mast-search-btn svg {
+      width: 22px;
+      height: 22px;
+    }
 
     /* Campo búsqueda */
-    .search{ position:relative; flex:1; max-width:340px; }
-    .search input{
-      width:100%; height:40px; border-radius:12px; border:1px solid #253042; background:#11151d;
-      color:var(--text); padding:0 12px 0 36px; outline:none;
+    .search {
+      position: relative;
+      flex: 1;
+      max-width: 340px;
     }
-    .search svg{ position:absolute; left:10px; top:50%; transform:translateY(-50%); width:18px; height:18px; color:#6b7583; }
-    .search-inline{ display:none; margin-left:auto; }
+
+    .search input {
+      width: 100%;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid #253042;
+      background: #11151d;
+      color: var(--text);
+      padding: 0 12px 0 36px;
+      outline: none;
+    }
+
+    .search svg {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      color: #6b7583;
+    }
+
+    .search-inline {
+      display: none;
+      margin-left: auto;
+    }
 
     /* Drawer móvil (buscador) */
-    .search-drawer[hidden]{ display:none; }
-    .search-drawer{ padding:0 2px 10px; animation:drawerIn .18s ease; }
-    @keyframes drawerIn { from { opacity:0; transform: translateY(-6px); } to { opacity:1; transform: translateY(0); } }
+    .search-drawer[hidden] {
+      display: none;
+    }
+
+    .search-drawer {
+      padding: 0 2px 10px;
+      animation: drawerIn .18s ease;
+    }
+
+    @keyframes drawerIn {
+      from {
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
 
     /* Desktop */
-    @media (min-width:768px){
-      .mast{
-        --mast-height:64px;
-        grid-template-columns: 72px auto 1fr; /* ancho logo fijo + título + buscador a la dcha */
-        column-gap:10px;
+    @media (min-width:768px) {
+      .mast {
+        --mast-height: 64px;
+        grid-template-columns: 72px auto 1fr;
+        /* ancho logo fijo + título + buscador a la dcha */
+        column-gap: 10px;
       }
-      .mast-logo{ width:72px; margin-left:0; }
-      .mast-title{ text-align:left; }
-      .mast-search-btn{ display:none; }
-      .search-inline{ display:block; max-width:360px; width:100%; }
-      .search-drawer{ display:none !important; }
+
+      .mast-logo {
+        width: 72px;
+        margin-left: 0;
+      }
+
+      .mast-title {
+        text-align: left;
+      }
+
+      .mast-search-btn {
+        display: none;
+      }
+
+      .search-inline {
+        display: block;
+        max-width: 360px;
+        width: 100%;
+      }
+
+      .search-drawer {
+        display: none !important;
+      }
     }
 
     /* A11y: texto solo lectores */
-    .sr-only{
-      position:absolute!important; width:1px; height:1px; padding:0; margin:-1px;
-      overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+    .sr-only {
+      position: absolute !important;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
 
     /* ===== Tema “Museo” (granate + marfil + azules) ===== */
-    body.theme-museo{
+    body.theme-museo {
       /* Paleta */
       --granate-osc: #6A0000;
-      --granate:     #00ffee;
-      --marfil:      #F7F4EA;
-      --azul:        #00deff;
-      --azul-osc:    #359b95;
+      --granate: #00ffee;
+      --marfil: #F7F4EA;
+      --azul: #00deff;
+      --azul-osc: #359b95;
 
       /* Map a tokens */
-      --bg:          #06090a;
-      --text:        #EEF1F5;
-      --muted:       #B7C3CF;
-      --card:        #1a2931;
-      --card-hover:  #268386;
+      --bg: #06090a;
+      --text: #EEF1F5;
+      --muted: #B7C3CF;
+      --card: #1a2931;
+      --card-hover: #268386;
 
       /* Fondo con “respiración” de color */
       background:
-      radial-gradient(1200px 700px at 12% -10%, rgba(37,37,37,.37), transparent 55%),
-      radial-gradient(1200px 700px at 88% 110%, rgba(31,73,101,.11), transparent 55%),
-      var(--bg);
+        radial-gradient(1200px 700px at 12% -10%, rgba(37, 37, 37, .37), transparent 55%),
+        radial-gradient(1200px 700px at 88% 110%, rgba(31, 73, 101, .11), transparent 55%),
+        var(--bg);
       /* importante: que no se repitan y que queden fijos al scroll */
       background-repeat: no-repeat, no-repeat, no-repeat;
       background-attachment: fixed, fixed, fixed;
-      }
+    }
 
 
     /* Tipografía/jerarquía en tema */
-    body.theme-museo .mast-title h1{ color: var(--marfil); }
-    body.theme-museo .mast-title small{ color: color-mix(in oklab, var(--marfil) 65%, transparent); }
+    body.theme-museo .mast-title h1 {
+      color: var(--marfil);
+    }
 
-    body.theme-museo .mast-logo img{
-      box-shadow: 0 0 0 2px rgba(247,244,234,.07), 0 8px 24px rgba(0,0,0,.35);
+    body.theme-museo .mast-title small {
+      color: color-mix(in oklab, var(--marfil) 65%, transparent);
+    }
+
+    body.theme-museo .mast-logo img {
+      box-shadow: 0 0 0 2px rgba(247, 244, 234, .07), 0 8px 24px rgba(0, 0, 0, .35);
     }
 
     /* Buscador en tema */
-    body.theme-museo .search input{
-      background:#0C1721;
+    body.theme-museo .search input {
+      background: #0C1721;
       border-color: color-mix(in oklab, var(--azul) 45%, transparent);
-      color:var(--text);
+      color: var(--text);
     }
-    body.theme-museo .search input::placeholder{ color: color-mix(in oklab, var(--muted) 80%, transparent); }
-    body.theme-museo .search svg{ color: color-mix(in oklab, var(--azul) 70%, white 10%); }
+
+    body.theme-museo .search input::placeholder {
+      color: color-mix(in oklab, var(--muted) 80%, transparent);
+    }
+
+    body.theme-museo .search svg {
+      color: color-mix(in oklab, var(--azul) 70%, white 10%);
+    }
 
     /* Tarjeta en tema */
-    body.theme-museo .card{
-      background:var(--card);
+    body.theme-museo .card {
+      background: var(--card);
       border-color: color-mix(in oklab, var(--azul-osc) 65%, transparent);
-      box-shadow: 0 12px 28px rgba(3,31,50,.18);
+      box-shadow: 0 12px 28px rgba(3, 31, 50, .18);
     }
-    body.theme-museo .card:hover{
-      background:var(--card-hover);
+
+    body.theme-museo .card:hover {
+      background: var(--card-hover);
       border-color: color-mix(in oklab, var(--azul) 45%, transparent);
-      box-shadow: 0 14px 34px rgba(3,31,50,.26);
+      box-shadow: 0 14px 34px rgba(3, 31, 50, .26);
     }
-    body.theme-museo .title{ color: var(--marfil); }
-    body.theme-museo .sub{ color: color-mix(in oklab, var(--muted) 85%, transparent); }
+
+    body.theme-museo .title {
+      color: var(--marfil);
+    }
+
+    body.theme-museo .sub {
+      color: color-mix(in oklab, var(--muted) 85%, transparent);
+    }
 
     /* Badge en tema (aro granate, trazo marfil) */
-    body.theme-museo .badge{
+    body.theme-museo .badge {
       background: color-mix(in oklab, var(--granate) 14%, transparent);
       border-color: color-mix(in oklab, var(--granate) 45%, transparent);
     }
-    body.theme-museo .badge svg{ stroke: var(--marfil); }
+
+    body.theme-museo .badge svg {
+      stroke: var(--marfil);
+    }
   </style>
 </head>
 
@@ -219,23 +427,23 @@
       </div>
 
       <div class="mast-title">
-        <h1>Museo San Joaquín Y<br/>Santa Ana</h1>
+        <h1>Museo San Joaquín Y<br />Santa Ana</h1>
         <small>Museo Virtual</small>
       </div>
 
       <!-- Botón de búsqueda (móvil). En desktop se oculta -->
       <button class="mast-search-btn" type="button" aria-label="Buscar">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"
-                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z" stroke="currentColor"
+            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </button>
 
       <!-- Campo de búsqueda inline en desktop -->
       <label class="search search-inline" aria-label="Buscar piezas">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"
-                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z" stroke="currentColor"
+            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
         <input id="q" type="search" placeholder="Buscar por título o autor…" autocomplete="off" />
       </label>
@@ -245,8 +453,8 @@
     <div class="search-drawer" id="searchDrawer" hidden>
       <label class="search" aria-label="Buscar piezas">
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-          <path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z"
-                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M21 21l-4.3-4.3M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15z" stroke="currentColor"
+            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
         <input id="q-mobile" type="search" placeholder="Buscar por título o autor…" autocomplete="off" />
       </label>
@@ -260,26 +468,26 @@
   <script>
     // Datos (los tuyos)
     const DATA = [
-      { slug:'cristo-yacente', title:'Cristo Yacente', subtitle:'Gregorio Fernández · s. XVII', type:'glb' },
-      { slug:'virgen-romanica', title:'Virgen Románica', subtitle:'Madera Policromada · s. XII', type:'glb' },
-      { slug:'san-bernardo-con-la-virgen', title:'San Bernardo con la Virgen', subtitle:'Luis Salvador Carmona · s.XVIII', type:'splat' },
-      { slug:'bargueno-relicario', title:'Bargueño Relicario', subtitle:'Madera Policromada y reliquias · s. XVI', type:'glb' },
-      { slug:'casulla-santa-ana', title:'Casulla Santa Ana', subtitle:'Religiosas del Real Monasterio de San Joaquín y Santa Ana · s. XVIII', type:'glb'},
-      { slug:'jesus-en-la-cruz', title:'Jesús en la Cruz', subtitle:'Escultura de papelón · s. XVI', type:'glb', poster:'/assets/landing/jesus-en-la-cruz.webp' },
-      { slug:'ecce-homo', title:'Ecce Homo', subtitle:'Francisco Alonso De Los Ríos · s. XVII', type:'glb', poster:'/assets/landing/' },
-      { slug:'jesus-atado-a-la-columna', title:'Jesús Atado a la Columna', subtitle:'Madera Policromada · s. XVII', type:'glb', poster:'/assets/landing/' },
-      { slug:'novisimos', title:'Novísimos', subtitle:'Giovanni Bernardino Azzolino · s. XVII', type:'glb', poster:'/assets/landing/' },
-      { slug:'reliquia-dorada', title:'Reliquia Dorada', subtitle:'—', type:'glb', poster:'/assets/landing/' },
-      { slug:'san-jose-con-el-nino', title:'San José con el Niño', subtitle:'Próximo a Luisa Ignacia Roldán Villavicencio “LA ROLDANA” · s. XVII', type:'glb', poster:'/assets/landing/' },
-      { slug:'tapiz', title:'Tapiz', subtitle:'Textil. Alfombra nudo turco · s. XVII', type:'glb', poster:'/assets/landing/' },
-      { slug:'virgen-asuncion', title:'Virgen de la Asunción', subtitle:'Madera Policromada · s. XVIII', type:'glb', poster:'/assets/landing/' },
-      { slug:'virgen-de-mena', title:'La Dolorosa', subtitle:'Pedro de Mena · s. XVII', type:'glb', poster:'/assets/landing/' },
-      { slug:'goya-uno', title:'Cuadro Goya Uno', subtitle:'', type:'glb', poster:'/assets/landing/' },
-      { slug:'goya-dos', title:'Cuadro Goya Dos', subtitle:'', type:'glb', poster:'/assets/landing/' },
-      { slug:'goya-tres', title:'Cuadro Goya Tres', subtitle:'', type:'glb', poster:'/assets/landing/' },
-      { slug:'bayeu-uno', title:'Cuadro Bayeu Uno', subtitle:'', type:'glb', poster:'/assets/landing/' },
-      { slug:'bayeu-dos', title:'Cuadro Bayeu Dos', subtitle:'', type:'glb', poster:'/assets/landing/' },
-      { slug:'bayeu-tres', title:'Cuadro Bayeu Tres', subtitle:'', type:'glb', poster:'/assets/landing/' },
+      { slug: 'cristo-yacente', title: 'Cristo Yacente', subtitle: 'Gregorio Fernández · s. XVII', type: 'glb' },
+      { slug: 'virgen-romanica', title: 'Virgen Románica', subtitle: 'Madera Policromada · s. XII', type: 'glb' },
+      { slug: 'san-bernardo-con-la-virgen', title: 'San Bernardo con la Virgen', subtitle: 'Luis Salvador Carmona · s.XVIII', type: 'splat' },
+      { slug: 'bargueno-relicario', title: 'Bargueño Relicario', subtitle: 'Madera Policromada y reliquias · s. XVI', type: 'glb' },
+      { slug: 'casulla-santa-ana', title: 'Casulla Santa Ana', subtitle: 'Religiosas del Real Monasterio de San Joaquín y Santa Ana · s. XVIII', type: 'glb' },
+      { slug: 'jesus-en-la-cruz', title: 'Jesús en la Cruz', subtitle: 'Escultura de papelón · s. XVI', type: 'glb', poster: '/assets/landing/jesus-en-la-cruz.webp' },
+      { slug: 'ecce-homo', title: 'Ecce Homo', subtitle: 'Francisco Alonso De Los Ríos · s. XVII', type: 'glb', poster: '/assets/landing/ecce-homo.webp' },
+      { slug: 'jesus-atado-a-la-columna', title: 'Jesús Atado a la Columna', subtitle: 'Madera Policromada · s. XVII', type: 'glb' },
+      { slug: 'novisimos', title: 'Novísimos', subtitle: 'Giovanni Bernardino Azzolino · s. XVII', type: 'glb' },
+      { slug: 'reliquia-dorada', title: 'Reliquia Dorada', subtitle: '—', type: 'glb' },
+      { slug: 'san-jose-con-el-nino', title: 'San José con el Niño', subtitle: 'Próximo a Luisa Ignacia Roldán Villavicencio "LA ROLDANA" · s. XVII', type: 'glb' },
+      { slug: 'tapiz', title: 'Tapiz', subtitle: 'Textil. Alfombra nudo turco · s. XVII', type: 'glb' },
+      { slug: 'virgen-asuncion', title: 'Virgen de la Asunción', subtitle: 'Madera Policromada · s. XVIII', type: 'glb' },
+      { slug: 'virgen-de-mena', title: 'La Dolorosa', subtitle: 'Pedro de Mena · s. XVII', type: 'glb' },
+      { slug: 'goya-uno', title: 'Cuadro Goya Uno', subtitle: '', type: 'glb' },
+      { slug: 'goya-dos', title: 'Cuadro Goya Dos', subtitle: '', type: 'glb' },
+      { slug: 'goya-tres', title: 'Cuadro Goya Tres', subtitle: '', type: 'glb' },
+      { slug: 'bayeu-uno', title: 'Cuadro Bayeu Uno', subtitle: '', type: 'glb' },
+      { slug: 'bayeu-dos', title: 'Cuadro Bayeu Dos', subtitle: '', type: 'glb' },
+      { slug: 'bayeu-tres', title: 'Cuadro Bayeu Tres', subtitle: '', type: 'glb' },
     ];
 
     // DOM
@@ -302,10 +510,10 @@
 
     const toURL = (item) => item.type === 'splat' ? `/splat/${item.slug}` : `/${item.slug}`;
     const toCardHTML = (item) => {
-  const thumb = item.poster || landingThumb(item.slug) || '/assets/landing/placeholder.webp';
-  const href = item.type === 'splat' ? `/splat/${item.slug}` : `/${item.slug}`;
+      const thumb = item.poster || landingThumb(item.slug) || '/assets/landing/placeholder.webp';
+      const href = item.type === 'splat' ? `/splat/${item.slug}` : `/${item.slug}`;
 
-    return `
+      return `
       <a class="card" href="${href}">
         <div class="thumb-wrap">
           <div class="thumb" style="background-image:url('${thumb}')"></div>
@@ -315,25 +523,25 @@
           </span>
         </div>
         <div class="body">
-          <h3 class="title">${item.title || item.slug.replace(/-/g,' ')}</h3>
+          <h3 class="title">${item.title || item.slug.replace(/-/g, ' ')}</h3>
           <p class="sub">${item.subtitle || ''}</p>
         </div>
       </a>
     `;
-  };
+    };
 
 
     // Término de búsqueda según breakpoint
-    function getTerm(){
+    function getTerm() {
       const v1 = qDesktop?.value?.trim().toLowerCase() || '';
       const v2 = qMobile?.value?.trim().toLowerCase() || '';
       return window.matchMedia('(min-width:768px)').matches ? v1 : v2;
     }
 
-    function render(){
+    function render() {
       const term = getTerm();
       const items = !term ? DATA : DATA.filter(x => {
-        const hay = (x.title+' '+x.subtitle+' '+x.slug).toLowerCase();
+        const hay = (x.title + ' ' + x.subtitle + ' ' + x.slug).toLowerCase();
         return hay.includes(term);
       });
       grid.innerHTML = items.map(toCardHTML).join('');
@@ -356,21 +564,22 @@
     render();
 
     // Bloqueo zoom accidental en UI
-    (function preventZoomOnUI(){
+    (function preventZoomOnUI() {
       const uiRoots = ['header', '.search', '.grid'];
-      const isInUI = (t)=> t?.closest && uiRoots.some(sel=> t.closest(sel));
-      const onGesture = (e)=>{ if(isInUI(e.target)) e.preventDefault(); };
-      document.addEventListener('gesturestart', onGesture, {passive:false, capture:true});
-      document.addEventListener('gesturechange', onGesture, {passive:false, capture:true});
-      window.addEventListener('wheel', (e)=>{ if(e.ctrlKey && isInUI(e.target)) e.preventDefault(); }, {passive:false, capture:true});
+      const isInUI = (t) => t?.closest && uiRoots.some(sel => t.closest(sel));
+      const onGesture = (e) => { if (isInUI(e.target)) e.preventDefault(); };
+      document.addEventListener('gesturestart', onGesture, { passive: false, capture: true });
+      document.addEventListener('gesturechange', onGesture, { passive: false, capture: true });
+      window.addEventListener('wheel', (e) => { if (e.ctrlKey && isInUI(e.target)) e.preventDefault(); }, { passive: false, capture: true });
       let lastTouchEnd = 0;
-      document.addEventListener('touchend', (e)=>{
-        if(!isInUI(e.target)) return;
+      document.addEventListener('touchend', (e) => {
+        if (!isInUI(e.target)) return;
         const now = Date.now();
-        if(now - lastTouchEnd < 350) e.preventDefault();
+        if (now - lastTouchEnd < 350) e.preventDefault();
         lastTouchEnd = now;
-      }, {passive:false, capture:true});
+      }, { passive: false, capture: true });
     })();
   </script>
 </body>
+
 </html>
