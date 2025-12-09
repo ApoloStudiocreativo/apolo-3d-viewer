@@ -807,28 +807,31 @@
       let arLoadingTimeout = null;
 
       function showARLoading() {
+        console.log('🔥 showARLoading() LLAMADO');
+
         const el = document.getElementById('arLoading');
         const btn = document.getElementById('arBtn');
         const textEl = document.getElementById('arLoadingText');
 
-        if (!el) return;
+        if (!el) {
+          console.error('❌ NO SE ENCONTRÓ #arLoading');
+          return;
+        }
 
-        // 🔥 FEEDBACK INSTANTÁNEO: Cambiar botón a estado loading INMEDIATAMENTE
+        console.log('✅ Mostrando overlay AR');
+
+        // 🔥 FEEDBACK INSTANTÁNEO: Cambiar botón a estado loading
         if (btn) {
           btn.classList.add('is-loading');
           btn.setAttribute('disabled', 'true');
-
-          // Cambiar texto del botón
           const arText = btn.querySelector('.ar-text');
           if (arText) arText.textContent = 'Preparando…';
-
-          // Vibración háptica si está disponible
           try {
             if (navigator.vibrate) navigator.vibrate(20);
           } catch { }
         }
 
-        // Mostrar overlay con mensaje específico por plataforma
+        // Mensaje específico por plataforma
         if (textEl) {
           if (isIOS) {
             textEl.textContent = 'Abriendo Quick Look…';
@@ -839,15 +842,25 @@
           }
         }
 
+        // 🚨 FORZAR OVERLAY A APARECER Y MANTENERSE
         el.classList.remove('hidden');
-        requestAnimationFrame(() => el.classList.add('visible'));
+        el.style.display = 'flex';
+        el.style.position = 'fixed';
+        el.style.inset = '0';
+        el.style.zIndex = '99999';
+        el.style.background = 'rgba(10, 12, 16, 0.95)';
+        el.style.visibility = 'visible';
+        el.style.opacity = '1';
+        el.classList.add('visible');
 
-        // Timeout de seguridad: si tarda más de 45s, ocultar overlay
+        console.log('✅ Overlay visible con opacity 1');
+
+        // Timeout de seguridad: 60s para conexiones MUY lentas
         clearTimeout(arLoadingTimeout);
         arLoadingTimeout = setTimeout(() => {
+          console.warn('⏱️ TIMEOUT: 60s - ocultando overlay');
           hideARLoading();
-          console.warn('[AR] Timeout: AR tardó más de 45s en abrir');
-        }, 45000);
+        }, 60000); // 60 segundos
       }
 
       // ========================================
