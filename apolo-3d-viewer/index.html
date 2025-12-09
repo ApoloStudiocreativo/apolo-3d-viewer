@@ -842,12 +842,12 @@
         el.classList.remove('hidden');
         requestAnimationFrame(() => el.classList.add('visible'));
 
-        // Timeout de seguridad: si tarda más de 10s, ocultar overlay
+        // Timeout de seguridad: si tarda más de 45s, ocultar overlay
         clearTimeout(arLoadingTimeout);
         arLoadingTimeout = setTimeout(() => {
           hideARLoading();
-          console.warn('[AR] Timeout: AR tardó más de 10s en abrir');
-        }, 10000);
+          console.warn('[AR] Timeout: AR tardó más de 45s en abrir');
+        }, 45000);
       }
 
       // ========================================
@@ -890,8 +890,15 @@
         el.classList.remove('visible');
         setTimeout(() => el.classList.add('hidden'), 250);
       }
+      // Solo ocultar overlay cuando el usuario vuelve a la página
+      // (esto permite que el overlay se mantenga mientras AR se abre)
       document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) hideARLoading();
+        // Esperar un poco para asegurar que AR realmente se abrió
+        if (!document.hidden) {
+          setTimeout(() => {
+            hideARLoading();
+          }, 500);
+        }
       });
 
       // ---------------- Info JSON ----------------
