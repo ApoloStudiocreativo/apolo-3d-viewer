@@ -207,11 +207,22 @@
 
     <!-- AR (derecha) -->
     <button id="arBtn" class="ar-fab hidden" type="button" aria-label="Ver en AR">
-      <svg viewBox="0 0 24 24" fill="none">
+      <!-- Spinner de carga (oculto por defecto) -->
+      <svg class="ar-spinner" viewBox="0 0 24 24" fill="none" style="display: none;">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+          stroke-dasharray="60" stroke-dashoffset="15" opacity="0.3" />
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+          stroke-dasharray="60" stroke-dashoffset="15">
+          <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="1s"
+            repeatCount="indefinite" />
+        </circle>
+      </svg>
+      <!-- Icono AR normal -->
+      <svg class="ar-icon" viewBox="0 0 24 24" fill="none">
         <path d="M12 3l8.66 5v8L12 21l-8.66-5V8L12 3zM12 3v18M3.34 8L12 13l8.66-5" stroke="white" stroke-width="1.8"
           stroke-linecap="round" stroke-linejoin="round" />
       </svg>
-      Ver en AR
+      <span class="ar-text">Ver en AR</span>
     </button>
   </div>
   <!-- =========================
@@ -219,7 +230,7 @@
          ========================= -->
   <div id="arLoading" class="ar-loading hidden" aria-hidden="true">
     <div class="spinner" aria-hidden="true"></div>
-    <span>Abriendo AR…</span>
+    <span id="arLoadingText">Preparando experiencia AR…</span>
   </div>
 
   <!-- =========================
