@@ -779,16 +779,114 @@
         }
       }
 
-      // Overlay “Abriendo AR….”
+      // ========================================
+      // MEJORAS DE FEEDBACK AR - INSTRUCCIONES
+      // ========================================
+
+      /*
+      INSTRUCCIONES PARA IMPLEMENTAR:
+      
+      1. Busca en index.html las líneas 782-788 que contienen:
+         
+            // Overlay "Abriendo AR…."
+            function showARLoading() {
+              const el = document.getElementById('arLoading');
+              if (!el) return;
+              el.classList.remove('hidden');
+              requestAnimationFrame(() => el.classList.add('visible'));
+            }
+      
+      2. Reemplázalas con el siguiente código:
+      */
+
+      // ========================================
+      // CÓDIGO NUEVO PARA showARLoading
+      // ========================================
+
+      // Overlay "Abriendo AR…." con feedback instantáneo
+      let arLoadingTimeout = null;
+
       function showARLoading() {
         const el = document.getElementById('arLoading');
+        const btn = document.getElementById('arBtn');
+        const textEl = document.getElementById('arLoadingText');
+
         if (!el) return;
+
+        // 🔥 FEEDBACK INSTANTÁNEO: Cambiar botón a estado loading INMEDIATAMENTE
+        if (btn) {
+          btn.classList.add('is-loading');
+          btn.setAttribute('disabled', 'true');
+
+          // Cambiar texto del botón
+          const arText = btn.querySelector('.ar-text');
+          if (arText) arText.textContent = 'Preparando…';
+
+          // Vibración háptica si está disponible
+          try {
+            if (navigator.vibrate) navigator.vibrate(20);
+          } catch { }
+        }
+
+        // Mostrar overlay con mensaje específico por plataforma
+        if (textEl) {
+          if (isIOS) {
+            textEl.textContent = 'Abriendo Quick Look…';
+          } else if (isAndroid) {
+            textEl.textContent = 'Iniciando Scene Viewer…';
+          } else {
+            textEl.textContent = 'Preparando experiencia AR…';
+          }
+        }
+
         el.classList.remove('hidden');
         requestAnimationFrame(() => el.classList.add('visible'));
+
+        // Timeout de seguridad: si tarda más de 10s, ocultar overlay
+        clearTimeout(arLoadingTimeout);
+        arLoadingTimeout = setTimeout(() => {
+          hideARLoading();
+          console.warn('[AR] Timeout: AR tardó más de 10s en abrir');
+        }, 10000);
       }
+
+      // ========================================
+      // FIN DEL CÓDIGO
+      // ========================================
+
+      /*
+      NOTA: La función hideARLoading() ya está correctamente actualizada en las líneas 789-809.
+      No necesitas modificarla.
+      
+      RESULTADO ESPERADO:
+      - Al tocar el botón AR, cambiará INMEDIATAMENTE a color naranja
+      - Mostrará un spinner girando
+      - El texto cambiará a "Preparando…"
+      - Vibrará el dispositivo (en Android)
+      - El overlay aparecerá con mensaje específico por plataforma
+      - Si tarda más de 10s, se ocultará automáticamente
+      */
+
+
+
       function hideARLoading() {
         const el = document.getElementById('arLoading');
+        const btn = document.getElementById('arBtn');
+
         if (!el) return;
+
+        // Limpiar timeout
+        clearTimeout(arLoadingTimeout);
+
+        // Restaurar botón a estado normal
+        if (btn) {
+          btn.classList.remove('is-loading');
+          btn.removeAttribute('disabled');
+
+          const arText = btn.querySelector('.ar-text');
+          if (arText) arText.textContent = 'Ver en AR';
+        }
+
         el.classList.remove('visible');
         setTimeout(() => el.classList.add('hidden'), 250);
       }
