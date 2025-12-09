@@ -486,8 +486,10 @@ body {
 .ar-loading {
   position: fixed;
   inset: 0;
-  z-index: 60;
-  display: flex;
+  z-index: 9999;
+  /* Por encima de TODO */
+  display: flex !important;
+  /* Forzar display flex siempre */
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -496,13 +498,25 @@ body {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   opacity: 0;
+  visibility: hidden;
+  /* Usar visibility en lugar de display:none */
   pointer-events: none;
-  transition: opacity .2s ease;
+  transition: opacity .2s ease, visibility .2s ease;
 }
 
 .ar-loading.visible {
   opacity: 1;
+  visibility: visible;
+  /* Hacer visible */
   pointer-events: auto;
+}
+
+/* Asegurar que el overlay NUNCA tenga display:none */
+.ar-loading.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  /* NO usar display:none aquí */
 }
 
 .ar-loading .spinner {
