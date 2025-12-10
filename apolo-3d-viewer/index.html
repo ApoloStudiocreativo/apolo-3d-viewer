@@ -858,7 +858,7 @@
         // Timeout de seguridad: 60s para conexiones MUY lentas
         clearTimeout(arLoadingTimeout);
         arLoadingTimeout = setTimeout(() => {
-          console.warn('⏱️ TIMEOUT: 60s - ocultando overlay');
+          console.warn('⏱️ TIMEOUT: 60s - ocultando overlay por timeout');
           hideARLoading();
         }, 60000); // 60 segundos
       }
@@ -903,6 +903,24 @@
         el.classList.remove('visible');
         setTimeout(() => el.classList.add('hidden'), 250);
       }
+      // ========================================
+      // SOLUCIÓN FINAL PARA EL OVERLAY AR
+      // ========================================
+
+      /**
+       * PROBLEMA IDENTIFICADO:
+       * El overlay SÍ aparece pero desaparece inmediatamente (flashazo)
+       * porque el evento 'visibilitychange' lo oculta cuando cambias a la app de AR.
+       * 
+       * SOLUCIÓN:
+       * Comentar/eliminar el listener de visibilitychange
+       */
+
+      // ========================================
+      // PASO 1: Busca las líneas 906-915 en index.html
+      // ========================================
+      // Deberías ver esto:
+
       // Solo ocultar overlay cuando el usuario vuelve a la página
       // (esto permite que el overlay se mantenga mientras AR se abre)
       document.addEventListener('visibilitychange', () => {
@@ -913,6 +931,23 @@
           }, 500);
         }
       });
+
+      // ========================================
+      // PASO 2: REEMPLÁZALO con esto (comentado):
+      // ========================================
+
+      // ⚠️ DESHABILITADO: No ocultar automáticamente el overlay
+      // El overlay debe mantenerse visible hasta que AR cargue completamente
+      // Solo se ocultará por timeout (60s)
+      /*
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          setTimeout(() => {
+            hideARLoading();
+          }, 500);
+        }
+      });
+      */
 
       // ---------------- Info JSON ----------------
       async function loadInfoDataOrFallback(current, lang = "es") {
@@ -1531,6 +1566,26 @@
 
               newArBtn.classList.remove('hidden');
               newArBtn.addEventListener('click', async () => {
+                // ✅ VERIFICAR COOLDOWN: No permitir clicks múltiples
+                const now = Date.now();
+                const timeSinceLastClick = now - lastARClickTime;
+
+                if (timeSinceLastClick < AR_COOLDOWN_MS) {
+                  const remainingSeconds = Math.ceil((AR_COOLDOWN_MS - timeSinceLastClick) / 1000);
+                  showToast(`Por favor espera ${remainingSeconds} segundos antes de volver a intentar`, 2000);
+
+                  // Vibración de feedback negativo
+                  try {
+                    if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
+                  } catch { }
+
+                  return; // Salir sin hacer nada
+                }
+
+                // Actualizar timestamp del último click
+                lastARClickTime = now;
+
+                // Mostrar overlay de carga inmediatamente
                 showARLoading();
 
                 try {
