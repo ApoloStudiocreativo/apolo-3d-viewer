@@ -136,7 +136,7 @@
   <!-- CONTENEDOR EXCLUSIVO DE ESCRITORIO -->
   <div id="viewerContainer" class="desktop-only">
     <model-viewer id="mv" class="hidden" loading="lazy" alt="Modelo 3D" camera-controls touch-action="pan-y" ar
-      ar-modes="scene-viewer quick-look webxr" ar-scale="fixed" ar-placement="floor" environment-image="neutral"
+      ar-modes="webxr scene-viewer quick-look" ar-scale="fixed" ar-placement="floor" environment-image="neutral"
       shadow-intensity="1.2" shadow-softness="0.9" exposure="1" camera-orbit="0deg 70deg 1.5m" field-of-view="30deg">
     </model-viewer>
 
@@ -768,7 +768,7 @@
           const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(
             file
           )}&mode=ar_preferred&title=${arTitle}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
-          window.location.href = intent;
+          window.location.href = intent.replace(";end;", ";S.browser_fallback_url=" + encodeURIComponent(file) + ";end;");
         }
       }
 
@@ -777,7 +777,7 @@
           const link = document.getElementById('iosARLink');
           if (!link) return false;
           const ts = Date.now(); // cache-buster (cada click es "nuevo")
-          link.setAttribute('href', preSigned?.usdz || usdzUrl(model));
+          link.setAttribute('href', preSigned?.usdz || usdzUrl(slug));
           link.click(); // síncrono, en la misma pila del gesto
           return true;
         } catch {
@@ -840,11 +840,11 @@
         // Mensaje específico por plataforma
         if (textEl) {
           if (isIOS) {
-            textEl.textContent = 'Abriendo Quick Look…';
+            textEl.textContent = 'Cargando Realidad Aumentada...';
           } else if (isAndroid) {
-            textEl.textContent = 'Iniciando Scene Viewer…';
+            textEl.textContent = 'Cargando Realidad Aumentada...';
           } else {
-            textEl.textContent = 'Preparando experiencia AR…';
+            textEl.textContent = 'Cargando Realidad Aumentada...';
           }
         }
 
@@ -1602,20 +1602,7 @@
                     return;
                   }
 
-                  if (isAndroid) {
-                    const a = document.createElement('a');
-                    const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(
-                      glbUrl(model)
-                    )}&mode=ar_preferred&title=${encodeURIComponent(
-                      model
-                    )}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
-                    a.href = intent;
-                    a.style.display = 'none';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    return;
-                  }
+
 
                   if (mv?.activateAR) await mv.activateAR();
                   else openARFor(model);
@@ -2346,7 +2333,7 @@
     let remaining = Math.ceil(7); // 7s hardcoded por seguridad
     const updateText = () => {
       const txt = btn.querySelector('.ar-text');
-      if (txt) txt.textContent = \Espere \s...\;
+      if (txt) txt.textContent = `Espere ${remaining}s...`;
     };
 
     updateText();
