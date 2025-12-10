@@ -747,6 +747,12 @@
       }
 
       // ---------------- AR helpers ----------------
+      // ========================================
+      // VARIABLES DE COOLDOWN AR
+      // ========================================
+      const AR_COOLDOWN_MS = 7000; // 7 segundos de cooldown
+      let lastARClickTime = 0; // Timestamp del último click en AR
+
       function openARFor(name) {
         const usdz = usdzUrl(name);
         const glb = glbUrl(name);
@@ -1739,7 +1745,19 @@
 
             // FAB AR
             arBtn.classList.remove('hidden');
-            arBtn.onclick = () => {
+            arBtn.addEventListener('click', async () => {
+              // ✅ VERIFICAR COOLDOWN
+              const now = Date.now();
+              const timeSinceLastClick = now - lastARClickTime;
+
+              if (timeSinceLastClick < AR_COOLDOWN_MS) {
+                const remainingSeconds = Math.ceil((AR_COOLDOWN_MS - timeSinceLastClick) / 1000);
+                showToast(`Por favor espera ${remainingSeconds} segundos antes de volver a intentar`, 2000);
+                try { if (navigator.vibrate) navigator.vibrate([50, 100, 50]); } catch { }
+                return;
+              }
+
+              lastARClickTime = now;
               showARLoading();
               if (isIOS) {
                 const ok = openQuickLookSync(figure);
@@ -1747,7 +1765,7 @@
                 return;
               }
               openARFor(figure);
-            };
+            });
 
             if (slug) {
               infoData = await loadInfoDataOrFallback(infoData);
