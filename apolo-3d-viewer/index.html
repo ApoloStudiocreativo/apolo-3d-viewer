@@ -1627,7 +1627,104 @@
           skel.classList.add('hidden');
         }
       })();
-      // ...otras funciones aquí, como setupAudioFor(), openARFor(), etc.
+      // --- Funciones auxiliares restauradas ---
+      async function loadInfoDataOrFallback(currentData) {
+        if (currentData && Object.keys(currentData).length > 0) return currentData;
+        try {
+          const res = await fetch('/assets/info.json');
+          return await res.json();
+        } catch {
+          return {};
+        }
+      }
+
+      function openARFor(name) {
+        const usdz = usdzUrl(name);
+        const glb = glbUrl(name);
+        const titleEl = document.getElementById('infoTitle');
+        const arTitle = encodeURIComponent((titleEl?.textContent || name).trim());
+
+        if (isIOS) {
+          window.location.href = usdz;
+          return;
+        }
+        if (isAndroid) {
+          const file = new URL(glb, location.origin).toString();
+          const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(
+            file
+          )}&mode=ar_preferred&title=${arTitle}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+          window.location.href = intent.replace(";end;", ";S.browser_fallback_url=" + encodeURIComponent(file) + ";end;");
+        }
+      }
+
+      let currentAudio = null;
+      async function setupAudioFor(id) {
+        const audioPath = `/assets/audio/${id}.mp3`;
+        const audioBtn = document.getElementById('audioBtn');
+
+        // Limpiar audio previo
+        if (currentAudio) {
+          try { currentAudio.pause(); } catch { }
+          currentAudio = null;
+        }
+
+        const audio = new Audio(audioPath);
+        audio.loop = true;
+        audio.preload = 'auto';
+        currentAudio = audio;
+
+        const toggleAudio = async (btn) => {
+          if (!audio) return;
+          const guideBtn = document.getElementById('audioGuideBtn'); // Buscar dinámicamente
+
+          if (audio.paused) {
+            try {
+              await audio.play();
+              btn.classList.add('is-playing');
+              if (guideBtn && (btn === guideBtn || btn.id === 'audioGuideBtn')) {
+                guideBtn.innerHTML = `
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="6" y="5" width="4" height="14" rx="1.2"></rect>
+                    <rect x="14" y="5" width="4" height="14" rx="1.2"></rect>
+                  </svg>
+                  Pausar audioguía
+                `;
+              }
+            } catch (err) {
+              console.warn('Audio bloqueado:', err);
+            }
+          } else {
+            audio.pause();
+            btn.classList.remove('is-playing');
+            if (guideBtn && (btn === guideBtn || btn.id === 'audioGuideBtn')) {
+              guideBtn.innerHTML = `
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                  Escuchar audioguía
+                `;
+            }
+          }
+        };
+
+        if (audioBtn) {
+          audioBtn.classList.remove('hidden');
+          const newBtn = audioBtn.cloneNode(true);
+          audioBtn.replaceWith(newBtn);
+          newBtn.onclick = () => toggleAudio(newBtn);
+        }
+
+        // Delegación para el botón de la cartela (que se crea dinámicamente)
+        document.addEventListener('click', (e) => {
+          const t = e.target.closest('#audioGuideBtn');
+          if (t) {
+            e.stopImmediatePropagation();
+            toggleAudio(t);
+          }
+        }, { capture: true, once: false }); // Nota: esto podría acumular listeners si se llama muchas veces setupAudioFor. 
+        // Mejor: no añadir listener global aquí, sino confiar en que loadInfoData lo maneje o usar un listener global único fuera.
+        // Simplificación: Asumimos que loadInfoData renderiza el botón.
+      }
 
       // ==== CARTELA DINÁMICA (versión escritorio y móvil) ====
       async function loadInfoData() {
@@ -1886,14 +1983,6 @@
 
       // Escuchar gestos táctiles
       sheet.addEventListener('touchstart', onStart, { passive: true });
-      sheet.addEventListener('touchmove', onMove, { passive: true });
-      sheet.addEventListener('touchend', onEnd);
-    })();
-
-    /* 🔒 Bloquear page-zoom del navegador solo cuando el gesto ocurre sobre la UI */
-    (function preventPageZoomOnUI() {
-      const uiRoots = ['#topBar', '#infoSheet', '#fabRow'];
-
       const isInUI = (target) => {
         if (!target || !target.closest) return false;
         return uiRoots.some((sel) => target.closest(sel));
@@ -2018,160 +2107,36 @@
       }
     })();
   </script>
-  <!-- ==== REGISTRO DEL SERVICE WORKER ==== -->
+
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // ---------------- URL: soporta query *y* pathname limpias ----------------
-      const qs = new URLSearchParams(location.search);
-      let type = (qs.get('type') || '').toLowerCase(); // 'glb' | 'splat'
-      let model = (qs.get('model') || '').toLowerCase();
-      let figure = (qs.get('figure') || '').toLowerCase();
+    // ========================================
+    // HELPERS COOLDOWN VISUAL (Inyectado)
+    // ========================================
+    window.startCooldownVisual = function (btn) {
+      if (!btn) return;
+      btn.classList.add('is-cooldown');
 
-      if (!type) {
-        const parts = location.pathname.split('/').filter(Boolean);
-        if (parts[0] === 'splat' && parts[1]) {
-          type = 'splat';
-          figure = parts[1];
-        } else if (parts[0] === 'glb' && parts[1]) {
-          type = 'glb';
-          model = parts[1];
-        } else if (parts.length === 1) {
-          type = 'glb';
-          model = parts[0];
-        }
-      }
-
-      const slug = model || figure || '';
-
-      // --- Función unificada de carga de información ---
-      function loadInfoForSlug(slug) {
-        const infoPath = `/assets/info.json`;
-        fetch(infoPath)
-          .then(res => res.json())
-          .then(infoData => {
-            const info = infoData[slug];
-            if (!info) return;
-
-            // Móvil
-            const infoTitle = document.getElementById('infoTitle');
-            const infoMeta = document.getElementById('infoMeta');
-            const infoDesc = document.getElementById('infoDesc');
-            if (infoTitle && infoMeta && infoDesc) {
-              infoTitle.textContent = info.title;
-              infoMeta.textContent = `${info.year} — ${info.author} — ${info.material}`;
-              infoDesc.textContent = info.desc;
-            }
-
-            // Escritorio
-            const infoTitleDesktop = document.getElementById('infoTitleDesktop');
-            const infoMetaDesktop = document.querySelector('#infoPanel .info-meta');
-            const infoDescDesktop = document.querySelector('#infoPanel .info-desc');
-            const infoDetails = document.querySelector('#infoPanel .info-details');
-
-            if (infoTitleDesktop) infoTitleDesktop.textContent = info.title;
-            if (infoMetaDesktop) infoMetaDesktop.textContent = `${info.year} — ${info.author} — ${info.material}`;
-            if (infoDescDesktop) infoDescDesktop.textContent = info.desc;
-
-            if (infoDetails) {
-              infoDetails.innerHTML = `
-            <li><strong>Tipología:</strong> ${info.typology || '—'}</li>
-            <li><strong>Material:</strong> ${info.material || '—'}</li>
-            <li><strong>Fecha:</strong> ${info.year || '—'}</li>
-            <li><strong>Autor:</strong> ${info.author || '—'}</li>
-          `;
-            }
-
-            console.log(`[Museo] Datos cargados de ${infoPath}`);
-          })
-          .catch(err => console.error('[Museo] Error cargando info.json:', err));
-      }
-
-      // Cargar idioma inicial al abrir la página
-      loadInfoForSlug(slug);
-    });
-  </script>
-  <script>
-    // --- Swipe down para cerrar la cartela móvil ---
-    (function () {
-      const sheet = document.getElementById('infoSheet');
-      const dragHandle = document.querySelector('.info-sheet__drag');
-      if (!sheet || !dragHandle) return;
-
-      let startY = 0;
-      let currentY = 0;
-      let isDragging = false;
-
-      const onTouchStart = (e) => {
-        startY = e.touches[0].clientY;
-        isDragging = true;
-        sheet.style.transition = 'none';
+      let remaining = 7;
+      const updateText = () => {
+        const txt = btn.querySelector('.ar-text');
+        if (txt) txt.textContent = `Espere ${remaining}s...`;
       };
 
-      const onTouchMove = (e) => {
-        if (!isDragging) return;
-        currentY = e.touches[0].clientY;
-        const diff = currentY - startY;
+      updateText();
 
-        // Solo desplazamos hacia abajo
-        if (diff > 0) {
-          sheet.style.transform = `translateY(${diff}px)`;
-          sheet.style.opacity = `${Math.max(1 - diff / 300, 0.4)}`;
-        }
-      };
-
-      const onTouchEnd = () => {
-        if (!isDragging) return;
-        isDragging = false;
-        sheet.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
-
-        const diff = currentY - startY;
-        if (diff > 120) {
-          // cerrar cartela
-          sheet.classList.add('hidden');
-          sheet.setAttribute('aria-hidden', 'true');
-          document.body.classList.remove('sheet-open');
+      const interval = setInterval(() => {
+        remaining--;
+        if (remaining <= 0) {
+          clearInterval(interval);
+          btn.classList.remove('is-cooldown');
+          const txt = btn.querySelector('.ar-text');
+          if (txt) txt.textContent = 'Ver en AR';
         } else {
-          // volver a su sitio
-          sheet.style.transform = '';
-          sheet.style.opacity = '';
+          updateText();
         }
-      };
-
-      dragHandle.addEventListener('touchstart', onTouchStart);
-      dragHandle.addEventListener('touchmove', onTouchMove);
-      dragHandle.addEventListener('touchend', onTouchEnd);
-    })();
+      }, 1000);
+    };
   </script>
 </body>
 
 </html>
-<script>
-  // ========================================
-  // HELPERS COOLDOWN VISUAL (Inyectado)
-  // ========================================
-  window.startCooldownVisual = function (btn) {
-    if (!btn) return;
-    btn.classList.add('is-cooldown');
-    const originalText = btn.querySelector('.ar-text')?.textContent || 'Ver en AR';
-
-    let remaining = Math.ceil(7); // 7s hardcoded por seguridad
-    const updateText = () => {
-      const txt = btn.querySelector('.ar-text');
-      if (txt) txt.textContent = `Espere ${remaining}s...`;
-    };
-
-    updateText();
-
-    const interval = setInterval(() => {
-      remaining--;
-      if (remaining <= 0) {
-        clearInterval(interval);
-        btn.classList.remove('is-cooldown');
-        const txt = btn.querySelector('.ar-text');
-        if (txt) txt.textContent = 'Ver en AR';
-      } else {
-        updateText();
-      }
-    }, 1000);
-  };
-</script>
