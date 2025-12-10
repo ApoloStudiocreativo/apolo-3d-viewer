@@ -1590,6 +1590,7 @@
 
                 // Actualizar timestamp del último click
                 lastARClickTime = now;
+                if (window.startCooldownVisual) window.startCooldownVisual(newArBtn || arBtn);
 
                 // Mostrar overlay de carga inmediatamente
                 showARLoading();
@@ -1622,7 +1623,7 @@
                   console.error('Error abriendo AR:', err);
                   openARFor(model);
                 } finally {
-                  hideARLoading();
+                  // hideARLoading();
                 }
               });
             }
@@ -1758,6 +1759,7 @@
               }
 
               lastARClickTime = now;
+              if (window.startCooldownVisual) window.startCooldownVisual(newArBtn || arBtn);
               showARLoading();
               if (isIOS) {
                 const ok = openQuickLookSync(figure);
@@ -2332,3 +2334,33 @@
 </body>
 
 </html>
+<script>
+  // ========================================
+  // HELPERS COOLDOWN VISUAL (Inyectado)
+  // ========================================
+  window.startCooldownVisual = function (btn) {
+    if (!btn) return;
+    btn.classList.add('is-cooldown');
+    const originalText = btn.querySelector('.ar-text')?.textContent || 'Ver en AR';
+
+    let remaining = Math.ceil(7); // 7s hardcoded por seguridad
+    const updateText = () => {
+      const txt = btn.querySelector('.ar-text');
+      if (txt) txt.textContent = \Espere \s...\;
+    };
+
+    updateText();
+
+    const interval = setInterval(() => {
+      remaining--;
+      if (remaining <= 0) {
+        clearInterval(interval);
+        btn.classList.remove('is-cooldown');
+        const txt = btn.querySelector('.ar-text');
+        if (txt) txt.textContent = 'Ver en AR';
+      } else {
+        updateText();
+      }
+    }, 1000);
+  };
+</script>

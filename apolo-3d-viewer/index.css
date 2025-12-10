@@ -1839,3 +1839,15 @@ model-viewer {
   }
 
 }
+/* Estado cooldown (espera) */
+.ar-fab.is-cooldown {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(80, 80, 80, 0.65), rgba(40, 40, 40, 0.55)),
+    linear-gradient(135deg, rgba(60, 60, 60, 0.65), rgba(30, 30, 30, 0.55));
+  border-color: rgba(100, 100, 100, 0.60);
+  color: rgba(255, 255, 255, 0.70);
+  cursor: wait;
+  pointer-events: none;
+  box-shadow: none;
+  transform: scale(0.98);
+}
