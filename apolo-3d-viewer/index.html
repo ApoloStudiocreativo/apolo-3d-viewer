@@ -1255,562 +1255,562 @@
           document.body.classList.remove('sheet-open');
           // no forzamos hidden aquí: de eso se encarga tu lógica actual
         }
-      });
+      }
 
-    DESKTOP_MQ.addEventListener?.('change', applyDesktopMode);
-    applyDesktopMode();
+      DESKTOP_MQ.addEventListener?.('change', applyDesktopMode);
+      applyDesktopMode();
 
-    // 👉 Forzar reglas de escritorio desde JS (defensa extra por si algún handler intenta cerrar)
-    const IS_DESKTOP = window.matchMedia('(min-width: 1024px)').matches;
-    if (IS_DESKTOP) {
-      try {
-        // Forzar cartela abierta
-        const sheet = document.getElementById('infoSheet');
-        const infoBtn = document.getElementById('infoBtn');
-        const sheetClose = document.getElementById('infoClose');
+      // 👉 Forzar reglas de escritorio desde JS (defensa extra por si algún handler intenta cerrar)
+      const IS_DESKTOP = window.matchMedia('(min-width: 1024px)').matches;
+      if (IS_DESKTOP) {
+        try {
+          // Forzar cartela abierta
+          const sheet = document.getElementById('infoSheet');
+          const infoBtn = document.getElementById('infoBtn');
+          const sheetClose = document.getElementById('infoClose');
 
-        if (sheet) {
-          sheet.classList.remove('hidden');
-          sheet.setAttribute('aria-hidden', 'false');
-          document.body.classList.add('sheet-open');
-        }
-        // Ocultar controles de abrir/cerrar
-        if (infoBtn) infoBtn.style.display = 'none';
-        if (sheetClose) sheetClose.style.display = 'none';
-
-        // Neutralizar posibles cierres por teclado (Esc) u otros
-        window.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape') {
-            e.stopImmediatePropagation();
-            e.preventDefault();
+          if (sheet) {
+            sheet.classList.remove('hidden');
+            sheet.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('sheet-open');
           }
-        }, true);
-      } catch { }
-    }
+          // Ocultar controles de abrir/cerrar
+          if (infoBtn) infoBtn.style.display = 'none';
+          if (sheetClose) sheetClose.style.display = 'none';
 
-    // ---------------- Inicialización ----------------
-    (async function init() {
-      try {
-        if (type === 'glb' && model) {
-          document.body.classList.remove('mode-splat');
+          // Neutralizar posibles cierres por teclado (Esc) u otros
+          window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+              e.stopImmediatePropagation();
+              e.preventDefault();
+            }
+          }, true);
+        } catch { }
+      }
 
-          // Prefirmamos GLB y USDZ antes de mostrar AR (evita async en el click iOS)
-          const preSigned = {
-            glb: await signedOrPlain(glbUrl(model)),
-            usdz: await signedOrPlain(usdzUrl(model))
-          };
+      // ---------------- Inicialización ----------------
+      (async function init() {
+        try {
+          if (type === 'glb' && model) {
+            document.body.classList.remove('mode-splat');
 
-          mv.src = preSigned.glb;          // <model-viewer> carga con token
-          mv.iosSrc = preSigned.usdz;      // Quick Look listo con token
+            // Prefirmamos GLB y USDZ antes de mostrar AR (evita async en el click iOS)
+            const preSigned = {
+              glb: await signedOrPlain(glbUrl(model)),
+              usdz: await signedOrPlain(usdzUrl(model))
+            };
 
-          // Mantener poster visible hasta que cargue
-          const posterEl = document.querySelector('.glb-poster');
-          if (posterEl) posterEl.classList.remove('loaded');
+            mv.src = preSigned.glb;          // <model-viewer> carga con token
+            mv.iosSrc = preSigned.usdz;      // Quick Look listo con token
 
-          mv.addEventListener('load', () => {
-            setTimeout(() => posterEl?.classList.add('loaded'), 300);
-          });
+            // Mantener poster visible hasta que cargue
+            const posterEl = document.querySelector('.glb-poster');
+            if (posterEl) posterEl.classList.remove('loaded');
 
-          const stopWatchdog = startProgressWatchdog(mv, {
-            timeoutMs: 60000,
-            onStall: () => {
-              // Sin progreso real: muestra CTA y reintenta con cache-buster
-              showErrorAndRetry('glb', model, () => {
-                const bust = `?v=${Date.now()}`;
-                mv.src = glbUrl(model) + bust;
+            mv.addEventListener('load', () => {
+              setTimeout(() => posterEl?.classList.add('loaded'), 300);
+            });
 
-                // Segundo watchdog por si sigue atascado
-                startProgressWatchdog(mv, {
-                  timeoutMs: 9000,
-                  onStall: () => showToast('Todavía no hay datos. Reintenta en unos segundos.', 2200)
+            const stopWatchdog = startProgressWatchdog(mv, {
+              timeoutMs: 60000,
+              onStall: () => {
+                // Sin progreso real: muestra CTA y reintenta con cache-buster
+                showErrorAndRetry('glb', model, () => {
+                  const bust = `?v=${Date.now()}`;
+                  mv.src = glbUrl(model) + bust;
+
+                  // Segundo watchdog por si sigue atascado
+                  startProgressWatchdog(mv, {
+                    timeoutMs: 9000,
+                    onStall: () => showToast('Todavía no hay datos. Reintenta en unos segundos.', 2200)
+                  });
+
+                  // Re-mostrar póster y skeleton durante el reintento
+                  const gp = document.getElementById('glbPoster');
+                  if (gp) { gp.classList.remove('fade-out'); gp.classList.add('visible'); }
+                  const sk = document.getElementById('skel');
+                  if (sk) { sk.classList.remove('hidden'); sk.style.opacity = '1'; }
                 });
-
-                // Re-mostrar póster y skeleton durante el reintento
-                const gp = document.getElementById('glbPoster');
-                if (gp) { gp.classList.remove('fade-out'); gp.classList.add('visible'); }
-                const sk = document.getElementById('skel');
-                if (sk) { sk.classList.remove('hidden'); sk.style.opacity = '1'; }
-              });
-            }
-          });
-          // Al cargar, paramos el watchdog
-          mv.addEventListener('load', () => { try { stopWatchdog?.(); } catch { } }, { once: true });
-
-
-          // Deshabilita AR hasta que el modelo esté listo
-          setArEnabled(false);
-
-          // Función de reintento (con cache-buster) y rehacer póster overlay si existe
-          const retryGlb = () => {
-            const sk = document.getElementById('skel');
-            if (sk) {
-              sk.classList.remove('hidden');
-              sk.style.opacity = '1';
-            }
-            const bust = `?v=${Date.now()}`;
-            mv.src = glbUrl(model) + bust;
-
-            const gp = document.getElementById('glbPoster');
-            if (gp) {
-              gp.classList.remove('fade-out');
-              gp.classList.add('visible');
-            }
-          };
-
-          // Si model-viewer reporta error: mostramos CTA de reintento
-          mv.addEventListener('error', () => {
-            const sk = document.getElementById('skel');
-            if (sk) {
-              sk.style.opacity = '0';
-              setTimeout(() => sk.classList.add('hidden'), 400);
-            }
-            showErrorAndRetry('glb', model, retryGlb);
-          });
-
-          // Auto-reintentar una vez al recuperar conexión si el estado era de error
-          window.addEventListener('online', () => {
-            const msg = document.getElementById('msg');
-            if (msg && !msg.classList.contains('hidden')) retryGlb();
-          });
-
-          // ▼▼ AÑADE ESTA LÍNEA AQUÍ ▼▼
-          mv.classList.remove('hidden');
-
-          // Failsafe: oculta el skeleton si algún navegador no dispara 'load'
-          setTimeout(() => {
-            const sk = document.getElementById('skel');
-            if (sk && !sk.classList.contains('hidden')) {
-              sk.style.opacity = '0';
-              setTimeout(() => sk.classList.add('hidden'), 600);
-            }
-          }, 12000);
-
-          // === Indicador de progreso del modelo ===
-          const progressEl = document.getElementById('loaderProgress');
-          if (mv) {
-            mv.addEventListener('progress', (e) => {
-              const ratio = Math.round(e.detail.totalProgress * 100);
-              if (progressEl) progressEl.textContent = `${ratio}%`;
-            });
-
-            // ▶ PÓSTER GLB (overlay separado para poder hacer fade)
-            let glbPoster = document.getElementById('glbPoster');
-            if (!glbPoster) {
-              glbPoster = document.createElement('div');
-              glbPoster.id = 'glbPoster';
-              glbPoster.className = 'glb-poster';
-
-              // Inyectar dentro del marco izquierdo (viewerContainer)
-              const viewerContainer = document.getElementById('viewerContainer');
-              if (viewerContainer) viewerContainer.prepend(glbPoster);
-              else document.body.appendChild(glbPoster); // fallback de seguridad
-            }
-
-            // ✅ Detectar si es escritorio o móvil
-            const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
-            const folder = isDesktop ? 'desktop' : 'mobile';
-
-            // ✅ Crear URL adaptativa (con cache-buster)
-            const glbPosterUrl = (await exists(`/assets/posters/${folder}/${model}.webp`))
-              ? `/assets/posters/${folder}/${model}.webp?v=${Date.now()}`
-              : '/models/placeholder.webp';
-
-            // ✅ Aplicar el poster como fondo del overlay
-            glbPoster.style.backgroundImage = `url('${glbPosterUrl}')`;
-            glbPoster.classList.add('visible');
-
-            const oldPoster = document.querySelector('.poster-layer');
-            if (oldPoster) oldPoster.remove();
-
-            console.log('✅ Poster adaptativo cargado:', glbPosterUrl);
-
-            // ▶ Listener del load del model-viewer
-            mv.addEventListener('load', () => {
-              // Espera un frame de render para asegurar que el modelo ya está visible
-              requestAnimationFrame(() => {
-                if (glbPoster) {
-                  glbPoster.classList.add('fade-out');
-                  setTimeout(() => glbPoster.remove(), 700);
-                }
-              });
-            });
-
-            mv.addEventListener('load', () => {
-              // ... tu código para ocultar skeleton ...
-
-              // ya haces visible el modelo:
-              requestAnimationFrame(() => mv.classList.add('is-visible'));
-
-              // ▶ Crossfade: poster GLB se desvanece tras un frame
-              if (glbPoster) {
-                // da un pequeño margen para que el modelo ya esté pintado
-                setTimeout(() => {
-                  glbPoster.classList.add('fade-out');
-                  // limpia el DOM tras la animación
-                  setTimeout(() => {
-                    glbPoster.remove();
-                  }, 500); // ≈ a tu transition .45s
-                }, 30);
               }
-              // Modelo listo → habilita AR
-              setArEnabled(true);
             });
-          }
+            // Al cargar, paramos el watchdog
+            mv.addEventListener('load', () => { try { stopWatchdog?.(); } catch { } }, { once: true });
 
-          // Poster por pieza con fallback
-          try {
-            const posterSrc = `/assets/posters/${model}.webp`;
-            if (await exists(posterSrc)) {
-              mv.poster = posterSrc;
-              mv.setAttribute('poster', posterSrc);
-            } else {
+
+            // Deshabilita AR hasta que el modelo esté listo
+            setArEnabled(false);
+
+            // Función de reintento (con cache-buster) y rehacer póster overlay si existe
+            const retryGlb = () => {
+              const sk = document.getElementById('skel');
+              if (sk) {
+                sk.classList.remove('hidden');
+                sk.style.opacity = '1';
+              }
+              const bust = `?v=${Date.now()}`;
+              mv.src = glbUrl(model) + bust;
+
+              const gp = document.getElementById('glbPoster');
+              if (gp) {
+                gp.classList.remove('fade-out');
+                gp.classList.add('visible');
+              }
+            };
+
+            // Si model-viewer reporta error: mostramos CTA de reintento
+            mv.addEventListener('error', () => {
+              const sk = document.getElementById('skel');
+              if (sk) {
+                sk.style.opacity = '0';
+                setTimeout(() => sk.classList.add('hidden'), 400);
+              }
+              showErrorAndRetry('glb', model, retryGlb);
+            });
+
+            // Auto-reintentar una vez al recuperar conexión si el estado era de error
+            window.addEventListener('online', () => {
+              const msg = document.getElementById('msg');
+              if (msg && !msg.classList.contains('hidden')) retryGlb();
+            });
+
+            // ▼▼ AÑADE ESTA LÍNEA AQUÍ ▼▼
+            mv.classList.remove('hidden');
+
+            // Failsafe: oculta el skeleton si algún navegador no dispara 'load'
+            setTimeout(() => {
+              const sk = document.getElementById('skel');
+              if (sk && !sk.classList.contains('hidden')) {
+                sk.style.opacity = '0';
+                setTimeout(() => sk.classList.add('hidden'), 600);
+              }
+            }, 12000);
+
+            // === Indicador de progreso del modelo ===
+            const progressEl = document.getElementById('loaderProgress');
+            if (mv) {
+              mv.addEventListener('progress', (e) => {
+                const ratio = Math.round(e.detail.totalProgress * 100);
+                if (progressEl) progressEl.textContent = `${ratio}%`;
+              });
+
+              // ▶ PÓSTER GLB (overlay separado para poder hacer fade)
+              let glbPoster = document.getElementById('glbPoster');
+              if (!glbPoster) {
+                glbPoster = document.createElement('div');
+                glbPoster.id = 'glbPoster';
+                glbPoster.className = 'glb-poster';
+
+                // Inyectar dentro del marco izquierdo (viewerContainer)
+                const viewerContainer = document.getElementById('viewerContainer');
+                if (viewerContainer) viewerContainer.prepend(glbPoster);
+                else document.body.appendChild(glbPoster); // fallback de seguridad
+              }
+
+              // ✅ Detectar si es escritorio o móvil
+              const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+              const folder = isDesktop ? 'desktop' : 'mobile';
+
+              // ✅ Crear URL adaptativa (con cache-buster)
+              const glbPosterUrl = (await exists(`/assets/posters/${folder}/${model}.webp`))
+                ? `/assets/posters/${folder}/${model}.webp?v=${Date.now()}`
+                : '/models/placeholder.webp';
+
+              // ✅ Aplicar el poster como fondo del overlay
+              glbPoster.style.backgroundImage = `url('${glbPosterUrl}')`;
+              glbPoster.classList.add('visible');
+
+              const oldPoster = document.querySelector('.poster-layer');
+              if (oldPoster) oldPoster.remove();
+
+              console.log('✅ Poster adaptativo cargado:', glbPosterUrl);
+
+              // ▶ Listener del load del model-viewer
+              mv.addEventListener('load', () => {
+                // Espera un frame de render para asegurar que el modelo ya está visible
+                requestAnimationFrame(() => {
+                  if (glbPoster) {
+                    glbPoster.classList.add('fade-out');
+                    setTimeout(() => glbPoster.remove(), 700);
+                  }
+                });
+              });
+
+              mv.addEventListener('load', () => {
+                // ... tu código para ocultar skeleton ...
+
+                // ya haces visible el modelo:
+                requestAnimationFrame(() => mv.classList.add('is-visible'));
+
+                // ▶ Crossfade: poster GLB se desvanece tras un frame
+                if (glbPoster) {
+                  // da un pequeño margen para que el modelo ya esté pintado
+                  setTimeout(() => {
+                    glbPoster.classList.add('fade-out');
+                    // limpia el DOM tras la animación
+                    setTimeout(() => {
+                      glbPoster.remove();
+                    }, 500); // ≈ a tu transition .45s
+                  }, 30);
+                }
+                // Modelo listo → habilita AR
+                setArEnabled(true);
+              });
+            }
+
+            // Poster por pieza con fallback
+            try {
+              const posterSrc = `/assets/posters/${model}.webp`;
+              if (await exists(posterSrc)) {
+                mv.poster = posterSrc;
+                mv.setAttribute('poster', posterSrc);
+              } else {
+                mv.poster = '/models/placeholder.webp';
+                mv.setAttribute('poster', '/models/placeholder.webp');
+              }
+            } catch {
               mv.poster = '/models/placeholder.webp';
               mv.setAttribute('poster', '/models/placeholder.webp');
             }
-          } catch {
-            mv.poster = '/models/placeholder.webp';
-            mv.setAttribute('poster', '/models/placeholder.webp');
-          }
 
-          // Config cámara
-          const cam = cameraSettings[model];
-          if (cam) {
-            if (cam.orbit) mv.cameraOrbit = cam.orbit;
-            if (cam.target) mv.cameraTarget = cam.target;
-            if (cam.minRadius) mv.minCameraOrbit = `auto auto ${cam.minRadius}`;
-            if (cam.maxRadius) mv.maxCameraOrbit = `auto auto ${cam.maxRadius}`;
-            if (cam.minFov) mv.minFieldOfView = cam.minFov;
-            if (cam.maxFov) mv.maxFieldOfView = cam.maxFov;
-          }
-
-          // === ENTORNO: usar HDR solo como luz; SIN skybox visible ===
-          const HDR_PRIMARY = '/assets/hdr/studio_small_09_2k.hdr';
-          const HDR_FALLBACK = 'neutral'; // si falla, luz neutra
-
-          async function firstExisting(urls) {
-            for (const u of urls) {
-              try {
-                const r = await fetch(u, { method: 'HEAD', cache: 'force-cache' });
-                if (r.ok) return u;
-              } catch { }
+            // Config cámara
+            const cam = cameraSettings[model];
+            if (cam) {
+              if (cam.orbit) mv.cameraOrbit = cam.orbit;
+              if (cam.target) mv.cameraTarget = cam.target;
+              if (cam.minRadius) mv.minCameraOrbit = `auto auto ${cam.minRadius}`;
+              if (cam.maxRadius) mv.maxCameraOrbit = `auto auto ${cam.maxRadius}`;
+              if (cam.minFov) mv.minFieldOfView = cam.minFov;
+              if (cam.maxFov) mv.maxFieldOfView = cam.maxFov;
             }
-            return '';
+
+            // === ENTORNO: usar HDR solo como luz; SIN skybox visible ===
+            const HDR_PRIMARY = '/assets/hdr/studio_small_09_2k.hdr';
+            const HDR_FALLBACK = 'neutral'; // si falla, luz neutra
+
+            async function firstExisting(urls) {
+              for (const u of urls) {
+                try {
+                  const r = await fetch(u, { method: 'HEAD', cache: 'force-cache' });
+                  if (r.ok) return u;
+                } catch { }
+              }
+              return '';
+            }
+
+            // Aplica solo iluminación (environment-image). Elimina cualquier skybox.
+            async function applyEnvironmentOnly(mv, hdrUrl) {
+              const env = hdrUrl || 'neutral';
+              mv.setAttribute('environment-image', env);
+              mv.environmentImage = env;
+
+              // 🔒 Sin skybox visible
+              mv.removeAttribute('skybox-image');
+              mv.skyboxImage = '';
+
+              // Ajustes de look (ajusta a tu gusto)
+              mv.exposure = '1.25';
+              mv.shadowIntensity = '0.8';
+              mv.shadowSoftness = '1.0';
+              // mv.environmentRotation = '10deg'; // opcional
+            }
+
+            // Elegimos un HDR válido (o neutro)
+            const hdrToUse = (await firstExisting([HDR_PRIMARY])) || HDR_FALLBACK;
+
+            // Ilumina sin fondo HDR
+            await applyEnvironmentOnly(mv, hdrToUse);
+
+            // Algunos navegadores “resetean” atributos tras ciertos eventos: lo reforzamos
+            mv.addEventListener('load', () => applyEnvironmentOnly(mv, hdrToUse), { once: true });
+
+
+
+            // Iluminación por pieza (opcional)
+            const lightSettings = {
+              'cristo-yacente': {
+                exposure: 1.6,
+                shadowIntensity: 0.9,
+                shadowSoftness: 0.9,
+                environmentRotation: '15deg'
+              },
+              'virgen-romanica': { exposure: 1.3, environmentRotation: '0deg' }
+            };
+            const L = lightSettings[model];
+            if (L) {
+              if (L.exposure != null) mv.exposure = String(L.exposure);
+              if (L.shadowIntensity != null) mv.shadowIntensity = String(L.shadowIntensity);
+              if (L.shadowSoftness != null) mv.shadowSoftness = String(L.shadowSoftness);
+              if (L.environmentRotation) mv.environmentRotation = L.environmentRotation;
+            }
+
+            // iOS Quick Look
+            mv.iosSrc = usdzUrl(model);
+            mv.classList.remove('hidden');
+
+            // Oculta botón AR nativo
+            if (!mv.querySelector('[slot="ar-button"]')) {
+              const blocker = document.createElement('button');
+              blocker.setAttribute('slot', 'ar-button');
+              blocker.setAttribute('aria-hidden', 'true');
+              blocker.style.display = 'none';
+              blocker.tabIndex = -1;
+              mv.appendChild(blocker);
+            }
+
+            // ✅ Botón AR unificado (optimizado y reseteado por carga)
+            if (arBtn) {
+              // Elimina handlers previos si la página fue recargada desde memoria
+              arBtn.replaceWith(arBtn.cloneNode(true));
+              const newArBtn = document.getElementById('arBtn');
+
+              const fileSigned = preSigned?.glb || glbUrl(model);
+              const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(
+                fileSigned
+              )}&mode=ar_preferred&title=${encodeURIComponent(model)}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+
+
+              newArBtn.classList.remove('hidden');
+              newArBtn.addEventListener('click', async () => {
+                // ✅ VERIFICAR COOLDOWN: No permitir clicks múltiples
+                const now = Date.now();
+                const timeSinceLastClick = now - lastARClickTime;
+
+                if (timeSinceLastClick < AR_COOLDOWN_MS) {
+                  const remainingSeconds = Math.ceil((AR_COOLDOWN_MS - timeSinceLastClick) / 1000);
+                  showToast(`Por favor espera ${remainingSeconds} segundos antes de volver a intentar`, 2000);
+
+                  // Vibración de feedback negativo
+                  try {
+                    if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
+                  } catch { }
+
+                  return; // Salir sin hacer nada
+                }
+
+                // Actualizar timestamp del último click
+                lastARClickTime = now;
+                if (window.startCooldownVisual) window.startCooldownVisual(newArBtn || arBtn);
+
+                // Mostrar overlay de carga inmediatamente
+                showARLoading();
+
+                try {
+                  if (isIOS) {
+                    const ok = openQuickLookSync(model);
+                    if (!ok) window.location.href = usdzUrl(model);
+                    return;
+                  }
+
+
+
+                  if (mv?.activateAR) await mv.activateAR();
+                  else openARFor(model);
+                } catch (err) {
+                  console.error('Error abriendo AR:', err);
+                  openARFor(model);
+                } finally {
+                  // hideARLoading();
+                }
+              });
+            }
+
+            if (slug) {
+              infoData = await loadInfoDataOrFallback(infoData);
+              renderInfo(slug);
+            }
+
+            // Auto-open si el usuario lo dejó abierto para este slug o si viene con ?info=1 o #info
+            const wantsInfo =
+              new URLSearchParams(location.search).get('info') === '1' ||
+              location.hash === '#info';
+            let lastState = 'closed';
+            try {
+              lastState = localStorage.getItem(sheetKeyFor(slug)) || 'closed';
+            } catch { }
+            if (wantsInfo || lastState === 'open') {
+              // Deja un frame para que el DOM pinte antes del open (suaviza la transición)
+              requestAnimationFrame(() => openSheet());
+            }
+
+            await loadInfoData();
+            setupAudioFor(model);
+            skel.classList.add('hidden');
+            return;
           }
 
-          // Aplica solo iluminación (environment-image). Elimina cualquier skybox.
-          async function applyEnvironmentOnly(mv, hdrUrl) {
-            const env = hdrUrl || 'neutral';
-            mv.setAttribute('environment-image', env);
-            mv.environmentImage = env;
+          if (type === 'splat' && figure) {
+            document.body.classList.add('mode-splat');
 
-            // 🔒 Sin skybox visible
-            mv.removeAttribute('skybox-image');
-            mv.skyboxImage = '';
-
-            // Ajustes de look (ajusta a tu gusto)
-            mv.exposure = '1.25';
-            mv.shadowIntensity = '0.8';
-            mv.shadowSoftness = '1.0';
-            // mv.environmentRotation = '10deg'; // opcional
-          }
-
-          // Elegimos un HDR válido (o neutro)
-          const hdrToUse = (await firstExisting([HDR_PRIMARY])) || HDR_FALLBACK;
-
-          // Ilumina sin fondo HDR
-          await applyEnvironmentOnly(mv, hdrToUse);
-
-          // Algunos navegadores “resetean” atributos tras ciertos eventos: lo reforzamos
-          mv.addEventListener('load', () => applyEnvironmentOnly(mv, hdrToUse), { once: true });
+            // Deshabilita AR mientras el SPLAT no esté listo
+            setArEnabled(false);
 
 
 
-          // Iluminación por pieza (opcional)
-          const lightSettings = {
-            'cristo-yacente': {
-              exposure: 1.6,
-              shadowIntensity: 0.9,
-              shadowSoftness: 0.9,
-              environmentRotation: '15deg'
-            },
-            'virgen-romanica': { exposure: 1.3, environmentRotation: '0deg' }
-          };
-          const L = lightSettings[model];
-          if (L) {
-            if (L.exposure != null) mv.exposure = String(L.exposure);
-            if (L.shadowIntensity != null) mv.shadowIntensity = String(L.shadowIntensity);
-            if (L.shadowSoftness != null) mv.shadowSoftness = String(L.shadowSoftness);
-            if (L.environmentRotation) mv.environmentRotation = L.environmentRotation;
-          }
+            // Estado de carga + watchdog de seguridad
+            let splatLoaded = false;
+            const WATCHDOG_MS = 12000;
 
-          // iOS Quick Look
-          mv.iosSrc = usdzUrl(model);
-          mv.classList.remove('hidden');
+            const retrySplat = () => {
+              // Reaparece el skeleton suavemente
+              const sk = document.getElementById('skel');
+              if (sk) {
+                sk.classList.remove('hidden');
+                sk.style.opacity = '1';
+              }
 
-          // Oculta botón AR nativo
-          if (!mv.querySelector('[slot="ar-button"]')) {
-            const blocker = document.createElement('button');
-            blocker.setAttribute('slot', 'ar-button');
-            blocker.setAttribute('aria-hidden', 'true');
-            blocker.style.display = 'none';
-            blocker.tabIndex = -1;
-            mv.appendChild(blocker);
-          }
+              // Rehacer poster overlay si estaba
+              const sp = document.getElementById('splatPoster');
+              if (sp) {
+                sp.classList.remove('hidden', 'fade-out');
+                requestAnimationFrame(() => sp.classList.add('visible'));
+              }
 
-          // ✅ Botón AR unificado (optimizado y reseteado por carga)
-          if (arBtn) {
-            // Elimina handlers previos si la página fue recargada desde memoria
-            arBtn.replaceWith(arBtn.cloneNode(true));
-            const newArBtn = document.getElementById('arBtn');
+              // Cache-buster al iframe
+              const bust = `?v=${Date.now()}`;
+              splat.src = splatUrl(figure) + bust;
 
-            const fileSigned = preSigned?.glb || glbUrl(model);
-            const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(
-              fileSigned
-            )}&mode=ar_preferred&title=${encodeURIComponent(model)}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+              // Reinicia estado
+              splatLoaded = false;
+              startWatchdog();
+            };
 
+            let watchdogTimer = null;
+            function startWatchdog() {
+              clearTimeout(watchdogTimer);
+              watchdogTimer = setTimeout(() => {
+                if (!splatLoaded) {
+                  showErrorAndRetry('splat', figure, retrySplat);
+                  // Al fallar, mantiene AR desactivado
+                  setArEnabled(false);
+                }
+              }, WATCHDOG_MS);
+            }
 
-            newArBtn.classList.remove('hidden');
-            newArBtn.addEventListener('click', async () => {
-              // ✅ VERIFICAR COOLDOWN: No permitir clicks múltiples
+            // Si vuelve la conexión y aún no cargó, reintenta
+            window.addEventListener('online', () => {
+              if (!splatLoaded) retrySplat();
+            });
+
+            // --- Poster previo al SPLAT (aparece ya, antes del src) ---
+            const splatPoster = document.getElementById('splatPoster');
+            if (splatPoster) {
+              // Fallback inmediato
+              splatPoster.style.backgroundImage = `url('/models/placeholder.webp')`;
+              splatPoster.classList.remove('hidden');
+              requestAnimationFrame(() => splatPoster.classList.add('visible'));
+              startWatchdog();
+
+              // Ocultar cuando el SPLAT carga
+              splat.addEventListener(
+                'load',
+                () => {
+                  splatLoaded = true;
+                  clearTimeout(watchdogTimer);
+
+                  splatPoster.classList.add('fade-out');
+                  setTimeout(() => splatPoster.classList.add('hidden'), 700);
+
+                  // SPLAT ya pintado → habilita AR y muestra la escena
+                  setArEnabled(true);
+                  requestAnimationFrame(() => splat.classList.add('is-visible'));
+
+                  // Oculta skeleton por si seguía visible
+                  const sk = document.getElementById('skel');
+                  if (sk) {
+                    sk.style.opacity = '0';
+                    setTimeout(() => sk.classList.add('hidden'), 400);
+                  }
+                },
+                { once: true }
+              );
+            }
+
+            // Cargar SPLAT
+            splat.src = splatUrl(figure);
+            splat.classList.remove('is-visible');
+            splat.classList.remove('hidden');
+
+            // FAB AR
+            arBtn.classList.remove('hidden');
+            arBtn.addEventListener('click', async () => {
+              // ✅ VERIFICAR COOLDOWN
               const now = Date.now();
               const timeSinceLastClick = now - lastARClickTime;
 
               if (timeSinceLastClick < AR_COOLDOWN_MS) {
                 const remainingSeconds = Math.ceil((AR_COOLDOWN_MS - timeSinceLastClick) / 1000);
                 showToast(`Por favor espera ${remainingSeconds} segundos antes de volver a intentar`, 2000);
-
-                // Vibración de feedback negativo
-                try {
-                  if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
-                } catch { }
-
-                return; // Salir sin hacer nada
+                try { if (navigator.vibrate) navigator.vibrate([50, 100, 50]); } catch { }
+                return;
               }
 
-              // Actualizar timestamp del último click
               lastARClickTime = now;
               if (window.startCooldownVisual) window.startCooldownVisual(newArBtn || arBtn);
-
-              // Mostrar overlay de carga inmediatamente
               showARLoading();
-
-              try {
-                if (isIOS) {
-                  const ok = openQuickLookSync(model);
-                  if (!ok) window.location.href = usdzUrl(model);
-                  return;
-                }
-
-
-
-                if (mv?.activateAR) await mv.activateAR();
-                else openARFor(model);
-              } catch (err) {
-                console.error('Error abriendo AR:', err);
-                openARFor(model);
-              } finally {
-                // hideARLoading();
+              if (isIOS) {
+                const ok = openQuickLookSync(figure);
+                if (!ok) window.location.href = usdzUrl(figure); // fallback duro
+                return;
               }
+              openARFor(figure);
             });
+
+            if (slug) {
+              infoData = await loadInfoDataOrFallback(infoData);
+              renderInfo(slug);
+            }
+
+            // Auto-open si el usuario lo dejó abierto para este slug o si viene con ?info=1 o #info
+            const wantsInfo =
+              new URLSearchParams(location.search).get('info') === '1' ||
+              location.hash === '#info';
+            let lastState = 'closed';
+            try {
+              lastState = localStorage.getItem(sheetKeyFor(slug)) || 'closed';
+            } catch { }
+            if (wantsInfo || lastState === 'open') {
+              // Deja un frame para que el DOM pinte antes del open (suaviza la transición)
+              requestAnimationFrame(() => openSheet());
+            }
+
+            await loadInfoData();
+            setupAudioFor(figure);
+            skel.classList.add('hidden');
+            return;
           }
 
-          if (slug) {
-            infoData = await loadInfoDataOrFallback(infoData);
-            renderInfo(slug);
-          }
-
-          // Auto-open si el usuario lo dejó abierto para este slug o si viene con ?info=1 o #info
-          const wantsInfo =
-            new URLSearchParams(location.search).get('info') === '1' ||
-            location.hash === '#info';
-          let lastState = 'closed';
-          try {
-            lastState = localStorage.getItem(sheetKeyFor(slug)) || 'closed';
-          } catch { }
-          if (wantsInfo || lastState === 'open') {
-            // Deja un frame para que el DOM pinte antes del open (suaviza la transición)
-            requestAnimationFrame(() => openSheet());
-          }
-
-          await loadInfoData();
-          setupAudioFor(model);
+          // Sin parámetros válidos:
+          showHelp();
+        } catch (err) {
+          console.error(err);
+          msg.classList.remove('hidden');
+          msg.innerHTML = `<b>Error:</b> ${String(err).replace(/</g, '&lt;')}`;
           skel.classList.add('hidden');
-          return;
         }
+      })();
+      // ...otras funciones aquí, como setupAudioFor(), openARFor(), etc.
 
-        if (type === 'splat' && figure) {
-          document.body.classList.add('mode-splat');
+      // ==== CARTELA DINÁMICA (versión escritorio y móvil) ====
+      async function loadInfoData() {
+        try {
+          const slug = new URLSearchParams(window.location.search).get('model') ||
+            new URLSearchParams(window.location.search).get('figure');
+          if (!slug) return;
 
-          // Deshabilita AR mientras el SPLAT no esté listo
-          setArEnabled(false);
+          const response = await fetch('/assets/info.json');
+          const data = await response.json();
 
-
-
-          // Estado de carga + watchdog de seguridad
-          let splatLoaded = false;
-          const WATCHDOG_MS = 12000;
-
-          const retrySplat = () => {
-            // Reaparece el skeleton suavemente
-            const sk = document.getElementById('skel');
-            if (sk) {
-              sk.classList.remove('hidden');
-              sk.style.opacity = '1';
-            }
-
-            // Rehacer poster overlay si estaba
-            const sp = document.getElementById('splatPoster');
-            if (sp) {
-              sp.classList.remove('hidden', 'fade-out');
-              requestAnimationFrame(() => sp.classList.add('visible'));
-            }
-
-            // Cache-buster al iframe
-            const bust = `?v=${Date.now()}`;
-            splat.src = splatUrl(figure) + bust;
-
-            // Reinicia estado
-            splatLoaded = false;
-            startWatchdog();
-          };
-
-          let watchdogTimer = null;
-          function startWatchdog() {
-            clearTimeout(watchdogTimer);
-            watchdogTimer = setTimeout(() => {
-              if (!splatLoaded) {
-                showErrorAndRetry('splat', figure, retrySplat);
-                // Al fallar, mantiene AR desactivado
-                setArEnabled(false);
-              }
-            }, WATCHDOG_MS);
+          if (!data[slug]) {
+            console.warn(`No se encontró información para ${slug}`);
+            return;
           }
 
-          // Si vuelve la conexión y aún no cargó, reintenta
-          window.addEventListener('online', () => {
-            if (!splatLoaded) retrySplat();
-          });
+          const info = data[slug];
+          const infoPanel = document.getElementById('infoPanel');
+          if (!infoPanel) return;
 
-          // --- Poster previo al SPLAT (aparece ya, antes del src) ---
-          const splatPoster = document.getElementById('splatPoster');
-          if (splatPoster) {
-            // Fallback inmediato
-            splatPoster.style.backgroundImage = `url('/models/placeholder.webp')`;
-            splatPoster.classList.remove('hidden');
-            requestAnimationFrame(() => splatPoster.classList.add('visible'));
-            startWatchdog();
-
-            // Ocultar cuando el SPLAT carga
-            splat.addEventListener(
-              'load',
-              () => {
-                splatLoaded = true;
-                clearTimeout(watchdogTimer);
-
-                splatPoster.classList.add('fade-out');
-                setTimeout(() => splatPoster.classList.add('hidden'), 700);
-
-                // SPLAT ya pintado → habilita AR y muestra la escena
-                setArEnabled(true);
-                requestAnimationFrame(() => splat.classList.add('is-visible'));
-
-                // Oculta skeleton por si seguía visible
-                const sk = document.getElementById('skel');
-                if (sk) {
-                  sk.style.opacity = '0';
-                  setTimeout(() => sk.classList.add('hidden'), 400);
-                }
-              },
-              { once: true }
-            );
-          }
-
-          // Cargar SPLAT
-          splat.src = splatUrl(figure);
-          splat.classList.remove('is-visible');
-          splat.classList.remove('hidden');
-
-          // FAB AR
-          arBtn.classList.remove('hidden');
-          arBtn.addEventListener('click', async () => {
-            // ✅ VERIFICAR COOLDOWN
-            const now = Date.now();
-            const timeSinceLastClick = now - lastARClickTime;
-
-            if (timeSinceLastClick < AR_COOLDOWN_MS) {
-              const remainingSeconds = Math.ceil((AR_COOLDOWN_MS - timeSinceLastClick) / 1000);
-              showToast(`Por favor espera ${remainingSeconds} segundos antes de volver a intentar`, 2000);
-              try { if (navigator.vibrate) navigator.vibrate([50, 100, 50]); } catch { }
-              return;
-            }
-
-            lastARClickTime = now;
-            if (window.startCooldownVisual) window.startCooldownVisual(newArBtn || arBtn);
-            showARLoading();
-            if (isIOS) {
-              const ok = openQuickLookSync(figure);
-              if (!ok) window.location.href = usdzUrl(figure); // fallback duro
-              return;
-            }
-            openARFor(figure);
-          });
-
-          if (slug) {
-            infoData = await loadInfoDataOrFallback(infoData);
-            renderInfo(slug);
-          }
-
-          // Auto-open si el usuario lo dejó abierto para este slug o si viene con ?info=1 o #info
-          const wantsInfo =
-            new URLSearchParams(location.search).get('info') === '1' ||
-            location.hash === '#info';
-          let lastState = 'closed';
-          try {
-            lastState = localStorage.getItem(sheetKeyFor(slug)) || 'closed';
-          } catch { }
-          if (wantsInfo || lastState === 'open') {
-            // Deja un frame para que el DOM pinte antes del open (suaviza la transición)
-            requestAnimationFrame(() => openSheet());
-          }
-
-          await loadInfoData();
-          setupAudioFor(figure);
-          skel.classList.add('hidden');
-          return;
-        }
-
-        // Sin parámetros válidos:
-        showHelp();
-      } catch (err) {
-        console.error(err);
-        msg.classList.remove('hidden');
-        msg.innerHTML = `<b>Error:</b> ${String(err).replace(/</g, '&lt;')}`;
-        skel.classList.add('hidden');
-      }
-    })();
-    // ...otras funciones aquí, como setupAudioFor(), openARFor(), etc.
-
-    // ==== CARTELA DINÁMICA (versión escritorio y móvil) ====
-    async function loadInfoData() {
-      try {
-        const slug = new URLSearchParams(window.location.search).get('model') ||
-          new URLSearchParams(window.location.search).get('figure');
-        if (!slug) return;
-
-        const response = await fetch('/assets/info.json');
-        const data = await response.json();
-
-        if (!data[slug]) {
-          console.warn(`No se encontró información para ${slug}`);
-          return;
-        }
-
-        const info = data[slug];
-        const infoPanel = document.getElementById('infoPanel');
-        if (!infoPanel) return;
-
-        // Inserta la información en la cartela
-        infoPanel.innerHTML = `
+          // Inserta la información en la cartela
+          infoPanel.innerHTML = `
             <h2>${info.title}</h2>
             <div class="info-meta">${info.author} · ${info.year}</div>
             <div class="info-desc">${info.desc}</div>
@@ -1843,27 +1843,23 @@
             </div>
           `;
 
-        // === PRELOAD AUDIO ===
-        async function preloadAudio(slug) {
-          try {
-            const audioPath = `/assets/audio/${slug}.mp3`;
-            const audio = new Audio(audioPath);
-            audio.preload = "auto";
-            console.log(`🎧 Precargado: ${audioPath}`);
-          } catch (err) {
-            console.warn("Error precargando audio:", err);
+          // === PRELOAD AUDIO ===
+          async function preloadAudio(slug) {
+            try {
+              const audioPath = `/assets/audio/${slug}.mp3`;
+              const audio = new Audio(audioPath);
+              audio.preload = "auto";
+              console.log(`🎧 Precargado: ${audioPath}`);
+            } catch (err) {
+              console.warn("Error precargando audio:", err);
+            }
           }
+
+        } catch (err) {
+          console.error('Error cargando info.json:', err);
         }
-
-      } catch (err) {
-        console.error('Error cargando info.json:', err);
       }
-    }
-
-        // 👇👇 Mantén esto abajo del todo, antes del cierre:
-      }) ();
-
-    }) ();
+    });
 
     /* === PANEL VISUAL DE AJUSTE DE CÁMARA (con min/max zoom) === */
     (function setupCameraDebugPanel() {
