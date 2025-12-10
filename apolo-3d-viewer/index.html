@@ -1300,162 +1300,11 @@
               usdz: await signedOrPlain(usdzUrl(model))
             };
 
-            mv.src = preSigned.glb;          // <model-viewer> carga con token
-            mv.iosSrc = preSigned.usdz;      // Quick Look listo con token
+            // mv.src y mv.iosSrc se asignan AL FINAL para evitar race conditions
 
             // Mantener poster visible hasta que cargue
             const posterEl = document.querySelector('.glb-poster');
             if (posterEl) posterEl.classList.remove('loaded');
-
-            mv.addEventListener('load', () => {
-              setTimeout(() => posterEl?.classList.add('loaded'), 300);
-            });
-
-            const stopWatchdog = startProgressWatchdog(mv, {
-              timeoutMs: 60000,
-              onStall: () => {
-                // Sin progreso real: muestra CTA y reintenta con cache-buster
-                showErrorAndRetry('glb', model, () => {
-                  const bust = `?v=${Date.now()}`;
-                  mv.src = glbUrl(model) + bust;
-
-                  // Segundo watchdog por si sigue atascado
-                  startProgressWatchdog(mv, {
-                    timeoutMs: 9000,
-                    onStall: () => showToast('Todavía no hay datos. Reintenta en unos segundos.', 2200)
-                  });
-
-                  // Re-mostrar póster y skeleton durante el reintento
-                  const gp = document.getElementById('glbPoster');
-                  if (gp) { gp.classList.remove('fade-out'); gp.classList.add('visible'); }
-                  const sk = document.getElementById('skel');
-                  if (sk) { sk.classList.remove('hidden'); sk.style.opacity = '1'; }
-                });
-              }
-            });
-            // Al cargar, paramos el watchdog
-            mv.addEventListener('load', () => { try { stopWatchdog?.(); } catch { } }, { once: true });
-
-
-            // Deshabilita AR hasta que el modelo esté listo
-            setArEnabled(false);
-
-            // Función de reintento (con cache-buster) y rehacer póster overlay si existe
-            const retryGlb = () => {
-              const sk = document.getElementById('skel');
-              if (sk) {
-                sk.classList.remove('hidden');
-                sk.style.opacity = '1';
-              }
-              const bust = `?v=${Date.now()}`;
-              mv.src = glbUrl(model) + bust;
-
-              const gp = document.getElementById('glbPoster');
-              if (gp) {
-                gp.classList.remove('fade-out');
-                gp.classList.add('visible');
-              }
-            };
-
-            // Si model-viewer reporta error: mostramos CTA de reintento
-            mv.addEventListener('error', () => {
-              const sk = document.getElementById('skel');
-              if (sk) {
-                sk.style.opacity = '0';
-                setTimeout(() => sk.classList.add('hidden'), 400);
-              }
-              showErrorAndRetry('glb', model, retryGlb);
-            });
-
-            // Auto-reintentar una vez al recuperar conexión si el estado era de error
-            window.addEventListener('online', () => {
-              const msg = document.getElementById('msg');
-              if (msg && !msg.classList.contains('hidden')) retryGlb();
-            });
-
-            // ▼▼ AÑADE ESTA LÍNEA AQUÍ ▼▼
-            mv.classList.remove('hidden');
-
-            // Failsafe: oculta el skeleton si algún navegador no dispara 'load'
-            setTimeout(() => {
-              const sk = document.getElementById('skel');
-              if (sk && !sk.classList.contains('hidden')) {
-                sk.style.opacity = '0';
-                setTimeout(() => sk.classList.add('hidden'), 600);
-              }
-            }, 12000);
-
-            // === Indicador de progreso del modelo ===
-            const progressEl = document.getElementById('loaderProgress');
-            if (mv) {
-              mv.addEventListener('progress', (e) => {
-                const ratio = Math.round(e.detail.totalProgress * 100);
-                if (progressEl) progressEl.textContent = `${ratio}%`;
-              });
-
-              // ▶ PÓSTER GLB (overlay separado para poder hacer fade)
-              let glbPoster = document.getElementById('glbPoster');
-              if (!glbPoster) {
-                glbPoster = document.createElement('div');
-                glbPoster.id = 'glbPoster';
-                glbPoster.className = 'glb-poster';
-
-                // Inyectar dentro del marco izquierdo (viewerContainer)
-                const viewerContainer = document.getElementById('viewerContainer');
-                if (viewerContainer) viewerContainer.prepend(glbPoster);
-                else document.body.appendChild(glbPoster); // fallback de seguridad
-              }
-
-              // ✅ Detectar si es escritorio o móvil
-              const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
-              const folder = isDesktop ? 'desktop' : 'mobile';
-
-              // ✅ Crear URL adaptativa (con cache-buster)
-              const glbPosterUrl = (await exists(`/assets/posters/${folder}/${model}.webp`))
-                ? `/assets/posters/${folder}/${model}.webp?v=${Date.now()}`
-                : '/models/placeholder.webp';
-
-              // ✅ Aplicar el poster como fondo del overlay
-              glbPoster.style.backgroundImage = `url('${glbPosterUrl}')`;
-              glbPoster.classList.add('visible');
-
-              const oldPoster = document.querySelector('.poster-layer');
-              if (oldPoster) oldPoster.remove();
-
-              console.log('✅ Poster adaptativo cargado:', glbPosterUrl);
-
-              // ▶ Listener del load del model-viewer
-              mv.addEventListener('load', () => {
-                // Espera un frame de render para asegurar que el modelo ya está visible
-                requestAnimationFrame(() => {
-                  if (glbPoster) {
-                    glbPoster.classList.add('fade-out');
-                    setTimeout(() => glbPoster.remove(), 700);
-                  }
-                });
-              });
-
-              mv.addEventListener('load', () => {
-                // ... tu código para ocultar skeleton ...
-
-                // ya haces visible el modelo:
-                requestAnimationFrame(() => mv.classList.add('is-visible'));
-
-                // ▶ Crossfade: poster GLB se desvanece tras un frame
-                if (glbPoster) {
-                  // da un pequeño margen para que el modelo ya esté pintado
-                  setTimeout(() => {
-                    glbPoster.classList.add('fade-out');
-                    // limpia el DOM tras la animación
-                    setTimeout(() => {
-                      glbPoster.remove();
-                    }, 500); // ≈ a tu transition .45s
-                  }, 30);
-                }
-                // Modelo listo → habilita AR
-                setArEnabled(true);
-              });
-            }
 
             // Poster por pieza con fallback
             try {
@@ -1544,7 +1393,10 @@
             }
 
             // iOS Quick Look
-            mv.iosSrc = usdzUrl(model);
+            // ✅ ASIGNACIÓN TARDÍA DE FUENTES (Evita Race Condition)
+            // Se hace aquí, después de configurar todos los listeners y el poster.
+            mv.src = preSigned.glb;
+            mv.iosSrc = preSigned.usdz;
             mv.classList.remove('hidden');
 
             // Oculta botón AR nativo
@@ -1574,19 +1426,6 @@
                 // ✅ VERIFICAR COOLDOWN: No permitir clicks múltiples
                 const now = Date.now();
                 const timeSinceLastClick = now - lastARClickTime;
-
-                if (timeSinceLastClick < AR_COOLDOWN_MS) {
-                  const remainingSeconds = Math.ceil((AR_COOLDOWN_MS - timeSinceLastClick) / 1000);
-                  showToast(`Por favor espera ${remainingSeconds} segundos antes de volver a intentar`, 2000);
-
-                  // Vibración de feedback negativo
-                  try {
-                    if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
-                  } catch { }
-
-                  return; // Salir sin hacer nada
-                }
-
                 // Actualizar timestamp del último click
                 lastARClickTime = now;
                 if (window.startCooldownVisual) window.startCooldownVisual(newArBtn || arBtn);
@@ -1865,17 +1704,6 @@
     (function setupCameraDebugPanel() {
       if (!location.search.includes('debug=true')) return;
 
-      const qs = new URLSearchParams(location.search);
-      let dbgModel = (qs.get('model') || qs.get('figure') || '').toLowerCase();
-      if (!dbgModel) {
-        const p = location.pathname.split('/').filter(Boolean);
-        if (p[0] === 'splat' && p[1]) dbgModel = p[1];
-        else if (p[0] === 'glb' && p[1]) dbgModel = p[1];
-        else if (p.length === 1) dbgModel = p[0];
-      }
-      const model = dbgModel;
-
-      const mv = document.getElementById('mv');
       if (!mv) return;
 
       const num = (s, def = 0) => {
