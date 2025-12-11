@@ -14,6 +14,12 @@
   <link rel="prefetch" href="/assets/posters/desktop/cristo-yacente.webp" as="image">
   <link rel="prefetch" href="/assets/audio/cristo-yacente.mp3" as="audio">
 
+  <!-- Preload fuentes críticas -->
+  <link rel="preload" href="https://fonts.gstatic.com/s/poppins/v20/pxiByp8kv8JHgFVrLGT9Z1xlFQ.woff2" as="font"
+    type="font/woff2" crossorigin>
+  <link rel="preload" href="https://fonts.gstatic.com/s/lora/v32/0QI6MX1D_JOuGQbT0gvTJPa787weuxJBkq0.woff2" as="font"
+    type="font/woff2" crossorigin>
+
   <!-- Preconnect (mejora de rendimiento fuentes) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -26,7 +32,7 @@
   </noscript>
 
   <!-- CSS principal -->
-  <link rel="stylesheet" href="/index.css" />
+  <link rel="stylesheet" href="/index.min.css" />
 
   <!-- Datos/metadatos -->
   <link rel="preload" href="/assets/info.json" as="fetch" type="application/json" crossorigin="anonymous" />
@@ -264,6 +270,37 @@
 
     window.addEventListener('load', prefetchCommonAssets);
 
+    // ========================================
+    // PRECARGA INTELIGENTE DE MODELOS 3D
+    // ========================================
+    function preloadModelsFor(slug) {
+      if (!slug) return;
+
+      const glbUrl = `/models/${slug}/${slug}.glb`;
+      const usdzUrl = `/models/${slug}/${slug}.usdz`;
+
+      console.log(`[Preload] Iniciando precarga de modelos para: ${slug}`);
+
+      // Usar fetch con prioridad baja para no bloquear recursos críticos
+      fetch(glbUrl, {
+        priority: 'low',
+        cache: 'force-cache'
+      }).then(() => {
+        console.log(`[Preload] ✅ GLB precargado: ${slug}`);
+      }).catch(err => {
+        console.warn(`[Preload] ⚠️ Error precargando GLB:`, err);
+      });
+
+      fetch(usdzUrl, {
+        priority: 'low',
+        cache: 'force-cache'
+      }).then(() => {
+        console.log(`[Preload] ✅ USDZ precargado: ${slug}`);
+      }).catch(err => {
+        console.warn(`[Preload] ⚠️ Error precargando USDZ:`, err);
+      });
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       // ---------------- URL: soporta query *y* pathname limpias ----------------
       const qs = new URLSearchParams(location.search);
@@ -285,6 +322,13 @@
         }
       }
       const slug = model || figure || '';
+      // 🚀 Iniciar precarga de modelos en background
+      if (slug) {
+        // Esperar 2 segundos para que carguen recursos críticos primero
+        setTimeout(() => {
+          preloadModelsFor(slug);
+        }, 2000);
+      }
 
       // === 🌐 Selector manual de idioma ===
 

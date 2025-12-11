@@ -2,7 +2,7 @@
    Museo Virtual Service Worker — v2.0.0
    ========================================================================== */
 
-const VERSION = 'v2.0.0';
+const VERSION = 'v1.1.0';
 const STATIC_CACHE = `museo-static-${VERSION}`;
 const DYNAMIC_CACHE = `museo-dynamic-${VERSION}`;
 const CLEANUP_INTERVAL_DAYS = 7;
@@ -73,8 +73,8 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   const route = matchRoute(url.pathname);
 
-  // HDR, POSTER, AUDIO, MODEL → Cache First
-  if (['HDR', 'POSTER', 'AUDIO', 'MODEL'].includes(route)) {
+  // HDR, POSTER, AUDIO → Cache First
+  if (['HDR', 'POSTER', 'AUDIO'].includes(route)) {
     event.respondWith(
       caches.open(STATIC_CACHE).then(async (cache) => {
         const hit = await cache.match(request);
@@ -85,6 +85,28 @@ self.addEventListener('fetch', (event) => {
           return res;
         } catch {
           return hit || new Response(null, { status: 504 });
+        }
+      })
+    );
+    return;
+  }
+
+  // MODEL → Cache First mejorado (para archivos grandes)
+  if (route === 'MODEL') {
+    event.respondWith(
+      caches.open(STATIC_CACHE).then(async (cache) => {
+        const hit = await cache.match(request);
+        if (hit) {
+          console.log('[SW] ✅ Modelo desde caché:', url.pathname);
+          return hit;
+        }
+        console.log('[SW] 📥 Descargando modelo:', url.pathname);
+        try {
+          const res = await fetch(request);
+          if (res.ok) cache.put(request, res.clone());
+          return res;
+        } catch {
+          return new Response(null, { status: 504 });
         }
       })
     );
