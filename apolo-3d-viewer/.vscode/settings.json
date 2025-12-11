@@ -26,6 +26,6 @@
     ]
   ],
   "editor.formatOnSave": true,
-  "files.autoSave": "afterDelay",
+  "files.autoSave": "off",
   "liveServer.settings.multiRootWorkspaceName": "apolo-3d-viewer"
 }
