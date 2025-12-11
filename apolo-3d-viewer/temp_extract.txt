@@ -1,0 +1,2100 @@
+﻿  <script>
+    function prefetchCommonAssets() {
+      const commonAssets = [
+        '/assets/info.json',
+        '/assets/brand/logo-museo.svg',
+        '/assets/brand/isotipo.svg',
+        '/index.css',
+        '/sw.js'
+      ];
+
+      commonAssets.forEach(url => {
+        const link = document.createElement('link');
+        link.rel = 'prefetch';
+        link.href = url;
+        document.head.appendChild(link);
+      });
+    }
+
+    window.addEventListener('load', prefetchCommonAssets);
+
+    // ========================================
+    // PRECARGA INTELIGENTE DE MODELOS 3D
+    // ========================================
+    function preloadModelsFor(slug) {
+      if (!slug) return;
+
+      const glbUrl = `/models/${slug}/${slug}.glb`;
+      const usdzUrl = `/models/${slug}/${slug}.usdz`;
+
+      console.log(`[Preload] Iniciando precarga de modelos para: ${slug}`);
+
+      // Usar fetch con prioridad baja para no bloquear recursos crÃ­ticos
+      fetch(glbUrl, {
+        priority: 'low',
+        cache: 'force-cache'
+      }).then(() => {
+        console.log(`[Preload] âœ… GLB precargado: ${slug}`);
+      }).catch(err => {
+        console.warn(`[Preload] âš ï¸ Error precargando GLB:`, err);
+      });
+
+      fetch(usdzUrl, {
+        priority: 'low',
+        cache: 'force-cache'
+      }).then(() => {
+        console.log(`[Preload] âœ… USDZ precargado: ${slug}`);
+      }).catch(err => {
+        console.warn(`[Preload] âš ï¸ Error precargando USDZ:`, err);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // ---------------- URL: soporta query *y* pathname limpias ----------------
+      const qs = new URLSearchParams(location.search);
+      let type = (qs.get('type') || '').toLowerCase(); // 'glb' | 'splat'
+      let model = (qs.get('model') || '').toLowerCase();
+      let figure = (qs.get('figure') || '').toLowerCase();
+
+      if (!type) {
+        const parts = location.pathname.split('/').filter(Boolean);
+        if (parts[0] === 'splat' && parts[1]) {
+          type = 'splat';
+          figure = parts[1];
+        } else if (parts[0] === 'glb' && parts[1]) {
+          type = 'glb';
+          model = parts[1];
+        } else if (parts.length === 1) {
+          type = 'glb';
+          model = parts[0]; // /:slug â†’ GLB por defecto
+        }
+      }
+      const slug = model || figure || '';
+      // ðŸš€ Iniciar precarga de modelos en background
+      if (slug) {
+        // Esperar 2 segundos para que carguen recursos crÃ­ticos primero
+        setTimeout(() => {
+          preloadModelsFor(slug);
+        }, 2000);
+      }
+
+      // === ðŸŒ Selector manual de idioma ===
+
+      // Recuperar idioma guardado o usar espaÃ±ol por defecto
+      let currentLang = localStorage.getItem('museum-lang') || 'es';
+      const langToggleBtn = document.getElementById('langToggleBtn');
+
+      if (langToggleBtn) {
+        langToggleBtn.textContent = currentLang.toUpperCase();
+
+        langToggleBtn.addEventListener('click', () => {
+          currentLang = currentLang === 'es' ? 'en' : 'es';
+          localStorage.setItem('museum-lang', currentLang);
+          langToggleBtn.textContent = currentLang.toUpperCase();
+          loadInfoForSlug(slug, currentLang); // ðŸ” Recargar cartela dinÃ¡micamente
+        });
+      }
+
+      // --- FunciÃ³n unificada de carga de informaciÃ³n ---
+      function loadInfoForSlug(slug, lang) {
+        const infoPath = `/assets/info${lang === 'en' ? '_en' : ''}.json`;
+        fetch(infoPath)
+          .then(res => res.json())
+          .then(infoData => {
+            const info = infoData[slug];
+            if (!info) return;
+
+            // MÃ³vil
+            const infoTitle = document.getElementById('infoTitle');
+            const infoMeta = document.getElementById('infoMeta');
+            const infoDesc = document.getElementById('infoDesc');
+            if (infoTitle && infoMeta && infoDesc) {
+              infoTitle.textContent = info.title;
+              infoMeta.textContent = `${info.year} â€” ${info.author} â€” ${info.material}`;
+              infoDesc.textContent = info.desc;
+            }
+
+            // Escritorio
+            const infoTitleDesktop = document.getElementById('infoTitleDesktop');
+            const infoMetaDesktop = document.querySelector('#infoPanel .info-meta');
+            const infoDescDesktop = document.querySelector('#infoPanel .info-desc');
+            const infoDetails = document.querySelector('#infoPanel .info-details');
+
+            if (infoTitleDesktop) infoTitleDesktop.textContent = info.title;
+            if (infoMetaDesktop) infoMetaDesktop.textContent = `${info.year} â€” ${info.author} â€” ${info.material}`;
+            if (infoDescDesktop) infoDescDesktop.textContent = info.desc;
+            if (infoDetails) {
+              infoDetails.innerHTML = `
+          <li><strong>${lang === 'en' ? 'Typology' : 'TipologÃ­a'}:</strong> ${info.typology || 'â€”'}</li>
+          <li><strong>${lang === 'en' ? 'Material' : 'Material'}:</strong> ${info.material || 'â€”'}</li>
+          <li><strong>${lang === 'en' ? 'Date' : 'Fecha'}:</strong> ${info.year || 'â€”'}</li>
+          <li><strong>${lang === 'en' ? 'Author' : 'Autor'}:</strong> ${info.author || 'â€”'}</li>
+        `;
+            }
+
+            console.log(`[Museo] Idioma: ${lang.toUpperCase()} â€” Datos cargados de ${infoPath}`);
+          })
+          .catch(err => console.error('[Museo] Error cargando info.json:', err));
+      }
+
+      // Cargar idioma inicial al abrir la pÃ¡gina
+      document.addEventListener('DOMContentLoaded', () => {
+        loadInfoForSlug(slug, currentLang);
+      });
+
+
+      // === ðŸŽ§ SINCRONIZAR CARTELA Y AUDIO (VERSIÃ“N ESCRITORIO) ===
+
+      fetch('/assets/info.json')
+        .then(res => res.json())
+        .then(infoData => {
+          const info = infoData[slug];
+          if (!info) {
+            console.warn(`[Museo] No se encontrÃ³ info para "${slug}"`);
+            return;
+          }
+
+          // ðŸŸ© Actualizar cartela mÃ³vil (ya existente)
+          const infoTitle = document.getElementById('infoTitle');
+          const infoMeta = document.getElementById('infoMeta');
+          const infoDesc = document.getElementById('infoDesc');
+          if (infoTitle && infoMeta && infoDesc) {
+            infoTitle.textContent = info.title;
+            infoMeta.textContent = `${info.year} â€” ${info.author} â€” ${info.material}`;
+            infoDesc.textContent = info.desc;
+          }
+
+          // ðŸŸ© Actualizar cartela escritorio
+          const infoTitleDesktop = document.getElementById('infoTitleDesktop');
+          const infoMetaDesktop = document.querySelector('#infoPanel .info-meta');
+          const infoDescDesktop = document.querySelector('#infoPanel .info-desc');
+          const infoDetails = document.querySelector('#infoPanel .info-details');
+
+          if (infoTitleDesktop) infoTitleDesktop.textContent = info.title;
+          if (infoMetaDesktop) infoMetaDesktop.textContent = `${info.year} â€” ${info.author} â€” ${info.material}`;
+          if (infoDescDesktop) infoDescDesktop.textContent = info.desc;
+
+          // ðŸŸ¨ Actualizar lista de detalles
+          if (infoDetails) {
+            infoDetails.innerHTML = `
+        <li><strong>TipologÃ­a:</strong> ${info.typology || 'â€”'}</li>
+        <li><strong>Material:</strong> ${info.material || 'â€”'}</li>
+        <li><strong>Fecha:</strong> ${info.year || 'â€”'}</li>
+        <li><strong>Autor:</strong> ${info.author || 'â€”'}</li>
+      `;
+          }
+
+        })
+        .catch(err => console.error('[Museo] Error cargando info.json:', err));
+
+
+      // Estado persistente de la cartela por pieza
+      const sheetKeyFor = (s) => `sheet:${s}`;
+
+      // ---------------- Elementos del DOM ----------------
+      const fabRow = document.getElementById('fabRow');
+      const mv = document.getElementById('mv');
+      const splat = document.getElementById('splat');
+      const skel = document.getElementById('skel');
+      const msg = document.getElementById('msg');
+      const arBtn = document.getElementById('arBtn');
+      const topBar = document.getElementById('topBar');
+      const pieceTitle = document.getElementById('pieceTitle');
+      const infoBtn = document.getElementById('infoBtn');
+      const sheet = document.getElementById('infoSheet');
+      const sheetClose = document.getElementById('infoClose');
+      const infoTitle = document.getElementById('infoTitle');
+      const infoMeta = document.getElementById('infoMeta');
+      const infoDesc = document.getElementById('infoDesc');
+      const audioBtn = document.getElementById('audioBtn');
+
+      // === Desktop mode toggle ===
+      const mqDesk = window.matchMedia('(min-width: 1025px)');
+      function applyDesktopClass() {
+        document.body.classList.toggle('is-desktop', mqDesk.matches);
+        // En desktop: cartela siempre visible y sin botÃ³n cerrar
+        if (mqDesk.matches) {
+          // mostrar cartela si hay slug
+          try { sheet.classList.remove('hidden'); sheet.setAttribute('aria-hidden', 'false'); } catch { }
+        }
+      }
+      mqDesk.addEventListener?.('change', applyDesktopClass);
+      applyDesktopClass();
+
+      // === Cheatsheet: H para mostrar/ocultar (solo desktop) ===
+      const kbd = document.getElementById('kbdHelp');
+      window.addEventListener('keydown', (e) => {
+        if (!document.body.classList.contains('is-desktop')) return;
+        if (e.key.toLowerCase() === 'h') {
+          kbd.classList.toggle('hidden');
+          kbd.setAttribute('aria-hidden', kbd.classList.contains('hidden') ? 'true' : 'false');
+        }
+      });
+
+
+      if (infoBtn) {
+        infoBtn.setAttribute('aria-controls', 'infoSheet');
+        infoBtn.setAttribute('aria-expanded', 'false');
+      }
+
+      // Accesibilidad: anuncia el progreso del loader
+      const loaderProgressEl = document.getElementById('loaderProgress');
+      if (loaderProgressEl) {
+        loaderProgressEl.setAttribute('role', 'status');
+        loaderProgressEl.setAttribute('aria-live', 'polite');
+        loaderProgressEl.setAttribute('aria-atomic', 'true');
+      }
+
+      // Wake Lock para evitar que se apague la pantalla mientras se usa la app
+      let wakeLock = null;
+      async function requestWakeLock() {
+        try {
+          if ('wakeLock' in navigator && !wakeLock) {
+            wakeLock = await navigator.wakeLock.request('screen');
+            wakeLock.addEventListener('release', () => {
+              wakeLock = null;
+            });
+          }
+        } catch (e) {
+          // Algunos mÃ³viles lo bloquean; sin drama
+          console.debug('WakeLock no disponible:', e?.message || e);
+        }
+      }
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          requestWakeLock();
+        } else if (wakeLock) {
+          try {
+            wakeLock.release();
+          } catch { }
+          wakeLock = null;
+        }
+      });
+      // Primer intento en cuanto cargue
+      requestWakeLock();
+
+      // ---------------- Rutas y helpers ----------------
+      const glbUrl = (name) => `/models/${name}/${name}.glb`;
+      const usdzUrl = (name) => `/models/${name}/${name}.usdz`;
+      const splatUrl = (name) => `/splat/${name}/index.html`;
+
+      // === Firma efÃ­mera de URLs (token 60s) ===
+      const signedCache = new Map();
+
+      async function signPath(path) {
+        // Devuelve URL absoluta firmada o lanza error
+        const r = await fetch(`/api/sign?f=${encodeURIComponent(path)}`, {
+          cache: 'no-store',
+          credentials: 'omit'
+        });
+        if (!r.ok) throw new Error('sign failed');
+        const { url } = await r.json();
+        return url;
+      }
+
+      async function signedOrPlain(path) {
+        try {
+          if (signedCache.has(path)) return signedCache.get(path);
+          const url = await signPath(path);
+          signedCache.set(path, url);
+          return url;
+        } catch {
+          // Fallback si algo falla (no bloquea la UX)
+          return path;
+        }
+      }
+
+
+      async function exists(url) {
+        try {
+          const r = await fetch(url, {
+            method: 'HEAD',
+            cache: 'force-cache',
+            priority: 'low',
+            keepalive: true
+          });
+          return r.ok;
+        } catch {
+          return false;
+        }
+      }
+
+      // Helpers de plataforma
+      const isIOS =
+        /iPad|iPhone|iPod/i.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      const isAndroid = /Android/.test(navigator.userAgent);
+
+      // Helper para resetear listeners de un botÃ³n sin cambiar su HTML ni clases
+      function resetClick(el) {
+        const clone = el.cloneNode(true);
+        el.replaceWith(clone);
+        return clone; // el nuevo nodo sin listeners
+      }
+
+      // Helpers de visibilidad
+      function show(el) {
+        if (el) el.classList.remove('hidden');
+      }
+      function hide(el) {
+        if (el) el.classList.add('hidden');
+      }
+
+      // ðŸŸ¢ Haptics robusto + fallback visual
+      function supportsVibrate() {
+        return typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function';
+      }
+      function addHapticFeedback(selector, pattern = [18]) {
+        const btn = document.querySelector(selector);
+        if (!btn) return;
+
+        // Fallback visual (escala rÃ¡pida) para iOS/desktop
+        const pulse = () => {
+          btn.classList.add('tap-pulse');
+          setTimeout(() => btn.classList.remove('tap-pulse'), 120);
+        };
+
+        const onDown = () => {
+          let didVibrate = false;
+          try {
+            if (supportsVibrate()) {
+              // En algunos Android un solo valor pequeÃ±o se ignora: patrÃ³n corto ayuda
+              didVibrate = navigator.vibrate(pattern);
+            }
+          } catch { }
+          if (!didVibrate) pulse();
+        };
+
+        // feedback inmediato
+        btn.addEventListener('pointerdown', onDown);
+      }
+      addHapticFeedback('#infoBtn', [14]);
+      addHapticFeedback('#infoClose', [14]);
+      addHapticFeedback('#arBtn', [20]);
+      addHapticFeedback('#audioBtn', [12, 8]);
+      addHapticFeedback('#homeBtn', [12]);
+      addHapticFeedback('#homeBtn', [12]);
+
+
+      console.debug('[haptics] vibrate supported?', supportsVibrate());
+
+      // Toast reutilizable (mensaje flotante)
+      function showToast(message = 'Pulsa de nuevo para habilitar el audio', ms = 1800) {
+        let t = document.querySelector('.toast');
+        if (!t) {
+          t = document.createElement('div');
+          t.className = 'toast';
+          document.body.appendChild(t);
+        }
+        t.textContent = message;
+        t.classList.add('show');
+        window.clearTimeout(showToast._timer);
+        showToast._timer = window.setTimeout(() => t.classList.remove('show'), ms);
+      }
+
+      // Mensaje de error con CTA de reintento
+      function showErrorAndRetry(kind, name, retryFn) {
+        const cta = document.createElement('div');
+        cta.style.cssText = 'margin-top:12px; display:flex; gap:8px; justify-content:center;';
+        const btnRetry = document.createElement('button');
+        btnRetry.textContent = 'Reintentar';
+        btnRetry.className = 'info-btn';
+        btnRetry.style.minWidth = 'auto';
+        btnRetry.onclick = () => {
+          const msg = document.getElementById('msg');
+          if (msg) msg.classList.add('hidden');
+          retryFn?.();
+        };
+
+        const msg = document.getElementById('msg');
+        if (msg) {
+          msg.innerHTML = `
+              <div>
+                <b>No se pudo cargar la pieza</b><br/><br/>
+                Tipo: <code>${kind}</code> Â· Id: <code>${name}</code><br/>
+                Puede ser tu conexiÃ³n o un archivo temporalmente no disponible.
+              </div>`;
+          msg.appendChild(cta);
+          cta.appendChild(btnRetry);
+          msg.classList.remove('hidden');
+        }
+
+        showToast('Error de carga. Pulsa â€œReintentarâ€.', 2200);
+      }
+
+      // Habilita/Deshabilita el botÃ³n AR visual y funcionalmente
+      function setArEnabled(enabled) {
+        const btn = document.getElementById('arBtn');
+        if (!btn) return;
+        if (enabled) {
+          btn.removeAttribute('disabled');
+          btn.classList.remove('is-disabled');
+        } else {
+          btn.setAttribute('disabled', 'true');
+          btn.classList.add('is-disabled');
+        }
+      }
+
+      // --- Standalone detector (A2HS) ---
+      function isStandalone() {
+        const iosStandalone = ('standalone' in navigator) && navigator.standalone;
+        const pwaStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+        return iosStandalone || pwaStandalone;
+      }
+
+      // --- Watchdog de progreso de <model-viewer> ---
+      function startProgressWatchdog(mvEl, { timeoutMs = 8000, onStall } = {}) {
+        let progressed = false;
+        const onProg = (e) => {
+          const p = e?.detail?.totalProgress ?? 0;
+          if (p > 0) progressed = true;
+        };
+        mvEl.addEventListener('progress', onProg, { passive: true });
+        const timer = setTimeout(() => {
+          mvEl.removeEventListener('progress', onProg);
+          if (!progressed) onStall?.();
+        }, timeoutMs);
+        return () => { clearTimeout(timer); mvEl.removeEventListener('progress', onProg); };
+      }
+
+
+      // ---------------- Audio por figura (botÃ³n siempre visible + cleanup) ----------------
+      let audio = null;
+      let audioCleanup = () => { };
+      async function setupAudioFor(id) {
+        const audioPath = `/assets/audio/${id}.mp3`;
+        const audioBtn = document.getElementById('audioBtn');
+        const audioGuideBtn = document.getElementById('audioGuideBtn');
+
+        // Detener y limpiar audios anteriores
+        if (audio) {
+          try { audio.pause(); } catch { }
+          audio = null;
+        }
+
+        try { audioCleanup(); } catch { }
+
+        // Crear audio nuevo
+        audio = new Audio(audioPath);
+        audio.loop = true;
+        audio.preload = 'auto';
+
+        // FunciÃ³n para alternar play/pause y actualizar botones varios
+        const toggleAudio = async (btn) => {
+          if (!audio) return;
+          if (audio.paused) {
+            try {
+              await audio.play();
+              btn.classList.add('is-playing');
+              if (btn === audioGuideBtn) {
+                btn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="6" y="5" width="4" height="14" rx="1.2"></rect>
+              <rect x="14" y="5" width="4" height="14" rx="1.2"></rect>
+            </svg>
+            Pausar audioguÃ­a
+          `;
+              }
+            } catch (err) {
+              console.warn('Audio bloqueado o no disponible:', err);
+            }
+          } else {
+            audio.pause();
+            btn.classList.remove('is-playing');
+            if (btn === audioGuideBtn) {
+              btn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Escuchar audioguÃ­a
+        `;
+            }
+          }
+        };
+
+        // Listeners para ambos botones
+        if (audioBtn) {
+          audioBtn.classList.remove('hidden');
+          audioBtn.onclick = () => toggleAudio(audioBtn);
+        }
+        if (audioGuideBtn) {
+          audioGuideBtn.onclick = () => toggleAudio(audioGuideBtn);
+        }
+
+        // Limpieza
+        audioCleanup = () => {
+          try { audio.pause(); } catch { }
+          audio = null;
+        };
+      }
+
+      // ---------------- AR helpers ----------------
+      // ========================================
+      // VARIABLES DE COOLDOWN AR
+      // ========================================
+      const AR_COOLDOWN_MS = 7000; // 7 segundos de cooldown
+      let lastARClickTime = 0; // Timestamp del Ãºltimo click en AR
+
+      function openARFor(name) {
+        const usdz = usdzUrl(name);
+        const glb = glbUrl(name);
+        const titleEl = document.getElementById('infoTitle');
+        const arTitle = encodeURIComponent((titleEl?.textContent || name).trim());
+
+        if (isIOS) {
+          window.location.href = usdz;
+          return;
+        }
+        if (isAndroid) {
+          const file = new URL(glb, location.origin).toString();
+          const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(
+            file
+          )}&mode=ar_preferred&title=${arTitle}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+          window.location.href = intent.replace(";end;", ";S.browser_fallback_url=" + encodeURIComponent(file) + ";end;");
+        }
+      }
+
+      function openQuickLookSync(slug) {
+        try {
+          const link = document.getElementById('iosARLink');
+          if (!link) return false;
+          const ts = Date.now(); // cache-buster (cada click es "nuevo")
+          link.setAttribute('href', preSigned?.usdz || usdzUrl(slug));
+          link.click(); // sÃ­ncrono, en la misma pila del gesto
+          return true;
+        } catch {
+          return false;
+        }
+      }
+
+      // ========================================
+      // MEJORAS DE FEEDBACK AR - INSTRUCCIONES
+      // ========================================
+
+      /*
+      INSTRUCCIONES PARA IMPLEMENTAR:
+      
+      1. Busca en index.html las lÃ­neas 782-788 que contienen:
+         
+            // Overlay "Abriendo ARâ€¦."
+            function showARLoading() {
+              const el = document.getElementById('arLoading');
+              if (!el) return;
+              el.classList.remove('hidden');
+              requestAnimationFrame(() => el.classList.add('visible'));
+            }
+      
+      2. ReemplÃ¡zalas con el siguiente cÃ³digo:
+      */
+
+      // ========================================
+      // CÃ“DIGO NUEVO PARA showARLoading
+      // ========================================
+
+      // Overlay "Abriendo ARâ€¦." con feedback instantÃ¡neo
+      let arLoadingTimeout = null;
+
+      function showARLoading() {
+        console.log('ðŸ”¥ showARLoading() LLAMADO');
+
+        const el = document.getElementById('arLoading');
+        const btn = document.getElementById('arBtn');
+        const textEl = document.getElementById('arLoadingText');
+
+        if (!el) {
+          console.error('âŒ NO SE ENCONTRÃ“ #arLoading');
+          return;
+        }
+
+        console.log('âœ… Mostrando overlay AR');
+
+        // ðŸ”¥ FEEDBACK INSTANTÃNEO: Cambiar botÃ³n a estado loading
+        if (btn) {
+          btn.classList.add('is-loading');
+          btn.setAttribute('disabled', 'true');
+          const arText = btn.querySelector('.ar-text');
+          if (arText) arText.textContent = 'Preparandoâ€¦';
+          try {
+            if (navigator.vibrate) navigator.vibrate(20);
+          } catch { }
+        }
+
+        // Mensaje especÃ­fico por plataforma
+        if (textEl) {
+          if (isIOS) {
+            textEl.textContent = 'Cargando Realidad Aumentada...';
+          } else if (isAndroid) {
+            textEl.textContent = 'Cargando Realidad Aumentada...';
+          } else {
+            textEl.textContent = 'Cargando Realidad Aumentada...';
+          }
+        }
+
+        // ðŸš¨ FORZAR OVERLAY A APARECER Y MANTENERSE
+        el.classList.remove('hidden');
+        el.style.display = 'flex';
+        el.style.position = 'fixed';
+        el.style.inset = '0';
+        el.style.zIndex = '99999';
+        el.style.background = 'rgba(10, 12, 16, 0.95)';
+        el.style.visibility = 'visible';
+        el.style.opacity = '1';
+        el.classList.add('visible');
+
+        console.log('âœ… Overlay visible con opacity 1');
+
+        // Timeout de seguridad: 60s para conexiones MUY lentas
+        clearTimeout(arLoadingTimeout);
+        arLoadingTimeout = setTimeout(() => {
+          console.warn('â±ï¸ TIMEOUT: 60s - ocultando overlay por timeout');
+          hideARLoading();
+        }, 60000); // 60 segundos
+      }
+
+      // ========================================
+      // FIN DEL CÃ“DIGO
+      // ========================================
+
+      /*
+      NOTA: La funciÃ³n hideARLoading() ya estÃ¡ correctamente actualizada en las lÃ­neas 789-809.
+      No necesitas modificarla.
+      
+      RESULTADO ESPERADO:
+      - Al tocar el botÃ³n AR, cambiarÃ¡ INMEDIATAMENTE a color naranja
+      - MostrarÃ¡ un spinner girando
+      - El texto cambiarÃ¡ a "Preparandoâ€¦"
+      - VibrarÃ¡ el dispositivo (en Android)
+      - El overlay aparecerÃ¡ con mensaje especÃ­fico por plataforma
+      - Si tarda mÃ¡s de 10s, se ocultarÃ¡ automÃ¡ticamente
+      */
+
+
+
+      function hideARLoading() {
+        const el = document.getElementById('arLoading');
+        const btn = document.getElementById('arBtn');
+
+        if (!el) return;
+
+        // Limpiar timeout
+        clearTimeout(arLoadingTimeout);
+
+        // Restaurar botÃ³n a estado normal
+        if (btn) {
+          btn.classList.remove('is-loading');
+          btn.removeAttribute('disabled');
+
+          const arText = btn.querySelector('.ar-text');
+          if (arText) arText.textContent = 'Ver en AR';
+        }
+
+        el.classList.remove('visible');
+        setTimeout(() => el.classList.add('hidden'), 250);
+      }
+      // ========================================
+      // SOLUCIÃ“N FINAL PARA EL OVERLAY AR
+      // ========================================
+
+      /**
+       * PROBLEMA IDENTIFICADO:
+       * El overlay SÃ aparece pero desaparece inmediatamente (flashazo)
+       * porque el evento 'visibilitychange' lo oculta cuando cambias a la app de AR.
+       * 
+       * SOLUCIÃ“N:
+       * Comentar/eliminar el listener de visibilitychange
+       */
+
+      // ========================================
+      // PASO 1: Busca las lÃ­neas 906-915 en index.html
+      // ========================================
+      // DeberÃ­as ver esto:
+
+      // Solo ocultar overlay cuando el usuario vuelve a la pÃ¡gina
+      // (esto permite que el overlay se mantenga mientras AR se abre)
+      document.addEventListener('visibilitychange', () => {
+        // Esperar un poco para asegurar que AR realmente se abriÃ³
+        if (!document.hidden) {
+          setTimeout(() => {
+            hideARLoading();
+          }, 500);
+        }
+      });
+
+      // ========================================
+      // PASO 2: REEMPLÃZALO con esto (comentado):
+      // ========================================
+
+      // âš ï¸ DESHABILITADO: No ocultar automÃ¡ticamente el overlay
+      // El overlay debe mantenerse visible hasta que AR cargue completamente
+      // Solo se ocultarÃ¡ por timeout (60s)
+      /*
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+          setTimeout(() => {
+            hideARLoading();
+          }, 500);
+        }
+      });
+      */
+
+      // ---------------- Info JSON ----------------
+      async function loadInfoDataOrFallback(current, lang = "es") {
+        try {
+          const file = lang === "en" ? "/assets/info_en.json" : "/assets/info.json";
+          const res = await fetch(file, { cache: "no-store" });
+          if (!res.ok) throw new Error("no info.json");
+          const json = await res.json();
+          console.log(`âœ… Datos cargados (${lang}):`, json);
+          return json || current;
+        } catch (e) {
+          console.warn("âš ï¸ Error cargando info.json:", e);
+          return current;
+        }
+      }
+
+      // ---------------- Cartela ----------------
+      function showHelp() {
+        skel.classList.add('hidden');
+        msg.classList.remove('hidden');
+        msg.innerHTML = `
+            <div>
+              <b>Falta parÃ¡metro en la URL.</b><br/><br/>
+              Usa ejemplos:<br/>
+              <code>?type=glb&model=cristo-yacente</code><br/>
+              <code>?type=splat&figure=calvo-anillo</code>
+            </div>`;
+      }
+
+      let infoData = {
+        'cristo-yacente': {
+          title: 'Cristo Yacente',
+          meta: 's. XVII Â· Autor/a desconocido/a',
+          desc: 'DescripciÃ³n pendiente.'
+        },
+        'virgen-romanica': {
+          title: 'Virgen RomÃ¡nica',
+          meta: 's. XII Â· Talla policromada',
+          desc: 'DescripciÃ³n pendiente.'
+        },
+        'san-jose-con-el-nino': {
+          title: 'San JosÃ© con el NiÃ±o',
+          meta: 's. XVIII',
+          desc: 'DescripciÃ³n pendiente.'
+        },
+        'jesus-en-la-cruz': {
+          title: 'Cristo en la Cruz',
+          meta: 's. XVII',
+          desc: 'DescripciÃ³n pendiente.'
+        }
+      };
+
+      // CÃ¡mara por figura
+      const cameraSettings = {
+        'cristo-yacente': {
+          orbit: '0deg 74deg 10.6m',
+          target: '0m 2m 0m',
+          minRadius: '2.5m',
+          maxRadius: '13.1m',
+          minFov: '22deg',
+          maxFov: '30deg'
+        },
+        'jesus-en-la-cruz': {
+          orbit: '0deg 60deg 3.5m',
+          target: '0m 1.8m 0m',
+          minRadius: '2m',
+          maxRadius: '5m',
+          minFov: '22deg',
+          maxFov: '45deg'
+        },
+        'san-jose-con-el-nino': {
+          orbit: '0deg 65deg 3m',
+          target: '0m 0.8m 0m',
+          minRadius: '1.5m',
+          maxRadius: '6m',
+          minFov: '22deg',
+          maxFov: '45deg'
+        },
+        'san-bernardo-con-la-virgen': {
+          orbit: '0deg 65deg 3m',
+          target: '0m 0.8m 0m',
+          minRadius: '1.5m',
+          maxRadius: '5m',
+          minFov: '22deg',
+          maxFov: '45deg'
+        },
+        'virgen-asuncion': {
+          orbit: '0deg 60deg 2.8m',
+          target: '0m 0.75m 0m',
+          minRadius: '1.5m',
+          maxRadius: '5m',
+          minFov: '20deg',
+          maxFov: '45deg'
+        },
+        'virgen-de-mena': {
+          orbit: '0deg 60deg 3m',
+          target: '0m 0.8m 0m',
+          minRadius: '1.5m',
+          maxRadius: '6m',
+          minFov: '22deg',
+          maxFov: '45deg'
+        },
+        'virgen-romanica': {
+          orbit: '0deg 55deg 2.5m',
+          target: '0m 0.35m 0m',
+          minRadius: '1.2m',
+          maxRadius: '5m',
+          minFov: '20deg',
+          maxFov: '45deg'
+        },
+        'ecce-homo': {
+          orbit: '0deg 60deg 2.2m',
+          target: '0m 0.4m 0m',
+          minRadius: '1.0m',
+          maxRadius: '4m',
+          minFov: '20deg',
+          maxFov: '45deg'
+        },
+        'reliquia-dorada': {
+          orbit: '0deg 60deg 1.8m',
+          target: '0m 0.25m 0m',
+          minRadius: '0.8m',
+          maxRadius: '3m',
+          minFov: '20deg',
+          maxFov: '45deg'
+        },
+        'bargueno-relicario': {
+          orbit: '0deg 55deg 2.8m',
+          target: '0m 0.4m 0m',
+          minRadius: '1.2m',
+          maxRadius: '5m',
+          minFov: '20deg',
+          maxFov: '45deg'
+        },
+        'tapiz': {
+          orbit: '0deg 90deg 3m',
+          target: '0m 1.2m 0m',
+          minRadius: '2m',
+          maxRadius: '6m',
+          minFov: '25deg',
+          maxFov: '45deg'
+        },
+        'casulla-santa-ana': {
+          orbit: '0deg 85deg 2.5m',
+          target: '0m 1.0m 0m',
+          minRadius: '1.5m',
+          maxRadius: '5m',
+          minFov: '25deg',
+          maxFov: '45deg'
+        },
+        'novisimos': {
+          orbit: '0deg 60deg 2.8m',
+          target: '0m 0.6m 0m',
+          minRadius: '1.2m',
+          maxRadius: '5m',
+          minFov: '22deg',
+          maxFov: '45deg'
+        },
+        'cristo-atado-a-la-columna': {
+          orbit: '0deg 65deg 2.8m',
+          target: '0m 0.8m 0m',
+          minRadius: '1.2m',
+          maxRadius: '5m',
+          minFov: '22deg',
+          maxFov: '45deg'
+        }
+      };
+
+      window.cameraSettings = cameraSettings;
+
+      function buildMeta(d) {
+        if (!d) return '';
+        if (d.author || d.year || d.material) {
+          const parts = [];
+          if (d.year) parts.push(d.year);
+          if (d.author) parts.push(d.author);
+          if (d.material) parts.push(d.material);
+          return parts.filter(Boolean).join(' Â· ');
+        }
+        return d.meta || '';
+      }
+
+      function renderInfo(s) {
+        const d = infoData[s] || {};
+        const nice = (x) => (x || s || '').replace(/-/g, ' ').trim();
+
+        if (topBar && s) {
+          topBar.classList.remove('hidden');
+          pieceTitle.textContent = d.title || nice(s);
+        }
+        infoTitle.textContent = d.title || nice(s);
+        infoMeta.textContent = buildMeta(d);
+
+        const desc = d.desc || '';
+        const extras = [];
+        if (d.typology) extras.push(`<div><strong>TipologÃ­a:</strong> ${d.typology}</div>`);
+        if (d.material) extras.push(`<div><strong>Material:</strong> ${d.material}</div>`);
+        if (d.technique) extras.push(`<div><strong>TÃ©cnica:</strong> ${d.technique}</div>`);
+        if (d.dimensions) extras.push(`<div><strong>Dimensiones:</strong> ${d.dimensions}</div>`);
+        if (d.year) extras.push(`<div><strong>Fecha:</strong> ${d.year}</div>`);
+        if (d.author) extras.push(`<div><strong>Autor:</strong> ${d.author}</div>`);
+
+        const extrasHtml = extras.length ? `<div class="info-extra">${extras.join('')}</div>` : '';
+        infoDesc.innerHTML = [desc, extrasHtml].filter(Boolean).join('');
+
+        // Actualizar <title> del documento
+        try {
+          const txt = (infoTitle?.textContent || s || 'Museo Virtual').trim();
+          if (txt) document.title = `${txt} Â· Museo Virtual San JoaquÃ­n y Santa Ana`;
+        } catch { }
+      }
+
+      // Panel/cartela UI
+      function openSheet() {
+        renderInfo(slug);
+        sheet.classList.remove('hidden');
+        sheet.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('sheet-open');
+
+        if (infoBtn) {
+          infoBtn.setAttribute('aria-expanded', 'true');
+          infoBtn.setAttribute('aria-label', 'Ocultar informaciÃ³n');
+        }
+
+        if (slug) {
+          try {
+            localStorage.setItem(sheetKeyFor(slug), 'open');
+          } catch { }
+        }
+      }
+
+      function closeSheet() {
+        sheet.classList.add('hidden');
+        sheet.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('sheet-open');
+
+        if (infoBtn) {
+          infoBtn.setAttribute('aria-expanded', 'false');
+          infoBtn.setAttribute('aria-label', 'Mostrar informaciÃ³n');
+        }
+
+        if (slug) {
+          try {
+            localStorage.setItem(sheetKeyFor(slug), 'closed');
+          } catch { }
+        }
+      }
+
+      function toggleSheet() {
+        const hidden = sheet.classList.contains('hidden');
+        hidden ? openSheet() : closeSheet();
+      }
+
+      if (infoBtn) infoBtn.addEventListener('click', toggleSheet);
+      sheetClose.addEventListener('click', closeSheet);
+      sheet.addEventListener('click', (e) => {
+        if (e.target === sheet) closeSheet();
+      });
+
+      window.addEventListener('keydown', (e) => {
+        // Ignorar si escribes dentro de inputs/textarea/contenteditable
+        const t = e.target;
+        const typing =
+          t &&
+          (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
+        if (typing) return;
+
+        if (e.key === 'Escape') {
+          closeSheet();
+        } else if (e.key.toLowerCase() === 'i') {
+          toggleSheet();
+        }
+      });
+
+      /* === Desktop mode: barra lateral fija + sin AR === */
+      const DESKTOP_MQ = window.matchMedia('(min-width: 1024px)');
+      function applyDesktopMode() {
+        const isDesktop = DESKTOP_MQ.matches && !/Android|iPhone|iPad/i.test(navigator.userAgent);
+        document.body.classList.toggle('is-desktop', isDesktop);
+
+        // En desktop: cartela siempre visible como lateral
+        const sheet = document.getElementById('infoSheet');
+        const topBar = document.getElementById('topBar');
+        if (isDesktop) {
+          // Asegura topbar y cartela visibles
+          topBar?.classList.remove('hidden');
+          sheet?.classList.remove('hidden');
+          sheet?.setAttribute('aria-hidden', 'false');
+          document.body.classList.add('sheet-open');
+
+          // Oculta AR (aunque el CSS ya lo esconde)
+          const arBtn = document.getElementById('arBtn');
+          if (arBtn) {
+            arBtn.setAttribute('disabled', 'true');
+            arBtn.classList.add('is-disabled', 'hidden');
+          }
+        } else {
+          // Vuelve a comportamiento mÃ³vil (cartela controlada por el botÃ³n)
+          document.body.classList.remove('sheet-open');
+          // no forzamos hidden aquÃ­: de eso se encarga tu lÃ³gica actual
+        }
+      }
+      DESKTOP_MQ.addEventListener?.('change', applyDesktopMode);
+      applyDesktopMode();
+
+      // ðŸ‘‰ Forzar reglas de escritorio desde JS (defensa extra por si algÃºn handler intenta cerrar)
+      const IS_DESKTOP = window.matchMedia('(min-width: 1024px)').matches;
+      if (IS_DESKTOP) {
+        try {
+          // Forzar cartela abierta
+          const sheet = document.getElementById('infoSheet');
+          const infoBtn = document.getElementById('infoBtn');
+          const sheetClose = document.getElementById('infoClose');
+
+          if (sheet) {
+            sheet.classList.remove('hidden');
+            sheet.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('sheet-open');
+          }
+          // Ocultar controles de abrir/cerrar
+          if (infoBtn) infoBtn.style.display = 'none';
+          if (sheetClose) sheetClose.style.display = 'none';
+
+          // Neutralizar posibles cierres por teclado (Esc) u otros
+          window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+              e.stopImmediatePropagation();
+              e.preventDefault();
+            }
+          }, true);
+        } catch { }
+      }
+      // ---------------- InicializaciÃ³n ----------------
+      (async function init() {
+        try {
+          if (type === 'glb' && model) {
+            document.body.classList.remove('mode-splat');
+
+            // Fuente GLB
+            mv.src = glbUrl(model);
+            // Prefirmamos GLB y USDZ antes de mostrar AR (evita async en el click iOS)
+            const preSigned = {
+              glb: await signedOrPlain(glbUrl(model)),
+              usdz: await signedOrPlain(usdzUrl(model))
+            };
+
+            mv.src = preSigned.glb;          // <model-viewer> carga con token
+            mv.iosSrc = preSigned.usdz;      // Quick Look listo con token
+
+            // Mantener poster visible hasta que cargue
+            const posterEl = document.querySelector('.glb-poster');
+            if (posterEl) posterEl.classList.remove('loaded');
+
+            mv.addEventListener('load', () => {
+              setTimeout(() => posterEl?.classList.add('loaded'), 300);
+            });
+
+
+            const stopWatchdog = startProgressWatchdog(mv, {
+              timeoutMs: isStandalone() ? 7000 : 10000,
+              onStall: () => {
+                // Sin progreso real: muestra CTA y reintenta con cache-buster
+                showErrorAndRetry('glb', model, () => {
+                  const bust = `?v=${Date.now()}`;
+                  mv.src = glbUrl(model) + bust;
+
+                  // Segundo watchdog por si sigue atascado
+                  startProgressWatchdog(mv, {
+                    timeoutMs: 9000,
+                    onStall: () => showToast('TodavÃ­a no hay datos. Reintenta en unos segundos.', 2200)
+                  });
+
+                  // Re-mostrar pÃ³ster y skeleton durante el reintento
+                  const gp = document.getElementById('glbPoster');
+                  if (gp) { gp.classList.remove('fade-out'); gp.classList.add('visible'); }
+                  const sk = document.getElementById('skel');
+                  if (sk) { sk.classList.remove('hidden'); sk.style.opacity = '1'; }
+                });
+              }
+            });
+            // Al cargar, paramos el watchdog
+            mv.addEventListener('load', () => { try { stopWatchdog?.(); } catch { } }, { once: true });
+
+
+            // Deshabilita AR hasta que el modelo estÃ© listo
+            setArEnabled(false);
+
+            // FunciÃ³n de reintento (con cache-buster) y rehacer pÃ³ster overlay si existe
+            const retryGlb = () => {
+              const sk = document.getElementById('skel');
+              if (sk) {
+                sk.classList.remove('hidden');
+                sk.style.opacity = '1';
+              }
+              const bust = `?v=${Date.now()}`;
+              mv.src = glbUrl(model) + bust;
+
+              const gp = document.getElementById('glbPoster');
+              if (gp) {
+                gp.classList.remove('fade-out');
+                gp.classList.add('visible');
+              }
+            };
+
+            // Si model-viewer reporta error: mostramos CTA de reintento
+            mv.addEventListener('error', () => {
+              const sk = document.getElementById('skel');
+              if (sk) {
+                sk.style.opacity = '0';
+                setTimeout(() => sk.classList.add('hidden'), 400);
+              }
+              showErrorAndRetry('glb', model, retryGlb);
+            });
+
+            // Auto-reintentar una vez al recuperar conexiÃ³n si el estado era de error
+            window.addEventListener('online', () => {
+              const msg = document.getElementById('msg');
+              if (msg && !msg.classList.contains('hidden')) retryGlb();
+            });
+
+            // â–¼â–¼ AÃ‘ADE ESTA LÃNEA AQUÃ â–¼â–¼
+            mv.classList.remove('hidden');
+
+            // Failsafe: oculta el skeleton si algÃºn navegador no dispara 'load'
+            setTimeout(() => {
+              const sk = document.getElementById('skel');
+              if (sk && !sk.classList.contains('hidden')) {
+                sk.style.opacity = '0';
+                setTimeout(() => sk.classList.add('hidden'), 600);
+              }
+            }, 12000);
+
+            // === Indicador de progreso del modelo ===
+            const progressEl = document.getElementById('loaderProgress');
+            if (mv) {
+              mv.addEventListener('progress', (e) => {
+                const ratio = Math.round(e.detail.totalProgress * 100);
+                if (progressEl) progressEl.textContent = `${ratio}%`;
+              });
+
+              // â–¶ PÃ“STER GLB (overlay separado para poder hacer fade)
+              let glbPoster = document.getElementById('glbPoster');
+              if (!glbPoster) {
+                glbPoster = document.createElement('div');
+                glbPoster.id = 'glbPoster';
+                glbPoster.className = 'glb-poster';
+
+                // Inyectar dentro del marco izquierdo (viewerContainer)
+                const viewerContainer = document.getElementById('viewerContainer');
+                if (viewerContainer) viewerContainer.prepend(glbPoster);
+                else document.body.appendChild(glbPoster); // fallback de seguridad
+              }
+
+              // âœ… Detectar si es escritorio o mÃ³vil
+              const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+              const folder = isDesktop ? 'desktop' : 'mobile';
+
+              // âœ… Crear URL adaptativa (con cache-buster)
+              const glbPosterUrl = (await exists(`/assets/posters/${folder}/${model}.webp`))
+                ? `/assets/posters/${folder}/${model}.webp?v=${Date.now()}`
+                : '/models/placeholder.webp';
+
+              // âœ… Aplicar el poster como fondo del overlay
+              glbPoster.style.backgroundImage = `url('${glbPosterUrl}')`;
+              glbPoster.classList.add('visible');
+
+              const oldPoster = document.querySelector('.poster-layer');
+              if (oldPoster) oldPoster.remove();
+
+              console.log('âœ… Poster adaptativo cargado:', glbPosterUrl);
+
+              // â–¶ Listener del load del model-viewer
+              mv.addEventListener('load', () => {
+                // Espera un frame de render para asegurar que el modelo ya estÃ¡ visible
+                requestAnimationFrame(() => {
+                  if (glbPoster) {
+                    glbPoster.classList.add('fade-out');
+                    setTimeout(() => glbPoster.remove(), 700);
+                  }
+                });
+              });
+
+              mv.addEventListener('load', () => {
+                // ... tu cÃ³digo para ocultar skeleton ...
+
+                // ya haces visible el modelo:
+                requestAnimationFrame(() => mv.classList.add('is-visible'));
+
+                // â–¶ Crossfade: poster GLB se desvanece tras un frame
+                if (glbPoster) {
+                  // da un pequeÃ±o margen para que el modelo ya estÃ© pintado
+                  setTimeout(() => {
+                    glbPoster.classList.add('fade-out');
+                    // limpia el DOM tras la animaciÃ³n
+                    setTimeout(() => {
+                      glbPoster.remove();
+                    }, 500); // â‰ˆ a tu transition .45s
+                  }, 30);
+                }
+                // Modelo listo â†’ habilita AR
+                setArEnabled(true);
+              });
+            }
+
+            // Poster por pieza con fallback
+            try {
+              const posterSrc = `/assets/posters/${model}.webp`;
+              if (await exists(posterSrc)) {
+                mv.poster = posterSrc;
+                mv.setAttribute('poster', posterSrc);
+              } else {
+                mv.poster = '/models/placeholder.webp';
+                mv.setAttribute('poster', '/models/placeholder.webp');
+              }
+            } catch {
+              mv.poster = '/models/placeholder.webp';
+              mv.setAttribute('poster', '/models/placeholder.webp');
+            }
+
+            // Config cÃ¡mara
+            const cam = cameraSettings[model];
+            if (cam) {
+              if (cam.orbit) mv.cameraOrbit = cam.orbit;
+              if (cam.target) mv.cameraTarget = cam.target;
+              if (cam.minRadius) mv.minCameraOrbit = `auto auto ${cam.minRadius}`;
+              if (cam.maxRadius) mv.maxCameraOrbit = `auto auto ${cam.maxRadius}`;
+              if (cam.minFov) mv.minFieldOfView = cam.minFov;
+              if (cam.maxFov) mv.maxFieldOfView = cam.maxFov;
+            }
+
+            // === ENTORNO: usar HDR solo como luz; SIN skybox visible ===
+            const HDR_PRIMARY = '/assets/hdr/studio_small_09_2k.hdr';
+            const HDR_FALLBACK = 'neutral'; // si falla, luz neutra
+
+            async function firstExisting(urls) {
+              for (const u of urls) {
+                try {
+                  const r = await fetch(u, { method: 'HEAD', cache: 'force-cache' });
+                  if (r.ok) return u;
+                } catch { }
+              }
+              return '';
+            }
+
+            // Aplica solo iluminaciÃ³n (environment-image). Elimina cualquier skybox.
+            async function applyEnvironmentOnly(mv, hdrUrl) {
+              const env = hdrUrl || 'neutral';
+              mv.setAttribute('environment-image', env);
+              mv.environmentImage = env;
+
+              // ðŸ”’ Sin skybox visible
+              mv.removeAttribute('skybox-image');
+              mv.skyboxImage = '';
+
+              // Ajustes de look (ajusta a tu gusto)
+              mv.exposure = '1.25';
+              mv.shadowIntensity = '0.8';
+              mv.shadowSoftness = '1.0';
+              // mv.environmentRotation = '10deg'; // opcional
+            }
+
+            // Elegimos un HDR vÃ¡lido (o neutro)
+            const hdrToUse = (await firstExisting([HDR_PRIMARY])) || HDR_FALLBACK;
+
+            // Ilumina sin fondo HDR
+            await applyEnvironmentOnly(mv, hdrToUse);
+
+            // Algunos navegadores â€œreseteanâ€ atributos tras ciertos eventos: lo reforzamos
+            mv.addEventListener('load', () => applyEnvironmentOnly(mv, hdrToUse), { once: true });
+
+
+
+            // IluminaciÃ³n por pieza (opcional)
+            const lightSettings = {
+              'cristo-yacente': {
+                exposure: 1.6,
+                shadowIntensity: 0.9,
+                shadowSoftness: 0.9,
+                environmentRotation: '15deg'
+              },
+              'virgen-romanica': { exposure: 1.3, environmentRotation: '0deg' }
+            };
+            const L = lightSettings[model];
+            if (L) {
+              if (L.exposure != null) mv.exposure = String(L.exposure);
+              if (L.shadowIntensity != null) mv.shadowIntensity = String(L.shadowIntensity);
+              if (L.shadowSoftness != null) mv.shadowSoftness = String(L.shadowSoftness);
+              if (L.environmentRotation) mv.environmentRotation = L.environmentRotation;
+            }
+
+            // iOS Quick Look
+            mv.iosSrc = usdzUrl(model);
+            mv.classList.remove('hidden');
+
+            // Oculta botÃ³n AR nativo
+            if (!mv.querySelector('[slot="ar-button"]')) {
+              const blocker = document.createElement('button');
+              blocker.setAttribute('slot', 'ar-button');
+              blocker.setAttribute('aria-hidden', 'true');
+              blocker.style.display = 'none';
+              blocker.tabIndex = -1;
+              mv.appendChild(blocker);
+            }
+
+            // âœ… BotÃ³n AR unificado (optimizado y reseteado por carga)
+            if (arBtn) {
+              // Elimina handlers previos si la pÃ¡gina fue recargada desde memoria
+              arBtn.replaceWith(arBtn.cloneNode(true));
+              const newArBtn = document.getElementById('arBtn');
+
+              const fileSigned = preSigned?.glb || glbUrl(model);
+              const intent = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(
+                fileSigned
+              )}&mode=ar_preferred&title=${encodeURIComponent(model)}#Intent;scheme=https;package=com.google.android.googlequicksearchbox;action=android.intent.action.VIEW;end;`;
+
+
+              newArBtn.classList.remove('hidden');
+              newArBtn.addEventListener('click', async () => {
+                // âœ… VERIFICAR COOLDOWN: No permitir clicks mÃºltiples
+                const now = Date.now();
+                const timeSinceLastClick = now - lastARClickTime;
+
+                if (timeSinceLastClick < AR_COOLDOWN_MS) {
+                  const remainingSeconds = Math.ceil((AR_COOLDOWN_MS - timeSinceLastClick) / 1000);
+                  showToast(`Por favor espera ${remainingSeconds} segundos antes de volver a intentar`, 2000);
+
+                  // VibraciÃ³n de feedback negativo
+                  try {
+                    if (navigator.vibrate) navigator.vibrate([50, 100, 50]);
+                  } catch { }
+
+                  return; // Salir sin hacer nada
+                }
+
+                // Actualizar timestamp del Ãºltimo click
+                lastARClickTime = now;
+                if (window.startCooldownVisual) window.startCooldownVisual(newArBtn || arBtn);
+
+                // Mostrar overlay de carga inmediatamente
+                showARLoading();
+
+                try {
+                  if (isIOS) {
+                    const ok = openQuickLookSync(model);
+                    if (!ok) window.location.href = usdzUrl(model);
+                    return;
+                  }
+
+
+
+                  if (mv?.activateAR) await mv.activateAR();
+                  else openARFor(model);
+                } catch (err) {
+                  console.error('Error abriendo AR:', err);
+                  openARFor(model);
+                } finally {
+                  // hideARLoading();
+                }
+              });
+            }
+
+            if (slug) {
+              infoData = await loadInfoDataOrFallback(infoData);
+              renderInfo(slug);
+            }
+
+            // Auto-open si el usuario lo dejÃ³ abierto para este slug o si viene con ?info=1 o #info
+            const wantsInfo =
+              new URLSearchParams(location.search).get('info') === '1' ||
+              location.hash === '#info';
+            let lastState = 'closed';
+            try {
+              lastState = localStorage.getItem(sheetKeyFor(slug)) || 'closed';
+            } catch { }
+            if (wantsInfo || lastState === 'open') {
+              // Deja un frame para que el DOM pinte antes del open (suaviza la transiciÃ³n)
+              requestAnimationFrame(() => openSheet());
+            }
+
+            await loadInfoData();
+            setupAudioFor(model);
+            skel.classList.add('hidden');
+            return;
+          }
+
+          if (type === 'splat' && figure) {
+            document.body.classList.add('mode-splat');
+
+            // Deshabilita AR mientras el SPLAT no estÃ© listo
+            setArEnabled(false);
+
+
+
+            // Estado de carga + watchdog de seguridad
+            let splatLoaded = false;
+            const WATCHDOG_MS = 12000;
+
+            const retrySplat = () => {
+              // Reaparece el skeleton suavemente
+              const sk = document.getElementById('skel');
+              if (sk) {
+                sk.classList.remove('hidden');
+                sk.style.opacity = '1';
+              }
+
+              // Rehacer poster overlay si estaba
+              const sp = document.getElementById('splatPoster');
+              if (sp) {
+                sp.classList.remove('hidden', 'fade-out');
+                requestAnimationFrame(() => sp.classList.add('visible'));
+              }
+
+              // Cache-buster al iframe
+              const bust = `?v=${Date.now()}`;
+              splat.src = splatUrl(figure) + bust;
+
+              // Reinicia estado
+              splatLoaded = false;
+              startWatchdog();
+            };
+
+            let watchdogTimer = null;
+            function startWatchdog() {
+              clearTimeout(watchdogTimer);
+              watchdogTimer = setTimeout(() => {
+                if (!splatLoaded) {
+                  showErrorAndRetry('splat', figure, retrySplat);
+                  // Al fallar, mantiene AR desactivado
+                  setArEnabled(false);
+                }
+              }, WATCHDOG_MS);
+            }
+
+            // Si vuelve la conexiÃ³n y aÃºn no cargÃ³, reintenta
+            window.addEventListener('online', () => {
+              if (!splatLoaded) retrySplat();
+            });
+
+            // --- Poster previo al SPLAT (aparece ya, antes del src) ---
+            const splatPoster = document.getElementById('splatPoster');
+            if (splatPoster) {
+              // Fallback inmediato
+              splatPoster.style.backgroundImage = `url('/models/placeholder.webp')`;
+              splatPoster.classList.remove('hidden');
+              requestAnimationFrame(() => splatPoster.classList.add('visible'));
+              startWatchdog();
+
+              // Ocultar cuando el SPLAT carga
+              splat.addEventListener(
+                'load',
+                () => {
+                  splatLoaded = true;
+                  clearTimeout(watchdogTimer);
+
+                  splatPoster.classList.add('fade-out');
+                  setTimeout(() => splatPoster.classList.add('hidden'), 700);
+
+                  // SPLAT ya pintado â†’ habilita AR y muestra la escena
+                  setArEnabled(true);
+                  requestAnimationFrame(() => splat.classList.add('is-visible'));
+
+                  // Oculta skeleton por si seguÃ­a visible
+                  const sk = document.getElementById('skel');
+                  if (sk) {
+                    sk.style.opacity = '0';
+                    setTimeout(() => sk.classList.add('hidden'), 400);
+                  }
+                },
+                { once: true }
+              );
+            }
+
+            // Cargar SPLAT
+            splat.src = splatUrl(figure);
+            splat.classList.remove('is-visible');
+            splat.classList.remove('hidden');
+
+            // FAB AR
+            arBtn.classList.remove('hidden');
+            arBtn.addEventListener('click', async () => {
+              // âœ… VERIFICAR COOLDOWN
+              const now = Date.now();
+              const timeSinceLastClick = now - lastARClickTime;
+
+              if (timeSinceLastClick < AR_COOLDOWN_MS) {
+                const remainingSeconds = Math.ceil((AR_COOLDOWN_MS - timeSinceLastClick) / 1000);
+                showToast(`Por favor espera ${remainingSeconds} segundos antes de volver a intentar`, 2000);
+                try { if (navigator.vibrate) navigator.vibrate([50, 100, 50]); } catch { }
+                return;
+              }
+
+              lastARClickTime = now;
+              if (window.startCooldownVisual) window.startCooldownVisual(newArBtn || arBtn);
+              showARLoading();
+              if (isIOS) {
+                const ok = openQuickLookSync(figure);
+                if (!ok) window.location.href = usdzUrl(figure); // fallback duro
+                return;
+              }
+              openARFor(figure);
+            });
+
+            if (slug) {
+              infoData = await loadInfoDataOrFallback(infoData);
+              renderInfo(slug);
+            }
+
+            // Auto-open si el usuario lo dejÃ³ abierto para este slug o si viene con ?info=1 o #info
+            const wantsInfo =
+              new URLSearchParams(location.search).get('info') === '1' ||
+              location.hash === '#info';
+            let lastState = 'closed';
+            try {
+              lastState = localStorage.getItem(sheetKeyFor(slug)) || 'closed';
+            } catch { }
+            if (wantsInfo || lastState === 'open') {
+              // Deja un frame para que el DOM pinte antes del open (suaviza la transiciÃ³n)
+              requestAnimationFrame(() => openSheet());
+            }
+
+            await loadInfoData();
+            setupAudioFor(figure);
+            skel.classList.add('hidden');
+            return;
+          }
+
+          // Sin parÃ¡metros vÃ¡lidos:
+          showHelp();
+        } catch (err) {
+          console.error(err);
+          msg.classList.remove('hidden');
+          msg.innerHTML = `<b>Error:</b> ${String(err).replace(/</g, '&lt;')}`;
+          skel.classList.add('hidden');
+        }
+        // ...otras funciones aquÃ­, como setupAudioFor(), openARFor(), etc.
+
+        // ==== CARTELA DINÃMICA (versiÃ³n escritorio y mÃ³vil) ====
+        async function loadInfoData() {
+          try {
+            const slug = new URLSearchParams(window.location.search).get('model') ||
+              new URLSearchParams(window.location.search).get('figure');
+            if (!slug) return;
+
+            const response = await fetch('/assets/info.json');
+            const data = await response.json();
+
+            if (!data[slug]) {
+              console.warn(`No se encontrÃ³ informaciÃ³n para ${slug}`);
+              return;
+            }
+
+            const info = data[slug];
+            const infoPanel = document.getElementById('infoPanel');
+            if (!infoPanel) return;
+
+            // Inserta la informaciÃ³n en la cartela
+            infoPanel.innerHTML = `
+            <h2>${info.title}</h2>
+            <div class="info-meta">${info.author} Â· ${info.year}</div>
+            <div class="info-desc">${info.desc}</div>
+
+            <ul class="info-details">
+            ${info.material ? `<li><strong>Material:</strong> ${info.material}</li>` : ""}
+            ${(info.tipologia || info.typology) ? `<li><strong>TipologÃ­a:</strong> ${info.tipologia || info.typology}</li>` : ""}
+            ${(info.tecnica || info.technique) ? `<li><strong>TÃ©cnica:</strong> ${info.tecnica || info.technique}</li>` : ""}
+            ${info.dimensions ? `<li><strong>Dimensiones:</strong> ${info.dimensions}</li>` : ""}
+            ${info.year ? `<li><strong>Fecha:</strong> ${info.year}</li>` : ""}
+            ${info.author ? `<li><strong>Autor:</strong> ${info.author}</li>` : ""}
+            </ul>
+
+            <div class="info-actions">
+              <button id="audioGuideBtn" class="info-btn-audio">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                Escuchar audioguÃ­a
+              </button>
+
+              <a href="https://museovirtualsantana.es" target="_blank" rel="noopener" class="info-btn-visit">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                  <polyline points="16 6 12 2 8 6"></polyline>
+                  <line x1="12" y1="2" x2="12" y2="15"></line>
+                </svg>
+                Ir al museo
+              </a>
+            </div>
+          `;
+
+            // === PRELOAD AUDIO ===
+            async function preloadAudio(slug) {
+              try {
+                const audioPath = `/assets/audio/${slug}.mp3`;
+                const audio = new Audio(audioPath);
+                audio.preload = "auto";
+                console.log(`ðŸŽ§ Precargado: ${audioPath}`);
+              } catch (err) {
+                console.warn("Error precargando audio:", err);
+              }
+            }
+
+          } catch (err) {
+            console.error('Error cargando info.json:', err);
+          }
+        }
+
+        // ðŸ‘‡ðŸ‘‡ MantÃ©n esto abajo del todo, antes del cierre:
+      })();
+
+    })();
+
+    /* === PANEL VISUAL DE AJUSTE DE CÃMARA (con min/max zoom) === */
+    (function setupCameraDebugPanel() {
+      if (!location.search.includes('debug=true')) return;
+
+      const qs = new URLSearchParams(location.search);
+      let dbgModel = (qs.get('model') || qs.get('figure') || '').toLowerCase();
+      if (!dbgModel) {
+        const p = location.pathname.split('/').filter(Boolean);
+        if (p[0] === 'splat' && p[1]) dbgModel = p[1];
+        else if (p[0] === 'glb' && p[1]) dbgModel = p[1];
+        else if (p.length === 1) dbgModel = p[0];
+      }
+      const model = dbgModel;
+
+      const mv = document.getElementById('mv');
+      if (!mv) return;
+
+      const num = (s, def = 0) => {
+        if (s == null) return def;
+        const m = String(s).match(/-?\d+(\.\d+)?/);
+        return m ? parseFloat(m[0]) : def;
+      };
+
+      const cam = (window.cameraSettings && window.cameraSettings[model]) || {};
+      const initPhi = num((cam.orbit || '0deg 70deg 3m').split(' ')[1], 70);
+      const initR = num((cam.orbit || '0deg 70deg 3m').split(' ')[2], 3);
+      const initY = num((cam.target || '0m 0.5m 0m').split(' ')[1], 0.5);
+      const initMinR = num(cam.minRadius, Math.max(0.4, initR * 0.4));
+      const initMaxR = num(cam.maxRadius, Math.max(initR * 1.5, initMinR + 0.5));
+      const initFov = num(cam.fov || mv.fieldOfView || '30deg', 30);
+
+      const panel = document.createElement('div');
+      panel.id = 'camDebug';
+      panel.style.cssText = `
+          position: fixed; top: 10px; right: 10px; width: 260px;
+          background: rgba(15,17,21,0.95); color: #e9eef7; font: 13px/1.2 system-ui,sans-serif;
+          border-radius: 12px; padding: 12px; z-index: 9999; box-shadow: 0 0 15px rgba(0,0,0,.4); backdrop-filter: blur(8px);
+        `;
+      panel.innerHTML = `
+          <b>ðŸŽ¥ Ajuste de CÃ¡mara</b><br><br>
+
+          <label>Altura (target Y): <span id="valY">${initY.toFixed(2)}</span> m</label><br>
+          <input id="ctrlY" type="range" min="-1" max="3" step="0.05" value="${initY}"><br><br>
+
+          <label>Distancia inicial (radius): <span id="valR">${initR.toFixed(1)}</span> m</label><br>
+          <input id="ctrlR" type="range" min="0.5" max="30" step="0.1" value="${initR}"><br><br>
+
+          <label>ElevaciÃ³n (phi): <span id="valPhi">${initPhi.toFixed(0)}</span>Â°</label><br>
+          <input id="ctrlPhi" type="range" min="0" max="90" step="1" value="${initPhi}"><br><br>
+
+          <label>FOV (zoom Ã³ptico): <span id="valFov">${initFov.toFixed(0)}</span>Â°</label><br>
+          <input id="ctrlFov" type="range" min="15" max="75" step="1" value="${initFov}"><br><br>
+
+          <hr style="border-color:#2a2f38; opacity:.4; margin:8px 0">
+
+          <label>Zoom mÃ­nimo (minRadius): <span id="valMinR">${initMinR.toFixed(1)}</span> m</label><br>
+          <input id="ctrlMinR" type="range" min="0.4" max="60" step="0.1" value="${initMinR}"><br><br>
+
+          <label>Zoom mÃ¡ximo (maxRadius): <span id="valMaxR">${initMaxR.toFixed(1)}</span> m</label><br>
+          <input id="ctrlMaxR" type="range" min="0.5" max="80" step="0.1" value="${initMaxR}"><br><br>
+
+          <button id="copyCam" style="width:100%; padding:8px; border:none; background:#40cbcb; color:#fff; font-weight:700; border-radius:8px; cursor:pointer;">
+            ðŸ“‹ Copiar valores
+          </button>
+        `;
+      document.body.appendChild(panel);
+
+      const yRange = panel.querySelector('#ctrlY');
+      const rRange = panel.querySelector('#ctrlR');
+      const phiRange = panel.querySelector('#ctrlPhi');
+      const fovRange = panel.querySelector('#ctrlFov');
+      const minRRange = panel.querySelector('#ctrlMinR');
+      const maxRRange = panel.querySelector('#ctrlMaxR');
+
+      const valY = panel.querySelector('#valY');
+      const valR = panel.querySelector('#valR');
+      const valPhi = panel.querySelector('#valPhi');
+      const valFov = panel.querySelector('#valFov');
+      const valMinR = panel.querySelector('#valMinR');
+      const valMaxR = panel.querySelector('#valMaxR');
+
+      function clampLimits() {
+        let minR = parseFloat(minRRange.value);
+        let r = parseFloat(rRange.value);
+        let maxR = parseFloat(maxRRange.value);
+
+        if (minR > maxR - 0.1) minR = maxR - 0.1;
+        if (r < minR) r = minR;
+        if (r > maxR) r = maxR;
+
+        minRRange.value = minR.toFixed(1);
+        rRange.value = r.toFixed(1);
+        maxRRange.value = maxR.toFixed(1);
+
+        valMinR.textContent = minR.toFixed(1);
+        valR.textContent = r.toFixed(1);
+        valMaxR.textContent = maxR.toFixed(1);
+        return { minR, r, maxR };
+      }
+
+      function updateCamera() {
+        const y = parseFloat(yRange.value);
+        const phi = parseFloat(phiRange.value);
+        const fov = parseFloat(fovRange.value);
+        const { minR, r, maxR } = clampLimits();
+
+        valY.textContent = y.toFixed(2);
+        valPhi.textContent = phi.toFixed(0);
+        valFov.textContent = fov.toFixed(0);
+
+        mv.minCameraOrbit = `auto auto ${minR}m`;
+        mv.maxCameraOrbit = `auto auto ${maxR}m`;
+        mv.cameraTarget = `0m ${y}m 0m`;
+        mv.cameraOrbit = `0deg ${phi}deg ${r}m`;
+        mv.fieldOfView = `${fov}deg`;
+        mv.jumpCameraToGoal();
+      }
+
+      [yRange, rRange, phiRange, fovRange, minRRange, maxRRange].forEach((i) =>
+        i.addEventListener('input', updateCamera)
+      );
+
+      updateCamera();
+
+      panel.querySelector('#copyCam').onclick = () => {
+        const text = `
+"${model || 'cristo-yacente'}": {
+  orbit: "0deg ${phiRange.value}deg ${rRange.value}m",
+  target: "0m ${yRange.value}m 0m",
+  minRadius: "${minRRange.value}m",
+  maxRadius: "${maxRRange.value}m",
+  minFov: "22deg",
+  maxFov: "${fovRange.value}deg"
+},`.trim();
+        navigator.clipboard.writeText(text);
+        const btn = panel.querySelector('#copyCam');
+        btn.textContent = 'âœ… Copiado';
+        setTimeout(() => (btn.textContent = 'ðŸ“‹ Copiar valores'), 1200);
+      };
+    })();
+
+    /* === InteracciÃ³n tÃ¡ctil para arrastrar la cartela (UX mejorado + fix reopen) === */
+    (function enableInfoSheetDrag() {
+      const sheet = document.getElementById('infoSheet');
+      const infoBtn = document.getElementById('infoBtn');
+      if (!sheet || !infoBtn) return;
+
+      let startY = 0;
+      let currentY = 0;
+      let isDragging = false;
+      const threshold = 90; // pÃ­xeles de arrastre necesarios para cerrar
+
+      const onStart = (e) => {
+        if (e.touches?.length !== 1) return;
+        startY = e.touches[0].clientY;
+        isDragging = true;
+        sheet.style.transition = 'none';
+      };
+
+      const onMove = (e) => {
+        if (!isDragging || e.touches?.length !== 1) return;
+        currentY = e.touches[0].clientY - startY;
+        if (currentY > 0) {
+          sheet.style.transform = `translateY(${currentY}px)`;
+          sheet.style.opacity = `${1 - Math.min(currentY / 250, 0.4)}`;
+        }
+      };
+
+      const closeSheetSmooth = () => {
+        sheet.style.transition = 'transform .28s ease, opacity .28s ease';
+        sheet.style.transform = 'translateY(100%)';
+        sheet.style.opacity = '0';
+        // pequeÃ±o retraso para permitir la animaciÃ³n antes del hidden
+        setTimeout(() => {
+          sheet.classList.add('hidden');
+          sheet.setAttribute('aria-hidden', 'true');
+          sheet.style.transform = '';
+          sheet.style.opacity = '';
+        }, 280);
+      };
+
+      const onEnd = () => {
+        if (!isDragging) return;
+        sheet.style.transition = 'transform .28s ease, opacity .28s ease';
+        if (currentY > threshold) {
+          closeSheetSmooth();
+        } else {
+          sheet.style.transform = 'translateY(0)';
+          sheet.style.opacity = '1';
+        }
+        isDragging = false;
+        startY = 0;
+        currentY = 0;
+      };
+
+      // Escuchar gestos tÃ¡ctiles
+      sheet.addEventListener('touchstart', onStart, { passive: true });
+      sheet.addEventListener('touchmove', onMove, { passive: true });
+      sheet.addEventListener('touchend', onEnd);
+    })();
+
+    /* ðŸ”’ Bloquear page-zoom del navegador solo cuando el gesto ocurre sobre la UI */
+    (function preventPageZoomOnUI() {
+      const uiRoots = ['#topBar', '#infoSheet', '#fabRow'];
+
+      const isInUI = (target) => {
+        if (!target || !target.closest) return false;
+        return uiRoots.some((sel) => target.closest(sel));
+      };
+
+      /* iOS: gesturestart/gesturechange â†’ pinch page-zoom */
+      const onGesture = (e) => {
+        if (isInUI(e.target)) {
+          e.preventDefault(); // requiere passive:false
+        }
+      };
+      document.addEventListener('gesturestart', onGesture, {
+        passive: false,
+        capture: true
+      });
+      document.addEventListener('gesturechange', onGesture, {
+        passive: false,
+        capture: true
+      });
+
+      /* Trackpad pinch (Ctrl+wheel) en Desktop â†’ evita zoom si es sobre UI */
+      window.addEventListener(
+        'wheel',
+        (e) => {
+          if (e.ctrlKey && isInUI(e.target)) {
+            e.preventDefault();
+          }
+        },
+        { passive: false, capture: true }
+      );
+
+      /* Evitar double-tap zoom en iOS SOLO en UI */
+      let lastTouchEnd = 0;
+      const onTouchEnd = (e) => {
+        if (!isInUI(e.target)) return;
+        const now = Date.now();
+        if (now - lastTouchEnd < 350) {
+          e.preventDefault(); // suprime double-tap zoom
+        }
+        lastTouchEnd = now;
+      };
+      document.addEventListener('touchend', onTouchEnd, {
+        passive: false,
+        capture: true
+      });
+
+      /* Extra: evita scroll-bounce que a veces dispara zoom accidental en UI */
+      const onTouchMove = (e) => {
+        if (isInUI(e.target)) {
+          // permitimos desplazamiento en la cartela, pero no â€œpinch zoomâ€ de pÃ¡gina
+          if (e.scale && e.scale !== 1) e.preventDefault();
+        }
+      };
+      document.addEventListener('touchmove', onTouchMove, {
+        passive: false,
+        capture: true
+      });
+
+      /* === Carga de pÃ³sters adaptativos (desktop vs mÃ³vil) === */
+      (function loadAdaptivePoster() {
+        const viewerContainer = document.getElementById('viewerContainer');
+        if (!viewerContainer) return;
+
+        // Detectar slug actual (ya lo tienes en URL)
+        const qs = new URLSearchParams(location.search);
+        const slug =
+          qs.get('model') ||
+          qs.get('figure') ||
+          location.pathname.split('/').filter(Boolean).pop() ||
+          '';
+
+        if (!slug) return;
+
+        // Detectar tipo de dispositivo
+        const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+        const folder = isDesktop ? 'desktop' : 'mobile';
+        const posterUrl = `/assets/posters/${folder}/${slug}.webp`;
+
+        // Crear capa si no existe
+        let posterLayer = document.querySelector('#viewerContainer .poster-layer');
+        if (!posterLayer) {
+          posterLayer = document.createElement('div');
+          posterLayer.className = 'poster-layer';
+          viewerContainer.prepend(posterLayer);
+        }
+
+        // Aplicar imagen y fade
+        posterLayer.style.backgroundImage = `url('${posterUrl}')`;
+        posterLayer.style.opacity = '1';
+
+        // Quitar el pÃ³ster cuando el viewer cargue
+        const mv = document.getElementById('mv');
+        const splat = document.getElementById('splat');
+
+        const hidePoster = () => {
+          posterLayer.classList.add('hidden');
+          setTimeout(() => posterLayer.remove(), 600);
+        };
+
+        mv?.addEventListener('load', hidePoster, { once: true });
+        splat?.addEventListener('load', hidePoster, { once: true });
+      })();
+
+      // ==== SPLAT POSTER (aÃ±adido manualmente) ====
+      const splatPoster = document.getElementById('splatPoster');
+      const splatIframe = document.getElementById('splat');
+
+      if (splatPoster && splatIframe) {
+        const isDesktop = window.matchMedia('(min-width: 1024px)').matches;
+        const posterPath = isDesktop
+          ? `/assets/posters/desktop/splat-poster.webp`
+          : `/assets/posters/mobile/splat-poster.webp`;
+
+        splatPoster.style.backgroundImage = `url('${posterPath}?v=${Date.now()}')`;
+
+        splatIframe.addEventListener('load', () => {
+          requestAnimationFrame(() => {
+            splatPoster.classList.add('fade-out');
+            setTimeout(() => splatPoster.remove(), 800);
+          });
+        });
+      }
+    })();
+  </script>
+  <!-- ==== REGISTRO DEL SERVICE WORKER ==== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // ---------------- URL: soporta query *y* pathname limpias ----------------
+      const qs = new URLSearchParams(location.search);
+      let type = (qs.get('type') || '').toLowerCase(); // 'glb' | 'splat'
+      let model = (qs.get('model') || '').toLowerCase();
+      let figure = (qs.get('figure') || '').toLowerCase();
+
+      if (!type) {
+        const parts = location.pathname.split('/').filter(Boolean);
+        if (parts[0] === 'splat' && parts[1]) {
+          type = 'splat';
+          figure = parts[1];
+        } else if (parts[0] === 'glb' && parts[1]) {
+          type = 'glb';
+          model = parts[1];
+        } else if (parts.length === 1) {
+          type = 'glb';
+          model = parts[0];
+        }
+      }
+
+      const slug = model || figure || '';
+
+      // --- FunciÃ³n unificada de carga de informaciÃ³n ---
+      function loadInfoForSlug(slug) {
+        const infoPath = `/assets/info.json`;
+        fetch(infoPath)
+          .then(res => res.json())
+          .then(infoData => {
+            const info = infoData[slug];
+            if (!info) return;
+
+            // MÃ³vil
+            const infoTitle = document.getElementById('infoTitle');
+            const infoMeta = document.getElementById('infoMeta');
+            const infoDesc = document.getElementById('infoDesc');
+            if (infoTitle && infoMeta && infoDesc) {
+              infoTitle.textContent = info.title;
+              infoMeta.textContent = `${info.year} â€” ${info.author} â€” ${info.material}`;
+              infoDesc.textContent = info.desc;
+            }
+
+            // Escritorio
+            const infoTitleDesktop = document.getElementById('infoTitleDesktop');
+            const infoMetaDesktop = document.querySelector('#infoPanel .info-meta');
+            const infoDescDesktop = document.querySelector('#infoPanel .info-desc');
+            const infoDetails = document.querySelector('#infoPanel .info-details');
+
+            if (infoTitleDesktop) infoTitleDesktop.textContent = info.title;
+            if (infoMetaDesktop) infoMetaDesktop.textContent = `${info.year} â€” ${info.author} â€” ${info.material}`;
+            if (infoDescDesktop) infoDescDesktop.textContent = info.desc;
+
+            if (infoDetails) {
+              infoDetails.innerHTML = `
+            <li><strong>TipologÃ­a:</strong> ${info.typology || 'â€”'}</li>
+            <li><strong>Material:</strong> ${info.material || 'â€”'}</li>
+            <li><strong>Fecha:</strong> ${info.year || 'â€”'}</li>
+            <li><strong>Autor:</strong> ${info.author || 'â€”'}</li>
+          `;
+            }
+
+            console.log(`[Museo] Datos cargados de ${infoPath}`);
+          })
+          .catch(err => console.error('[Museo] Error cargando info.json:', err));
+      }
+
+      // Cargar idioma inicial al abrir la pÃ¡gina
+      loadInfoForSlug(slug);
+    });
+  </script>
+  <script>
+    // --- Swipe down para cerrar la cartela mÃ³vil ---
+    (function () {
+      const sheet = document.getElementById('infoSheet');
+      const dragHandle = document.querySelector('.info-sheet__drag');
+      if (!sheet || !dragHandle) return;
+
+      let startY = 0;
+      let currentY = 0;
+      let isDragging = false;
+
+      const onTouchStart = (e) => {
+        startY = e.touches[0].clientY;
+        isDragging = true;
+        sheet.style.transition = 'none';
+      };
+
+      const onTouchMove = (e) => {
+        if (!isDragging) return;
+        currentY = e.touches[0].clientY;
+        const diff = currentY - startY;
+
+        // Solo desplazamos hacia abajo
+        if (diff > 0) {
+          sheet.style.transform = `translateY(${diff}px)`;
+          sheet.style.opacity = `${Math.max(1 - diff / 300, 0.4)}`;
+        }
+      };
+
+      const onTouchEnd = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        sheet.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+
+        const diff = currentY - startY;
+        if (diff > 120) {
+          // cerrar cartela
+          sheet.classList.add('hidden');
+          sheet.setAttribute('aria-hidden', 'true');
+          document.body.classList.remove('sheet-open');
+        } else {
+          // volver a su sitio
+          sheet.style.transform = '';
+          sheet.style.opacity = '';
+        }
+      };
+
+      dragHandle.addEventListener('touchstart', onTouchStart);
