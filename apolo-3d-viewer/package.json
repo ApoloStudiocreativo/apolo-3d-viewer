@@ -1,8 +1,4 @@
 {
-  "scripts": {
-    "compress:all": "node scripts/compress-all-models.js",
-    "backup:models": "node scripts/backup-models.js"
-  },
   "devDependencies": {
     "@gltf-transform/cli": "^4.2.1"
   }
