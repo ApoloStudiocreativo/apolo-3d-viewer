@@ -35,6 +35,8 @@ self.addEventListener('install', (event) => {
         '/network-monitor.js',
         '/assets/brand/logo-museo.svg',
         '/assets/brand/isotipo.svg',
+        '/vendor/draco/draco_decoder_gltf.wasm',
+        '/vendor/draco/draco_wasm_wrapper.js',
       ])
     )
   );

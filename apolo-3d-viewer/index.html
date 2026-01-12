@@ -205,6 +205,12 @@
   <link rel="manifest" href="/manifest.webmanifest">
 
   <!-- model-viewer (GLB) - Deferred para no bloquear -->
+  <script>
+    // 🗜️ Configurar decoder Draco para modelos comprimidos
+    // IMPORTANTE: Esto debe ejecutarse ANTES de cargar model-viewer
+    window.ModelViewerElement = window.ModelViewerElement || {};
+    window.ModelViewerElement.dracoDecoderLocation = '/vendor/draco/';
+  </script>
   <script type="module" src="/vendor/model-viewer-4.0.0.min.js" defer></script>
 
   <!-- Network Monitor - Detecta velocidad de conexión -->
